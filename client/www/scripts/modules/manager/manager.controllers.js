@@ -497,14 +497,28 @@ Manager.controller('ManagerMainController', [
       if (host.targetProcessCount < 1) {
         host.targetProcessCount = 1;
       }
-
-      host.action({cmd:"current","sub": "set-size", "size": host.targetProcessCount }, function(err, res) {
-        if (err) {
-          $log.warn('bad Strong PM host action ' + cmd + ' error: ' + err.message);
+      
+      var tClient = host.getPMClient();
+      tClient.instanceFind(1, function(error, instance){
+        if (error) {
+          $log.warn('bad pm client init: ' + error.message);
         }
-        $log.debug('| update pid count: target[' + host.targetProcessCount + ']   actual[' + host.processCount + ']');
-
+        instance.clusterSizeSet(host.targetProcessCount, false, function(error, response) {
+          if (error) {
+            $log.warn('bad Strong PM cluster resize error: ' + error.message);
+          }
+          $log.debug('| update pid count: target[' + host.targetProcessCount + ']  ');
+      
+        });
       });
+
+      //host.action({cmd:"current","sub": "set-size", "size": host.targetProcessCount }, function(err, res) {
+      //  if (err) {
+      //    $log.warn('bad Strong PM host action ' + cmd + ' error: ' + err.message);
+      //  }
+      //  $log.debug('| update pid count: target[' + host.targetProcessCount + ']   actual[' + host.processCount + ']');
+      //
+      //});
 
     };
     $scope.getProcessCount = function(host) {

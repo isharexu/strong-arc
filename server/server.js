@@ -17,6 +17,9 @@ app.meshProxy = meshProxy;
 
 var arcApi = require('../arc-api/server/server');
 
+// export the workspace object, useful e.g. in tests
+app.workspace = workspace;
+
 // REST APIs
 app.use('/workspace', workspace);
 app.use('/devtools', devtools);

@@ -1,0 +1,31 @@
+<div class="tracing-header-container row panel-heading section-header">
+  <div class="col-sm-5">
+    <h2 ng-show="tracingCtx.currentPMInstance.applicationName">{{ tracingCtx.currentPMInstance.applicationName }}</h2>
+  </div>
+  <div class="col-sm-2">
+    <div class="btn-group pm-host-select" dropdown is-open="status.isopen">
+      <button type="button" class="btn btn-default dropdown-toggle" dropdown-toggle ng-disabled="disabled">
+        {{tracingCtx.currentPMHost.host}} <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu" role="menu">
+        <li ng-repeat="host in managerHosts">
+          <a href="#" ng-click="changePMHost(host)">{{host.host}}:{{host.port}}</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="col-sm-4">
+    <div class="sl-pid-selector">
+      <sl-tracing-processes></sl-tracing-processes>
+    </div>
+  </div>
+  <div class="col-sm-1">
+
+    <button ng-hide="!tracingCtx.currentPFKey" class="ui-btn secondary small" ng-click="closeTraceView()">
+      <i class="glyphicon glyphicon-arrow-up"></i>
+    </button>
+  </div>
+</div>
+
+
+
