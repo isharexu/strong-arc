@@ -68,22 +68,29 @@ Tracing.directive('slTracingTimeSeriesChart', [
 ]);
 Tracing.directive('slTracingTransactionHistory', [
   '$log',
+  '$timeout',
   'TransactionList',
-  function($log, TransactionList) {
+  function($log, $timeout, TransactionList) {
     return {
       templateUrl: './scripts/modules/tracing/templates/tracing.transaction.history.html',
       restrict: 'E',
       link: function(scope, el, attrs) {
 
-
         scope.transactionListView = TransactionList('[data-hook="transaction-list-cont"]', {});
 
-        scope.$watch('transactionKeys', function(newVal, oldVal) {
-          if (newVal.length) {
+        scope.$watch('transactionHistoryCollection', function(newVal, oldVal) {
+          if (newVal && newVal.length) {
             scope.transactionListView.render(newVal, scope.currentHost);
-          }
+            //
+            $timeout(function() {
+              window.setScrollView('.monitor-view');
+            }, 200);
 
-        });
+          }
+        }, true);
+        window.onresize = function() {
+          window.setScrollView('.monitor-view');
+        };
       }
     }
   }
