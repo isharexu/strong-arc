@@ -44,6 +44,8 @@ function TransactionList(el, app) {
   }
 }
 
+
+
 TransactionList.prototype.renderList = function renderList(keys){
   var self = this
   keys = keys || []
