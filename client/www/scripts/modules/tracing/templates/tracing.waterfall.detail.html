@@ -53,10 +53,12 @@
               Time is normalized to the start of the profile being examined.
             </p>
           </div>
-          <div data-hook='eventloop'></div>
+          <div data-hook='eventloop'>
+            <sl-tracing-waterfall-eventLoop></sl-tracing-waterfall-eventLoop>
+          </div>
           <div class='row'>
             <div class='col-md-12 text-center'>
-              Total Execution Time: <span role='total-execution-time'></span>
+              Total Execution Time: <span role='total-execution-time'>{{ (currentWaterfall.stats.duration / 1000) }}</span>
             </div>
           </div>
         </div>
