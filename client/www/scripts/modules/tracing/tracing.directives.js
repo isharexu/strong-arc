@@ -1,16 +1,21 @@
 Tracing.directive('slTracingWaterfallEventloop', [
   '$log',
   'EventLoop',
-  function($log, EventLoop) {
+  'FlameGraph',
+  'Color',
+  function($log, EventLoop, FlameGraph, Color) {
     return {
       restrict: 'E',
       link: function(scope, el, attrs) {
         var eventloop = EventLoop();
+        var flame = FlameGraph();
         eventloop.init('[data-hook="eventloop"]', { expanded: true, color: '#1234af' });
+        flame.init('[data-hook="flame"]', {colors: Color, disableZoom: true})
 
         scope.$watch('currentWaterfall', function(newVal, oldVal) {
           if (newVal && newVal.id) {
             eventloop.update(newVal, scope.currentTrace.functions);
+            flame.update(newVal, scope.currentTrace.functions);
           }
         });
 
