@@ -1,3 +1,23 @@
+Tracing.directive('slTracingWaterfallEventloop', [
+  '$log',
+  'EventLoop',
+  function($log, EventLoop) {
+    return {
+      restrict: 'E',
+      link: function(scope, el, attrs) {
+        var eventloop = EventLoop();
+        eventloop.init('[data-hook="eventloop"]', { expanded: true, color: '#1234af' });
+
+        scope.$watch('currentWaterfall', function(newVal, oldVal) {
+          if (newVal && newVal.id) {
+            eventloop.update(newVal, scope.currentTrace.functions);
+          }
+        });
+
+      }
+    }
+  }
+]);
 Tracing.directive('slTracingWaterfallSummary', [
   '$log',
   function($log) {
