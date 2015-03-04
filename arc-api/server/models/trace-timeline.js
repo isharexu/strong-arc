@@ -46,7 +46,8 @@ module.exports = function(TraceTimeline) {
     'fetchTimeLine',
     {
       accepts: {arg: 'reqparams', type: 'object'},
-      returns: {arg: 'data', type: 'string'}
+      returns: {arg: 'data', type: 'string'},
+      http: {verb: 'get'}
     }
   );
 };

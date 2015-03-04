@@ -1,11 +1,13 @@
 Tracing.service('TracingServices', [
   '$http',
   '$log',
+  'Trace',
   'TraceHost',
+  'TraceEnhance',
   'TraceTimeline',
   'TraceTransactionKey',
   'TraceTransactionHistory',
-  function($http, $log, TraceHost, TraceTimeline, TraceTransactionKey, TraceTransactionHistory) {
+  function($http, $log, Trace, TraceHost, TraceEnhance, TraceTimeline, TraceTransactionKey, TraceTransactionHistory) {
     var svc = this;
     var currTraceHosts = [];
 
@@ -49,12 +51,17 @@ Tracing.service('TracingServices', [
       return ret;
     };
 
-    svc.fetchTrace = function fetchTrace(pfkey, cb) {
-      var url = this.base + path.join('get_raw_pieces', encodeURIComponent(pfkey))
-      cb = cb || function(){}
-      $http.get(url)
-        .success(function(data, status, xhr) { cb(null, enhance(data)) })
-        .error(function(xhr, status, err) { cb(err) });
+    svc.fetchTrace = function(pfkey, cb) {
+      return Trace.fetchTrace(pfkey)
+        .$promise
+        .then(function(trace) {
+          var rData = JSON.parse(trace.data);
+         // $log.debug('TRACE DATA: ' + rData);
+          return TraceEnhance(rData);
+        })
+        .catch(function(error) {
+          $log.warn('bad get trace: ' + error.message);
+        });
     };
 
     svc.fetchHosts = function(cb) {

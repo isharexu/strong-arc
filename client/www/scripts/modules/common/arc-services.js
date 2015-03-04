@@ -137,12 +137,7 @@ module.factory(
          *
          * @param {Object=} parameters Request parameters.
          *
-         *   This method does not accept any parameters.
-         *   Supply an empty object or omit this argument altogether.
-         *
-         * @param {Object} postData Request data.
-         *
-         *  - `msg` – `{string=}` - 
+         *  - `pfkey` – `{string=}` - 
          *
          * @param {function(Object,Object)=} successCb
          *   Success callback with two arguments: `value`, `responseHeaders`.
@@ -156,11 +151,11 @@ module.factory(
          *
          * Data properties:
          *
-         *  - `data` – `{string=}` - 
+         *  - `data` – `{object=}` - 
          */
         "fetchTrace": {
           url: urlBase + "/Traces/fetchTrace",
-          method: "POST"
+          method: "GET"
         },
       }
     );
@@ -220,11 +215,6 @@ module.factory(
          *
          * @param {Object=} parameters Request parameters.
          *
-         *   This method does not accept any parameters.
-         *   Supply an empty object or omit this argument altogether.
-         *
-         * @param {Object} postData Request data.
-         *
          *  - `msg` – `{string=}` - 
          *
          * @param {function(Object,Object)=} successCb
@@ -243,7 +233,7 @@ module.factory(
          */
         "fetchHosts": {
           url: urlBase + "/TraceHosts/fetchHosts",
-          method: "POST"
+          method: "GET"
         },
       }
     );
@@ -303,12 +293,7 @@ module.factory(
          *
          * @param {Object=} parameters Request parameters.
          *
-         *   This method does not accept any parameters.
-         *   Supply an empty object or omit this argument altogether.
-         *
-         * @param {Object} postData Request data.
-         *
-         *  - `msg` – `{string=}` - 
+         *  - `reqparams` – `{object=}` - 
          *
          * @param {function(Object,Object)=} successCb
          *   Success callback with two arguments: `value`, `responseHeaders`.
@@ -326,7 +311,7 @@ module.factory(
          */
         "fetchTimeLine": {
           url: urlBase + "/TraceTimelines/fetchTimeLine",
-          method: "POST"
+          method: "GET"
         },
       }
     );
@@ -386,11 +371,6 @@ module.factory(
          *
          * @param {Object=} parameters Request parameters.
          *
-         *   This method does not accept any parameters.
-         *   Supply an empty object or omit this argument altogether.
-         *
-         * @param {Object} postData Request data.
-         *
          *  - `msg` – `{string=}` - 
          *
          * @param {function(Object,Object)=} successCb
@@ -409,7 +389,7 @@ module.factory(
          */
         "transactionKeys": {
           url: urlBase + "/TraceWaterfalls/transactionKeys",
-          method: "POST"
+          method: "GET"
         },
       }
     );
@@ -469,12 +449,7 @@ module.factory(
          *
          * @param {Object=} parameters Request parameters.
          *
-         *   This method does not accept any parameters.
-         *   Supply an empty object or omit this argument altogether.
-         *
-         * @param {Object} postData Request data.
-         *
-         *  - `msg` – `{string=}` - 
+         *  - `reqparams` – `{object=}` - 
          *
          * @param {function(Object,Object)=} successCb
          *   Success callback with two arguments: `value`, `responseHeaders`.
@@ -492,7 +467,7 @@ module.factory(
          */
         "transactionKeys": {
           url: urlBase + "/TraceTransactionKeys/transactionKeys",
-          method: "POST"
+          method: "GET"
         },
       }
     );
@@ -552,12 +527,7 @@ module.factory(
          *
          * @param {Object=} parameters Request parameters.
          *
-         *   This method does not accept any parameters.
-         *   Supply an empty object or omit this argument altogether.
-         *
-         * @param {Object} postData Request data.
-         *
-         *  - `msg` – `{string=}` - 
+         *  - `reqparams` – `{object=}` - 
          *
          * @param {function(Object,Object)=} successCb
          *   Success callback with two arguments: `value`, `responseHeaders`.
@@ -575,7 +545,7 @@ module.factory(
          */
         "transactionHistory": {
           url: urlBase + "/TraceTransactionHistories/transactionHistory",
-          method: "POST"
+          method: "GET"
         },
       }
     );

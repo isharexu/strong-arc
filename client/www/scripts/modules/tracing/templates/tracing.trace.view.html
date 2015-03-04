@@ -1,6 +1,10 @@
-<div class='trace-view'>
-  <div data-hook='breadcrumbs'></div>
-  <div data-hook='summary' class='summary'></div>
+<div class='trace-view' ng-show="showTraceView()">
+  <div data-hook='breadcrumbs'>
+    <button class="ui-btn primary small" ng-click="closeTraceView()">back to Main</button>
+  </div>
+  <div data-hook='summary' class='summary'>
+    <sl-tracing-trace-summary></sl-tracing-trace-summary>
+  </div>
   <div class="panel panel-info">
     <div class="panel-heading help">
       <h3 class="panel-title">Transaction Sequences</h3>

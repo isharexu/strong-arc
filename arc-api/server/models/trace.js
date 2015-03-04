@@ -2,56 +2,55 @@ module.exports = function(Trace) {
   var request = require('request');
   var http = require("http");
   var zlib = require("zlib");
-
-  Trace.fetchTrace = function(msg, cb) {
-
-    var project = 'wfp:helloworld';
-    var urlString = 'http://localhost:8103/get_host_pid_list/wfp:helloworld';
-    //  var url = this.base + path.join('get_host_pid_list', this.project)
-    // cb = cb || function(data){}
+  var util = require("util");
 
 
+  Trace.fetchTrace = function(pfkey, cb) {
+
+
+    var urlString = 'http://localhost:8103/get_raw_pieces/' + pfkey;
 
     function getGzipped(url, callback) {
       // buffer to store the streamed decompression
       var buffer = [];
 
-      http.get(url, function(res) {
+      http.get(url, function (res) {
         // pipe the response into the gunzip to decompress
         var gunzip = zlib.createGunzip();
         res.pipe(gunzip);
 
-        gunzip.on('data', function(data) {
+        gunzip.on('data', function (data) {
           // decompression chunk ready, add it to the buffer
-          buffer.push(data.toString())
+          buffer.push(data);
 
-        }).on("end", function() {
+        }).on("end", function () {
           // response and decompression complete, join the buffer and return
-          callback(null, buffer.join(""));
+          var outputString = buffer.join("");
 
-        }).on("error", function(e) {
+          callback(null, outputString);
+
+        }).on("error", function (e) {
           callback(e);
         })
-      }).on('error', function(e) {
+      }).on('error', function (e) {
         callback(e)
       });
     }
 
-    getGzipped(urlString, function(err, data) {
-      console.log('|    DATA   | ----------   | ' + data);
+    getGzipped(urlString, function (err, data) {
       cb(null, data);
     });
 
 
   };
 
+
   Trace.remoteMethod(
     'fetchTrace',
     {
-      accepts: {arg: 'msg', type: 'string'},
-      returns: {arg: 'data', type: 'string'}
+      accepts: {arg: 'pfkey', type: 'string'},
+      returns: {arg: 'data', type: 'object'},
+      http: {verb: 'get'}
     }
   );
-
-
 };

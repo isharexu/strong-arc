@@ -5,7 +5,7 @@ module.exports = function(TraceTransactionKey) {
 
   TraceTransactionKey.transactionKeys = function(reqparams, cb) {
 
-    var project = 'wfp:helloworld';
+   // var project = 'wfp:helloworld';
     var urlString = 'http://localhost:8103/get_meta_transactions/' + reqparams.project + '/0/0';
     //  var url = this.base + path.join('get_host_pid_list', this.project)
     // cb = cb || function(data){}
@@ -38,7 +38,7 @@ module.exports = function(TraceTransactionKey) {
     }
 
     getGzipped(urlString, function(err, data) {
-      console.log('|  transaction key  DATA   | ----------   | ' + data);
+      //console.log('|  transaction key  DATA   | ----------   | ' + data);
       cb(null, data);
     });
 
@@ -49,7 +49,8 @@ module.exports = function(TraceTransactionKey) {
     'transactionKeys',
     {
       accepts: {arg: 'reqparams', type: 'object'},
-      returns: {arg: 'data', type: 'string'}
+      returns: {arg: 'data', type: 'string'},
+      http: {verb: 'get'}
     }
   );
 
