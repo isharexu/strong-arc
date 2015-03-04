@@ -5,8 +5,8 @@ module.exports = function(TraceWaterfall) {
 
   TraceWaterfall.transactionKeys = function(msg, cb) {
 
-    var project = 'wfp:helloworld';
-    var urlString = 'http://localhost:8103/get_host_pid_list/wfp:helloworld';
+    //var project = 'wfp:helloworld';
+    var urlString = 'http://localhost:8103/get_host_pid_list/arctest_concurix_key';
     //  var url = this.base + path.join('get_host_pid_list', this.project)
     // cb = cb || function(data){}
 
@@ -38,7 +38,7 @@ module.exports = function(TraceWaterfall) {
     }
 
     getGzipped(urlString, function(err, data) {
-      console.log('|    DATA   | ----------   | ' + data);
+      //console.log('|    DATA   | ----------   | ' + data);
       cb(null, data);
     });
 
@@ -49,7 +49,8 @@ module.exports = function(TraceWaterfall) {
     'transactionKeys',
     {
       accepts: {arg: 'msg', type: 'string'},
-      returns: {arg: 'data', type: 'string'}
+      returns: {arg: 'data', type: 'string'},
+      http: {verb: 'get'}
     }
   );
 

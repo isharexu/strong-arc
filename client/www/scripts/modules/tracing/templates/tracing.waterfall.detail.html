@@ -1,10 +1,11 @@
-
-<div class='waterfall-detail container-fluid'>
+<div class='waterfall-detail container-fluid' ng-show="showDetailView()">
 
   <div class='row'>
 
     <div class='col-md-9'>
-      <div data-hook='breadcrumbs'></div>
+      <div data-hook='breadcrumbs'>
+        <button class="ui-btn primary small" ng-click="closeDetailView()">back to Trace</button>
+      </div>
     </div>
 
     <div class='left col-sm-9'>
@@ -16,13 +17,19 @@
         <div class="panel-body">
           <div class='row'>
             <div class='col-xs-6 col-sm-6 col-md-3 col-lg-2'>
-              <button role='previous' type="button" class="btn btn-primary"><i class="fa fa-chevron-left"></i></button>
+              <button ng-click="previousWaterfall()" role='previous' type="button" class="btn btn-primary">
+                <i class="fa fa-chevron-left"></i>
+              </button>
             </div>
             <div class='col-xs-6 col-sm-6 col-md-3 col-md-push-6 col-lg-2 col-lg-push-8'>
-              <button role='next' type="button" class="btn btn-primary right"><i class="fa fa-chevron-right"></i></button>
+              <button ng-click="nextWaterfall()" role='next' type="button" class="btn btn-primary right">
+                <i class="fa fa-chevron-right"></i>
+              </button>
             </div>
             <div class='col-xs-12 col-sm-12 col-md-6 col-md-pull-3 col-lg-8 col-lg-pull-2'>
-              <div role='summary-text'></div>
+              <div role='summary-text'>
+                <sl-tracing-waterfall-summary></sl-tracing-waterfall-summary>
+              </div>
             </div>
           </div>
         </div>

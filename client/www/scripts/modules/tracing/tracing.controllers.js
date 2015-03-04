@@ -8,7 +8,21 @@ Tracing.controller('TracingMainController', [
     $scope.currentTimeline = {};
     $scope.transactionKeys = [];
     $scope.currentProject = 'wfp:helloworld';
+    $scope.currentPFKey = '';
+    $scope.currentTrace = {};
+    $scope.currentWaterfallKey = '';
+    $scope.currentWaterfall = {};
 
+    $scope.setCurrentWaterfallKey = function(key) {
+      if (key && key.length > 0) {
+        $scope.currentWaterfallKey = key;
+      }
+    }
+
+    //$scope.showTraceView = function(data) {
+    //  $log.debug('load trace view: ' + data.pfkey);
+    //  $scope.currentPFKey = data.pfkey;
+    //};
     $scope.hosts = TracingServices.fetchHosts()
       .then(function(response) {
         $log.debug('yay hosts: ' + JSON.stringify(response));
@@ -16,7 +30,7 @@ Tracing.controller('TracingMainController', [
         $scope.hosts = response;
         var firstHost = TracingServices.getFirstHost();
         $scope.currentHost = {
-          project: 'wfp:helloworld',
+          project: $scope.currentProject,
           host:firstHost.host,
           pid:firstHost.pids[0]
         };

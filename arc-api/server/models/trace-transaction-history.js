@@ -5,17 +5,17 @@ module.exports = function(TraceTransactionHistory) {
 
   TraceTransactionHistory.transactionHistory = function(reqparams, cb) {
 
-    var project = 'wfp:helloworld';
+  //  var project = 'wfp:helloworld';
     //var urlString = 'http://localhost:8103/get_transaction/' + reqparams.project + '/' + reqparams.host + '/' + reqparams.pid;
     var urlString = 'http://localhost:8103/get_transaction/' + reqparams.project + '/' + reqparams.transaction + '/' + reqparams.host + '/' + reqparams.pid;
     //  var url = this.base + path.join('get_host_pid_list', this.project)
     // cb = cb || function(data){}
-    console.log('|');
-    console.log('|');
-    console.log('|wtf: ' + urlString);
-    console.log('|');
-    console.log('|');
-    console.log('|');
+    //console.log('|');
+    //console.log('|');
+    //console.log('|wtf: ' + urlString);
+    //console.log('|');
+    //console.log('|');
+    //console.log('|');
 
 
 
@@ -47,7 +47,7 @@ module.exports = function(TraceTransactionHistory) {
     }
 
     getGzipped(urlString, function(err, data) {
-      console.log('|  transactionHistory  DATA   | ----------   | ' + data);
+      //console.log('|  transactionHistory  DATA   | ----------   | ' + data);
       cb(null, data);
     });
 
@@ -58,7 +58,8 @@ module.exports = function(TraceTransactionHistory) {
     'transactionHistory',
     {
       accepts: {arg: 'reqparams', type: 'object'},
-      returns: {arg: 'data', type: 'string'}
+      returns: {arg: 'data', type: 'string'},
+      http: {verb: 'get'}
     }
   );
 

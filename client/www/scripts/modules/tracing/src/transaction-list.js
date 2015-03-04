@@ -45,6 +45,7 @@ function togglePanel(event) {
   this.app.expanded[id] = !this.app.expanded[id]
   target.classList.toggle('expanded', this.app.expanded[id])
 }
+
 TransactionList.prototype.renderList = function renderList(keys){
   var self = this;
   keys = keys || [];
