@@ -10,4 +10,5 @@ var TracingViz = angular.module('TracingViz', [])
   .value('Slug', require('slug'))
   .value('TraceEnhance',   require('concurix-waterfalltransform').enhanceWaterfall)
   .value('MSFormat', require('./format').msFormat)
+  .value('Inspector', require('./inspector'))
   .value('TransactionList', require('./transaction-list'));
