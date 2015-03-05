@@ -3,8 +3,9 @@
     <div class="panel-heading">
       <h3 class="panel-title">Inspector</h3>
     </div>
-    <sl-tracing-inspector-costtree></sl-tracing-inspector-costtree>
-    <sl-tracing-inspector-eventloop></sl-tracing-inspector-eventloop>
+    <sl-tracing-inspector-costtree ng-show="showCosttreeInspector()"></sl-tracing-inspector-costtree>
+    <sl-tracing-inspector-eventloop ng-show="showEventloopInspector()"></sl-tracing-inspector-eventloop>
+    <sl-tracing-inspector-functions ng-show="showFunctionsInspector()"></sl-tracing-inspector-functions>
     <ul class='list-group'>
       <li class='list-group-item'>Nothing selected</li>
     </ul>
