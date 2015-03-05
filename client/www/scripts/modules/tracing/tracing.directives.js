@@ -24,7 +24,7 @@ Tracing.directive('slTracingInspectorEventloop', [
 
   }
 ]);
-Tracing.directive('slTracingInspectorFunction', [
+Tracing.directive('slTracingInspectorFunctions', [
   '$log',
   function($log) {
     return {
@@ -61,10 +61,23 @@ Tracing.directive('slTracingWaterfallEventloop', [
   function($log, EventLoop, FlameGraph, RawTree, Inspector, Color) {
     return {
       restrict: 'E',
+      controller: ['$scope', function($scope) {
+        $scope.showEventloopInspector = function() {
+          return false;
+        };
+        $scope.showCosttreeInspector = function() {
+          return true
+        };
+        $scope.showFunctionsInspector = function() {
+          return false;
+        }
+
+      }],
       link: function(scope, el, attrs) {
         var eventloop = EventLoop();
         var flame = FlameGraph();
         var rawtree = RawTree();
+
 
         eventloop.init('[data-hook="eventloop"]', { expanded: true, color: '#1234af' });
         flame.init('[data-hook="flame"]', {colors: Color, disableZoom: true});
