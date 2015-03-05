@@ -1,10 +1,64 @@
+Tracing.directive('slTracingInspectorCosttree', [
+  '$log',
+  function($log) {
+    return {
+      templateUrl: './scripts/modules/tracing/templates/tracing.inspector.costtree.html',
+      restrict: 'E',
+      link: function(scope, el, attrs) {
+
+      }
+    }
+
+  }
+]);
+Tracing.directive('slTracingInspectorEventloop', [
+  '$log',
+  function($log) {
+    return {
+      templateUrl: './scripts/modules/tracing/templates/tracing.inspector.eventloop.html',
+      restrict: 'E',
+      link: function(scope, el, attrs) {
+
+      }
+    }
+
+  }
+]);
+Tracing.directive('slTracingInspectorFunction', [
+  '$log',
+  function($log) {
+    return {
+      templateUrl: './scripts/modules/tracing/templates/tracing.inspector.function.html',
+      restrict: 'E',
+      link: function(scope, el, attrs) {
+
+      }
+    }
+
+  }
+]);
+Tracing.directive('slTracingInspectorBase', [
+  '$log',
+  function($log) {
+    return {
+      templateUrl: './scripts/modules/tracing/templates/tracing.inspector.base.html',
+      restrict: 'E',
+      link: function(scope, el, attrs) {
+
+
+      }
+    }
+
+  }
+]);
 Tracing.directive('slTracingWaterfallEventloop', [
   '$log',
   'EventLoop',
   'FlameGraph',
   'RawTree',
+  'Inspector',
   'Color',
-  function($log, EventLoop, FlameGraph, RawTree, Color) {
+  function($log, EventLoop, FlameGraph, RawTree, Inspector, Color) {
     return {
       restrict: 'E',
       link: function(scope, el, attrs) {
@@ -15,13 +69,61 @@ Tracing.directive('slTracingWaterfallEventloop', [
         eventloop.init('[data-hook="eventloop"]', { expanded: true, color: '#1234af' });
         flame.init('[data-hook="flame"]', {colors: Color, disableZoom: true});
         rawtree.init('[data-hook="rawtree"]', {colors: Color});
-        scope.$watch('currentWaterfall', function(newVal, oldVal) {
-          if (newVal && newVal.id) {
-            eventloop.update(newVal, scope.currentTrace.functions);
-            flame.update(newVal, scope.currentTrace.functions);
-            rawtree.update(newVal);
+
+        var inspector = new Inspector({
+          app: {},
+          trace: scope.currentTrace,
+          el: jQuery('[role=inspector]')[0]
+        });
+        scope.preview = function mouseEnter(d){
+          var self = inspector;
+          scope.currentHilightItem = d;
+          self.charts.forEach(function(chart) {
+            if (chart.highlight) chart.highlight(scope.currentHilightItem.item)
+          })
+        };
+        scope.restore = function mouseLeave(){
+          var self = inspector;
+          self.charts.forEach(function(chart) {
+            if (chart.highlight) chart.highlight()
+          });
+          //self.render(this.selected)
+        };
+        //
+        scope.select = function select(d) {
+          var self = inspector;
+          self.selected = (self.selected && self.selected.item == d.item) ? false : d
+         // self.render(self.selected)
+          self.charts.forEach(function(chart) {
+            if (chart.select) chart.select(self.selected && self.selected.item)
+          })
+        };
+        //
+        scope.deselect = function deselect() {
+          var self = inspector;
+          delete self.selected;
+         // self.render()
+        };
+        var setupListeners = function setupListeners(charts){
+          var self = inspector;
+          self.charts = charts
+          charts.forEach(function(d){
+            d.on('mouseenter', scope.preview.bind(self));
+            d.on('mouseleave', scope.restore.bind(self))
+            d.on('click', scope.select.bind(self))
+          })
+        };
+        setupListeners([rawtree, eventloop, flame]);
+
+        scope.$watch('currentWaterfall', function(newWaterfall, oldVal) {
+          if (newWaterfall && newWaterfall.id) {
+            eventloop.update(newWaterfall, scope.currentTrace.functions);
+            flame.update(newWaterfall, scope.currentTrace.functions);
+            rawtree.update(newWaterfall);
+            rawtree.update(newWaterfall);
           }
         });
+
 
       }
     }
@@ -48,6 +150,7 @@ Tracing.directive('slTracingDetailView', [
       templateUrl: './scripts/modules/tracing/templates/tracing.waterfall.detail.html',
       restrict: 'E',
       controller: ['$scope', function($scope) {
+        $scope.currentFunction = {};
         $scope.showDetailView = function() {
           return ($scope.currentWaterfallKey && $scope.currentWaterfallKey.length > 0);
         };
@@ -90,11 +193,7 @@ Tracing.directive('slTracingDetailView', [
         }
       }],
       link: function(scope, el, attrs) {
-
-
-
         scope.$watch('currentWaterfallKey', function(newVal, oldVal) {
-
           if (newVal && newVal.length > 0) {
             scope.currentWaterfall = scope.loadWaterfallById(newVal);
           }
