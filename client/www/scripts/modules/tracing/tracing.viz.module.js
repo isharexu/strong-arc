@@ -29,13 +29,13 @@ function Inspector (options) {
   if (opts.class) {
     component.el.classList.add(opts.class);
   }
-  component.el.innerHTML = '<div>hello world</div>';
+  //component.el.innerHTML = '<div>hello world</div>';
 
  // delegate.bind(this.el, '.eventloop .top-costs .function .header', 'click', this.toggleFunction)
 
-  if (component.opts.app.on) {
-    component.opts.app.on('inspect', component.render);
-  }
+  //if (component.opts.app.on) {
+  //  component.opts.app.on('inspect', component.render);
+  //}
 
   return component;
 }
@@ -52,45 +52,7 @@ Inspector.prototype.remove = function remove() {
   this.opts.app.off('inspect', this.render)
 };
 
-Inspector.prototype.setupListeners = function setupListeners(charts){
-  var self = this
-  this.charts = charts
-  charts.forEach(function(d){
-    d.on('mouseenter', self.preview.bind(self))
-    d.on('mouseleave', self.restore.bind(self))
-    d.on('click', self.select.bind(self))
-  })
-};
 
-Inspector.prototype.preview = function mouseEnter(d){
-  var self = this
-  this.render(d)
-  this.charts.forEach(function(chart) {
-    if (chart.highlight) chart.highlight(d.item)
-  })
-};
-
-Inspector.prototype.restore = function mouseLeave(){
-  var self = this
-  this.charts.forEach(function(chart) {
-    if (chart.highlight) chart.highlight()
-  })
-  this.render(this.selected)
-};
-
-Inspector.prototype.select = function select(d) {
-  var self = this
-  this.selected = (this.selected && this.selected.item == d.item) ? false : d
-  this.render(this.selected)
-  this.charts.forEach(function(chart) {
-    if (chart.select) chart.select(self.selected && self.selected.item)
-  })
-};
-
-Inspector.prototype.deselect = function deselect() {
-  delete this.selected
-  this.render()
-};
 
 Inspector.prototype.toggleFunction = function (e) {
   var functions = this.querySelectorAll('.top-costs .function')

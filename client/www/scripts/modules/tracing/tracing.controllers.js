@@ -12,6 +12,7 @@ Tracing.controller('TracingMainController', [
     $scope.currentTrace = {};
     $scope.currentWaterfallKey = '';
     $scope.currentWaterfall = {};
+    $scope.currentFunction = {};
 
     $scope.setCurrentWaterfallKey = function(key) {
       if (key && key.length > 0) {

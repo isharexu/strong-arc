@@ -9,41 +9,42 @@
     <ul class='list-group'>
 
       <li class='list-group-item'>
-        <strong>Name: </strong>{{ currentItem.name }}
+        <strong>Name: </strong>{{ currentFunction.item.name }}
       </li>
 
       <!--<% if (trace.functions[item.id].start) { }}-->
         <!--<% if (trace.functions[item.id].module) { }}-->
-        <!--<li class='list-group-item'><strong>Module: </strong>{{ trace.functions[item.id].module.name }}</li>-->
-        <!--<li class='list-group-item'><strong>Version: </strong>{{ trace.functions[item.id].module.version }}</li>-->
+        <li ng-show="currentTrace.functions[currentFunction.item.id].module" class='list-group-item'><strong>Module: </strong>{{ trace.functions[item.id].module.name }}</li>
+        <li ng-show="currentTrace.functions[currentFunction.item.id].module" class='list-group-item'><strong>Version: </strong>{{ trace.functions[item.id].module.version }}</li>
         <!--<% } }}-->
-      <!--<li class='list-group-item'><strong>Filename: </strong>{{ trace.functions[item.id].module.filename }}</li>-->
-      <!--<li class='list-group-item'><strong>Line: </strong>{{ trace.functions[item.id].start.line }}</li>-->
-      <!--<li class='list-group-item'><strong>Column: </strong>{{ trace.functions[item.id].start.column }}</li>-->
+      <li ng-show="!currentTrace.functions[currentFunction.item.id].module" class='list-group-item'><strong>Filename: </strong>{{ trace.functions[item.id].module.filename }}</li>
+      <li ng-show="!currentTrace.functions[currentFunction.item.id].module" class='list-group-item'><strong>Line: </strong>{{ trace.functions[item.id].start.line }}</li>
+      <li ng-show="!currentTrace.functions[currentFunction.item.id].module" class='list-group-item'><strong>Column: </strong>{{ trace.functions[item.id].start.column }}</li>
       <!--<% } }}-->
 
+
       <li class='list-group-item'>
-        <strong>Total Cost: </strong>{{ currentItem.cost }}
+        <strong>Total Cost: </strong>{{ currentFunction.item.cost }}
       </li>
 
       <li class='list-group-item'>
-        <strong>Self Cost: </strong>{{ currentItem.selfCost }}
+        <strong>Self Cost: </strong>{{ currentFunction.item.selfCost }}
       </li>
 
       <li class='list-group-item'>
-        <strong>Child Cost: </strong>{{ currentItem.childCost }}
+        <strong>Child Cost: </strong>{{ currentFunction.item.childCost }}
       </li>
 
       <li class='list-group-item'>
-        <strong>Total Percentage: </strong>{{ currentItem.totalPct }}%
+        <strong>Total Percentage: </strong>{{ currentFunction.item.totalPct }}%
       </li>
 
       <li class='list-group-item'>
-        <strong>Self Percentage: </strong>{{ currentItem.selfPct }}%
+        <strong>Self Percentage: </strong>{{ currentFunction.item.selfPct }}%
       </li>
 
       <li class='list-group-item'>
-        <strong>Child Percentage: </strong>{{ currentItem.childPct }}%
+        <strong>Child Percentage: </strong>{{ currentFunction.item.childPct }}%
       </li>
 
     </ul>

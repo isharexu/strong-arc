@@ -7,36 +7,35 @@
 
     <ul class='list-group'>
       <li class='list-group-item'>
-        <strong>Name: </strong>{{ currentItem.name }}
+        <strong>Name: </strong>{{ currentFunction.item.name }}
       </li>
 
       <li class='list-group-item'>
-        <strong>Cost: </strong>{{ currentItem.cost }}
+        <strong>Cost: </strong>{{ currentFunction.item.cost }}
       </li>
 
-      <% if (item.costSummary && item.costSummary.topCosts) {  }}
-      <li class='top-costs list-group-item'>
+
+      <li class='top-costs list-group-item' ng-show="isShowTopCosts()">
         <strong>Top Costs</strong>
         <ul class='functions'>
-          <% item.costSummary.topCosts.slice(0, 5).forEach(function(d){ }}
-          <li class='function' data-id='{{ d.id }}'>
+          <li ng-repeat="costItem in currentFunction.item.costSummary.topCosts" class="function" data-id='{{ costItem.id }}'>
             <div class='header row'>
               <div class='function-name col-md-12 col-lg-8'>
-                {{ trace.functions[d.id].name }}
+                {{ currentTrace.functions[costItem.id].name }}
               </div>
               <div class='col-md-12 col-lg-4'>
                 <div class="progress">
-                  <span class='progress-value'>{{ d.selfPct }}%</span>
-                  <div class="progress-bar" role="progressbar" aria-valuenow="{{  d.selfPct }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ d.selfPct }}%;"></div>
+                  <span class='progress-value'>{{ costItem.selfPct }}%</span>
+                  <div class="progress-bar" role="progressbar" aria-valuenow="{{  costItem.selfPct }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ d.selfPct }}%;"></div>
                 </div>
               </div>
             </div>
-            {{ trace.functions[d.id] ? fn({ item: d, fns: trace.functions }) : 'asyncronous wait' }}
+            {{ currentTrace.functions[costItem.id] ? fn({ item: costItem, fns: currentTrace.functions }) : 'asyncronous wait' }}
           </li>
-          <% }) }}
+
         </ul>
       </li>
-      <% } }}
+
 
     </ul>
 

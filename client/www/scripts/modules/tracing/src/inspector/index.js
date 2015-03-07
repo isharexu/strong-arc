@@ -15,13 +15,13 @@ function Inspector (options) {
   if (opts.class) {
     component.el.classList.add(opts.class);
   }
-  component.el.innerHTML = '<div>hello world</div>';
+  //component.el.innerHTML = '<div>hello world</div>';
 
  // delegate.bind(this.el, '.eventloop .top-costs .function .header', 'click', this.toggleFunction)
 
-  if (component.opts.app.on) {
-    component.opts.app.on('inspect', component.render);
-  }
+  //if (component.opts.app.on) {
+  //  component.opts.app.on('inspect', component.render);
+  //}
 
   return component;
 }

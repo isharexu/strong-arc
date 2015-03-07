@@ -43,6 +43,9 @@ Tracing.directive('slTracingInspectorBase', [
     return {
       templateUrl: './scripts/modules/tracing/templates/tracing.inspector.base.html',
       restrict: 'E',
+      controller: ['$scope', function($scope) {
+
+      }],
       link: function(scope, el, attrs) {
 
 
@@ -70,13 +73,40 @@ Tracing.directive('slTracingWaterfallEventloop', [
         };
         $scope.showFunctionsInspector = function() {
           return false;
-        }
+        };
+
+        //$scope.isShowInspector = function(type) {
+        //  switch(type) {
+        //    case 'flame':
+        //      if ($scope.currentFunction && $scope.currentFunction.type) {
+        //        if ($scope.currentFunction.type === 'flame') {
+        //          return true;
+        //        }
+        //
+        //      }
+        //
+        //      break;
+        //
+        //    case 'eventLoop':
+        //
+        //      break;
+        //
+        //    case 'rawTree':
+        //
+        //      break;
+        //
+        //    default:
+        //
+        //
+        //  }
+        //}
 
       }],
       link: function(scope, el, attrs) {
         var eventloop = EventLoop();
         var flame = FlameGraph();
         var rawtree = RawTree();
+
 
 
         eventloop.init('[data-hook="eventloop"]', { expanded: true, color: '#1234af' });
@@ -88,14 +118,28 @@ Tracing.directive('slTracingWaterfallEventloop', [
           trace: scope.currentTrace,
           el: jQuery('[role=inspector]')[0]
         });
+
         scope.preview = function mouseEnter(d){
+
           var self = inspector;
-          scope.currentHilightItem = d;
+          scope.currentFunction = d;
+          $log.debug('PREVIEW: ' + scope.currentFunction.type);
+          /*
+          *
+          * need to switch on type
+          * - flame
+          * - eventLoop
+          * - rawTree
+          *
+          * */
+
           self.charts.forEach(function(chart) {
-            if (chart.highlight) chart.highlight(scope.currentHilightItem.item)
+            if (chart.highlight) chart.highlight(scope.currentFunction.item)
           })
         };
         scope.restore = function mouseLeave(){
+          $log.debug('RESTORE');
+         // scope.currentFunction = '';
           var self = inspector;
           self.charts.forEach(function(chart) {
             if (chart.highlight) chart.highlight()
@@ -181,6 +225,12 @@ Tracing.directive('slTracingDetailView', [
               }
             }
           }
+        };
+        $scope.isShowTopCosts = function() {
+          if ($scope.currentFunction.item && $scope.currentFunction.item.costSummary && $scope.currentFunction.item.costSummary.topCosts) {
+            return true;
+          }
+          return false;
         };
         $scope.nextWaterfall = function() {
           var totalLen = $scope.currentTrace.waterfalls.length;
