@@ -75,32 +75,6 @@ Tracing.directive('slTracingWaterfallEventloop', [
           return false;
         };
 
-        //$scope.isShowInspector = function(type) {
-        //  switch(type) {
-        //    case 'flame':
-        //      if ($scope.currentFunction && $scope.currentFunction.type) {
-        //        if ($scope.currentFunction.type === 'flame') {
-        //          return true;
-        //        }
-        //
-        //      }
-        //
-        //      break;
-        //
-        //    case 'eventLoop':
-        //
-        //      break;
-        //
-        //    case 'rawTree':
-        //
-        //      break;
-        //
-        //    default:
-        //
-        //
-        //  }
-        //}
-
       }],
       link: function(scope, el, attrs) {
         var eventloop = EventLoop();
