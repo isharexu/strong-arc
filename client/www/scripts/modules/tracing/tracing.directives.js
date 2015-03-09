@@ -77,9 +77,9 @@ Tracing.directive('slTracingWaterfallEventloop', [
 
       }],
       link: function(scope, el, attrs) {
-        var eventloop = EventLoop();
-        var flame = FlameGraph();
-        var rawtree = RawTree();
+        var eventloop = new EventLoop();
+        var flame = new FlameGraph();
+        var rawtree = new RawTree();
 
 
 
@@ -243,14 +243,29 @@ Tracing.directive('slTracingTraceSummary', [
   '$log',
   'Sha1',
   'EventLoop',
+  'PieChart',
   'MSFormat',
   'Color',
   'Slug',
-  function($log, Sha1, EventLoop, msFormat, color, slug) {
+  function($log, Sha1, EventLoop, PieChart, msFormat, color, slug) {
     return {
       templateUrl: './scripts/modules/tracing/templates/tracing.trace.summary.html',
       restrict: 'E',
       controller: ['$scope', function($scope) {
+
+        $scope.format = d3.format('.3s');
+
+
+
+        $scope.msFormat = function(d){
+          return format(d/1000000) + 's'
+        };
+
+        $scope.tsText = function(ts){
+          return m(ts).fromNow() +' (' + m(ts).format('ddd, MMM Do YYYY, h:mm:ss a') + ')'
+        };
+
+
         $scope.mapTransactions = function(transactions) {
           var collectionData = Object.keys(transactions)
             .filter(function (key) {
@@ -286,11 +301,63 @@ Tracing.directive('slTracingTraceSummary', [
         }
         //$scope.mappedTransactions = $scope.mapTransactions($scope.currentTrace.transactions.transactions)
         $scope.mappedTransactions = [];
+
+
       }],
       link: function(scope, el, attrs) {
+        var traceToAsyncPie = function(trace){
+          var data = [
+            {
+              key: "async",
+              value: trace.summary_stats.percentAsync,
+              fillClass: 'async'
+            },
+            {
+              key: "sync",
+              value: trace.summary_stats.percentBlocked,
+              fillClass: 'blocked'
+            }
+          ]
+          return data
+        }
 
+        var traceToIdlePie = function(trace){
+          var data = [
+            {
+              key: "idle",
+              value: trace.summary_stats.percentIdle,
+              fillClass: 'idle'
+            },
+            {
+              key: "busy",
+              value: trace.summary_stats.percentOperating,
+              fillClass: 'operating'
+            }
+          ]
+          return data
+        }
 
+        var asyncpie = new PieChart();
+        var idlepie = new PieChart();
+
+        asyncpie.init('[role="summary-async-pie"]', {fixedWidth: 200, fixedHeight: 200});
+        idlepie.init('[role=summary-idle-pie]', {fixedWidth: 200, fixedHeight: 200});
         function render() {
+          /*
+          *
+          * Pie Charts
+          *
+          *
+          * */
+
+          asyncpie.update(traceToAsyncPie(scope.currentTrace));
+          idlepie.update(traceToIdlePie(scope.currentTrace));
+
+          /*
+          *
+          * Transaction History
+          *
+          * */
           var trans = d3.select('[role=transactions]').selectAll('li').data(scope.mappedTransactions, function key(d){ return d.id })
           trans.exit().remove()
 
@@ -437,6 +504,11 @@ Tracing.directive('slTracingTraceSummary', [
               window.location.href = window.location.hash;
             }
           }, 0)
+        }
+
+        if (scope.currentTrace.summary_stats) {
+          scope.asyncpie.update(scope.traceToAsyncPie(trace))
+          scope.idlepie.update(scope.traceToIdlePie(trace))
         }
 
         scope.$watch('currentTrace', function(newVal, oldVal) {
