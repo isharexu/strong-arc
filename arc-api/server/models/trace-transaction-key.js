@@ -6,7 +6,15 @@ module.exports = function(TraceTransactionKey) {
   TraceTransactionKey.transactionKeys = function(reqparams, cb) {
 
    // var project = 'wfp:helloworld';
-    var urlString = 'http://localhost:8103/get_meta_transactions/' + reqparams.project + '/0/0';
+    var apiHost = 'http://localhost:8103/';
+    //var apiHost = 'http://ec2-54-165-203-29.compute-1.amazonaws.com:8103/';
+    var project = reqparams.project;
+    //var host = reqparams.host;
+    //var pid = reqparams.pid;
+    var urlString = apiHost + 'get_meta_transactions/' + project + '/0/0';
+
+
+   // var urlString = 'http://localhost:8103/get_meta_transactions/' + project + '/0/0';
     //  var url = this.base + path.join('get_host_pid_list', this.project)
     // cb = cb || function(data){}
 

@@ -215,7 +215,7 @@ module.factory(
          *
          * @param {Object=} parameters Request parameters.
          *
-         *  - `msg` – `{string=}` - 
+         *  - `reqparams` – `{object=}` - 
          *
          * @param {function(Object,Object)=} successCb
          *   Success callback with two arguments: `value`, `responseHeaders`.

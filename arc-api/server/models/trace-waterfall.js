@@ -6,7 +6,8 @@ module.exports = function(TraceWaterfall) {
   TraceWaterfall.transactionKeys = function(msg, cb) {
 
     //var project = 'wfp:helloworld';
-    var urlString = 'http://localhost:8103/get_host_pid_list/arctest_concurix_key';
+    var apiHost = 'http://localhost:8103/';
+    //var urlString = 'http://localhost:8103/get_host_pid_list/arctest_concurix_key';
     //  var url = this.base + path.join('get_host_pid_list', this.project)
     // cb = cb || function(data){}
 

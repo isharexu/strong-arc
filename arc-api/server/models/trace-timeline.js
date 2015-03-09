@@ -5,7 +5,15 @@ module.exports = function(TraceTimeline) {
 
   TraceTimeline.fetchTimeLine = function (reqparams, cb) {
 
-    var urlString = 'http://localhost:8103/get_raw_memory_pieces/' + reqparams.project + '/' + reqparams.host + '/' + reqparams.pid;
+
+    var apiHost = 'http://localhost:8103/';
+    //var apiHost = 'http://ec2-54-165-203-29.compute-1.amazonaws.com:8103/';
+    var project = reqparams.project;
+    var host = reqparams.host;
+    var pid = reqparams.pid;
+    var urlString = apiHost + 'get_raw_memory_pieces/' + project + '/' + host + '/' + pid;
+
+  //  var urlString = 'http://localhost:8103/get_raw_memory_pieces/' + project + '/' + reqparams.host + '/' + reqparams.pid;
 
     function getGzipped(url, callback) {
       // buffer to store the streamed decompression
