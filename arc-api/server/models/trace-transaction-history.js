@@ -5,9 +5,18 @@ module.exports = function(TraceTransactionHistory) {
 
   TraceTransactionHistory.transactionHistory = function(reqparams, cb) {
 
-  //  var project = 'wfp:helloworld';
+    var project = 'wfp:helloworld';
     //var urlString = 'http://localhost:8103/get_transaction/' + reqparams.project + '/' + reqparams.host + '/' + reqparams.pid;
-    var urlString = 'http://localhost:8103/get_transaction/' + reqparams.project + '/' + reqparams.transaction + '/' + reqparams.host + '/' + reqparams.pid;
+
+    var apiHost = 'http://localhost:8103/';
+    //var apiHost = 'http://ec2-54-165-203-29.compute-1.amazonaws.com:8103/';
+    var transaction = reqparams.transaction;
+    var host = reqparams.host;
+    var pid = reqparams.pid;
+    var urlString = apiHost + 'get_transaction/' + project + '/' + transaction + '/' + host + '/' + pid;
+
+
+   // var urlString = 'http://localhost:8103/get_transaction/' + project + '/' + transaction + '/' + host + '/' + pid;
     //  var url = this.base + path.join('get_host_pid_list', this.project)
     // cb = cb || function(data){}
     //console.log('|');

@@ -64,7 +64,7 @@ Tracing.service('TracingServices', [
         });
     };
 
-    svc.fetchHosts = function(cb) {
+    svc.fetchHosts = function(options) {
 
       return TraceHost.fetchHosts()
         .$promise

@@ -173,6 +173,21 @@ Tracing.directive('slTracingWaterfallSummary', [
     }
   }
 ]);
+Tracing.directive('slTracingHeader', [
+  '$log',
+  function($log) {
+    return {
+      templateUrl: './scripts/modules/tracing/templates/tracing.header.html',
+      restrict: 'E',
+      controller: [
+        '$scope',
+        function($scope) {
+
+        }
+      ]
+    }
+  }
+]);
 Tracing.directive('slTracingDetailView', [
   '$log',
   'Sha1',

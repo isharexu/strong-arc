@@ -7,8 +7,11 @@ module.exports = function(Trace) {
 
   Trace.fetchTrace = function(pfkey, cb) {
 
+    var apiHost = 'http://localhost:8103/';
+    //var apiHost = 'http://ec2-54-165-203-29.compute-1.amazonaws.com:8103/';
+    var urlString = apiHost + 'get_raw_pieces/' + pfkey;
 
-    var urlString = 'http://localhost:8103/get_raw_pieces/' + pfkey;
+   // var urlString = 'http://localhost:8103/get_raw_pieces/' + pfkey;
 
     function getGzipped(url, callback) {
       // buffer to store the streamed decompression

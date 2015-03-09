@@ -3,10 +3,13 @@ module.exports = function(TraceHost) {
   var http = require("http");
   var zlib = require("zlib");
 
-  TraceHost.fetchHosts = function(msg, cb) {
+  TraceHost.fetchHosts = function(reqparams, cb) {
 
-    //var project = 'wfp:helloworld';
-    var urlString = 'http://localhost:8103/get_host_pid_list/wfp:helloworld';
+    var project = 'wfp:helloworld';  // get this from url
+    //var project = reqparams.project;
+    var apiHost = 'http://localhost:8103/';
+   // var apiHost = 'http://ec2-54-165-203-29.compute-1.amazonaws.com:8103/';
+    var urlString = apiHost + 'get_host_pid_list/' + project;
     //  var url = this.base + path.join('get_host_pid_list', this.project)
     // cb = cb || function(data){}
 
@@ -48,7 +51,7 @@ module.exports = function(TraceHost) {
   TraceHost.remoteMethod(
     'fetchHosts',
     {
-      accepts: {arg: 'msg', type: 'string'},
+      accepts: {arg: 'reqparams', type: 'object'},
       returns: {arg: 'data', type: 'string'},
       http: {verb: 'get'}
     }
