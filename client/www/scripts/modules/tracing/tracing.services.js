@@ -51,6 +51,17 @@ Tracing.service('TracingServices', [
       return ret;
     };
 
+    svc.getTimeline = function(config) {
+      return svc.fetchTimeline({reqparams:config})
+        .then(function(timelineRaw) {
+          var tHost = timelineRaw.hosts[config.host];
+          var dataArray = tHost[config.pid];
+          if (dataArray) {
+            return svc.convertTimeseries(dataArray);
+          }
+        });
+    };
+
     svc.fetchTrace = function(pfkey, cb) {
       return Trace.fetchTrace(pfkey)
         .$promise

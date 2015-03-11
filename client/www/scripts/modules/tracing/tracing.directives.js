@@ -670,7 +670,7 @@ Tracing.directive('slTracingTransactionHistory', [
 
         scope.$watch('transactionHistoryCollection', function(newVal, oldVal) {
           if (newVal && newVal.length) {
-            scope.transactionListView.render(newVal, scope.currentHost);
+            scope.transactionListView.render(newVal, scope.currentHostConfig);
             //
             $timeout(function() {
               window.setScrollView('.monitor-view');
@@ -681,6 +681,21 @@ Tracing.directive('slTracingTransactionHistory', [
         window.onresize = function() {
           window.setScrollView('.monitor-view');
         };
+      }
+    }
+  }
+
+]);
+Tracing.directive('slTracingMainView', [
+  '$log',
+  '$timeout',
+  'TransactionList',
+  function($log, $timeout, TransactionList) {
+    return {
+      templateUrl: './scripts/modules/tracing/templates/tracing.main.view.html',
+      restrict: 'E',
+      link: function(scope, el, attrs) {
+
       }
     }
   }

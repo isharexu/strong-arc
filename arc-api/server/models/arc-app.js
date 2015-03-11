@@ -66,6 +66,14 @@ module.exports = function(ArcApp) {
       "supports": "*"
     },
     {
+      "id": "tracing",
+      "name": "Tracing",
+      "description": "Trace through request profiles over time.",
+      "disabled": false,
+      "beta": true,
+      "supports": "*"
+    },
+    {
       "id": "profiler",
       "name": "Profiler",
       "description": "Profile applications’ CPU and memory consumption.",
