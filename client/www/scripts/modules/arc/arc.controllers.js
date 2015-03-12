@@ -10,6 +10,15 @@ Arc.controller('ArcMainController', [
       apps: []
     };
 
+    /*
+     *
+     * temporary while we nail down the metrics memory leak
+     *
+     * */
+    if (window.nv && window.nv.dev) {
+      window.nv.dev = false;
+    }
+
     $scope.isAuthUser = function(){
       return ArcUserService.isAuthUser();
     };
