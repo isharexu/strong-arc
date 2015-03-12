@@ -1,5 +1,15 @@
 <ul class="ui-list-scroll skinny">
   <li ng-repeat="pid in host.processes.pids">
-    {{ pid.pid }}
+    <span>{{ pid.pid }}</span>
+    <span class="dropdown" dropdown on-toggle="toggled(open)">
+      <a href class="dropdown-toggle" dropdown-toggle>
+        <span class="caret"></span>
+      </a>
+      <ul class="dropdown-menu">
+        <li><button class="link-cmd">tracing</button></li>
+        <li><button class="link-cmd">profiles</button></li>
+        <li><button class="link-cmd">metrics</button></li>
+      </ul>
+    </span>
   </li>
 </ul>

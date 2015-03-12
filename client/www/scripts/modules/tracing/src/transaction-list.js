@@ -170,9 +170,10 @@ function enterTransactionStats(el) {
   var transactionStatsEnter = d3.select(el);
   var transactionStatsTableEnter = transactionStatsEnter.append('table')
     .on('click', function(d,i) {
-        console.log('got the click');
+        var self = this;
+        jQuery(self.parentElement).toggleClass('expanded');
+        console.log('got the click: ');
       });
-    //.attr('role', 'toggle');
 
   var transactionStatsRowEnter = transactionStatsTableEnter.append('tr');
   transactionStatsRowEnter.append('td').attr('class', 'transaction-route').text(function(d){ return d });

@@ -446,7 +446,7 @@ Tracing.directive('slTracingTraceSummary', [
             //.attr('href', function (d) { return path.join(history.state.basePath, history.state.project, 'trace', encodeURIComponent(history.state.pfkey), sha1(d.id)) })
             .attr('class', 'link-cmd')
             .on('click', function(d) {
-              var projectName = scope.currentProject;
+              //var projectName = scope.currentApp;
              // var pfKey = encodeURIComponent(scope.currentPFKey);
               var waterfallId = Sha1(d.id);
               scope.currentWaterfallKey = waterfallId;
@@ -668,9 +668,9 @@ Tracing.directive('slTracingTransactionHistory', [
 
         scope.transactionListView = TransactionList('[data-hook="transaction-list-cont"]', {});
 
-        scope.$watch('transactionHistoryCollection', function(newVal, oldVal) {
-          if (newVal && newVal.length) {
-            scope.transactionListView.render(newVal, scope.currentHostConfig);
+        scope.$watch('currentTransactionHistoryCollection', function(historyCollection, oldVal) {
+          if (historyCollection && historyCollection.length) {
+            scope.transactionListView.render(historyCollection, scope.currentHostConfig);
             //
             $timeout(function() {
               window.setScrollView('.monitor-view');

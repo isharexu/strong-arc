@@ -108,7 +108,7 @@ Tracing.service('TracingServices', [
 
     };
 
-    svc.transactionKeys = function transactionKeys(reqparams){
+    svc.getTransactionKeys = function getTransactionKeys(reqparams){
 
       return TraceTransactionKey.transactionKeys(reqparams)
         .$promise

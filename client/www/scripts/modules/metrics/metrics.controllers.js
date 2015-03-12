@@ -10,6 +10,7 @@ Metrics.controller('MetricsMainController', [
   'ChartConfigService',
   function($scope, $state, $log, growl, $interval, MetricsService, PMPidService, PMHostService, ChartConfigService) {
 
+    var iterationCount = 0;
     $scope.isDisplayChartValid = false; // control display of charts (transition between data sets)
     $scope.currentServerConfig = PMHostService.getLastPMServer();
     $scope.isCollapsed = true;  // settings
@@ -272,6 +273,8 @@ Metrics.controller('MetricsMainController', [
 
       // clear memory to avoid leaks
       ChartConfigService.clearChartMemory();
+      iterationCount++;
+      $log.debug('| iteration[' + iterationCount + ']');
 
       // assign scope chart model variable data here
       $scope.chartData.map(function(chart) {

@@ -6,57 +6,32 @@ Tracing.controller('TracingMainController', [
   function($scope, $log, TracingServices, TimeSeries) {
     $log.debug('tracing controller');
     $scope.currentTimeline = {};
-    $scope.transactionKeys = [];
-    $scope.currentProject = 'wfp:helloworld';
-   // $scope.tracingHosts = [];
+    $scope.currentTransactionKeys = [];
+    $scope.currentTransactionHistoryCollection = [];
+    $scope.currentApp = 'wfp:helloworld';
     $scope.currentPFKey = '';
     $scope.currentTrace = {};
     $scope.currentWaterfallKey = '';
     $scope.currentWaterfall = {};
     $scope.currentFunction = {};
     $scope.currentHostConfig = {};
-    $scope.currentHost;
-    $scope.currentPid;
     $scope.currentPids = [];
 
-    $scope.setCurrentWaterfallKey = function(key) {
-      if (key && key.length > 0) {
-        $scope.currentWaterfallKey = key;
-      }
-    };
-
-    $scope.$watch('currentHost', function(newHost,oldHost) {
-      if (newHost) {
-        $scope.currentHostConfig.host = newHost;
-        // iterate over the hosts and set currentHostConfig to new value
-        $scope.hosts.map(function(host) {
-
-          if (host.host === newHost) {
-            $scope.currentPids = host.pids;
-            $scope.currentHostConfig.pid = host.pids[0];
-          }
-        });
-
-        //$scope.currentHostConfig.project = $scope.currentProject, $scope.currentPid = newHost.pids[0];
-
-      }
-    });
-    $scope.$watch('currentPid', function(newPid,oldPid) {
-      // iterate over the hosts and set currentHostConfig to new value
-      if (newPid) {
-        $scope.currentHostConfig.pid = newPid;
-        $scope.currentPid = newPid;
-
-      }
-    });
-
     window.onresize = function() {
-      window.setScrollView('.monitor-view');
+      window.setScrollView('.tracing-content-container');
     };
-    //$scope.showTraceView = function(data) {
-    //  $log.debug('load trace view: ' + data.pfkey);
-    //  $scope.currentPFKey = data.pfkey;
-    //};
+
+    /*
+    *
+    * update trigger
+    * if anything changes in the view context
+    * - app name /version
+    * - pm host
+    * - pid
+    *
+    * should probably be renamed to currentTracingContext
+    *
+    * */
     $scope.$watch('currentHostConfig', function(newConfig, oldConfig) {
       if (newConfig.host && newConfig.pid && newConfig.project) {
         $scope.currentTimeline = TracingServices.getTimeline(newConfig)
@@ -81,7 +56,7 @@ Tracing.controller('TracingMainController', [
 
 
       */
-      $scope.hosts = TracingServices.fetchHosts({project:$scope.currentProject})
+      $scope.hosts = TracingServices.fetchHosts({project:$scope.currentApp})
         .then(function(response) {
 
           if (response.length && response.length > 0) {
@@ -93,7 +68,7 @@ Tracing.controller('TracingMainController', [
             // set up the core data context
             $scope.currentPids = firstHost.pids;
             $scope.currentHostConfig = {
-              project: $scope.currentProject,
+              project: $scope.currentApp,
               host:firstHost.host,
               pid:firstHost.pids[0]
             };
@@ -103,15 +78,18 @@ Tracing.controller('TracingMainController', [
               .then(function(timeline) {
                 $scope.currentTimeline = timeline;
               });
-            $scope.transactionHistoryCollection = [];
-            $scope.transactionKeys = TracingServices.transactionKeys({reqparams:$scope.currentHostConfig})
+
+            /*
+            *
+            * Process the transaction history list
+            *
+            * */
+            TracingServices.getTransactionKeys({reqparams:$scope.currentHostConfig})
               .then(function(response) {
 
+
+                // make sure we get a list
                 if (response.hosts) {
-
-
-
-
 
                   /*
                    the current context list of transactions
@@ -119,35 +97,43 @@ Tracing.controller('TracingMainController', [
                    we need to iterate over them and create a deeper object than the simple one used by transaction-list component
 
                    trasObj = {
-                   key: transaction,
-                   history: {object based on api call}
+                    key: transaction,
+                    history: {object based on api call}
                    };
-                   */
-                  var transactionKCollection = response.hosts[$scope.currentHostConfig.host] ? response.hosts[$scope.currentHostConfig.host][$scope.currentHostConfig.pid] : [];
-                  $scope.transactionKeys = response.hosts[$scope.currentHostConfig.host] ? response.hosts[$scope.currentHostConfig.host][$scope.currentHostConfig.pid] : []
 
-                  // iterate over the transactions
-                  transactionKCollection.map(function(transaction) {
+                   */
+                  // var rawTransactionList = response.hosts[$scope.currentHostConfig.host] ? response.hosts[$scope.currentHostConfig.host][$scope.currentHostConfig.pid] : [];
+                  // isolate the transactions for this pid
+                  $scope.currentTransactionKeys = response.hosts[$scope.currentHostConfig.host] ? response.hosts[$scope.currentHostConfig.host][$scope.currentHostConfig.pid] : [];
+
+                  // iterate over the transaction keys
+                  $scope.currentTransactionKeys.map(function(transaction) {
+                    /*
+                    *
+                    *   Transaction key
+                    *
+                    * */
                     var transObj = {
                       key: transaction
                     };
 
+                    // history
                     TracingServices.transactionHistory(encodeURIComponent(transaction), $scope.currentHostConfig.host, $scope.currentHostConfig.pid)
                       .then(function(response){
 
+                        // get the history data per transaction
                         var rawTransactionData = JSON.parse(response.data);
+                        // assign history data to ui model
                         transObj.history = rawTransactionData.hosts[$scope.currentHostConfig.host][$scope.currentHostConfig.pid];
-                        $log.debug('Assign transactionData');
-                        //$log.debug('transdata: ' + response.data);
-                        //self.renderItem(key, history.hosts[host][pid])
-                        $scope.transactionHistoryCollection.push(transObj);
+                        $scope.currentTransactionHistoryCollection.push(transObj);
+
                       });
-
-
                   });
-
                 }
               });
+          }
+          else {
+            $log.debug('There are no tracing hosts');
           }
 
         })
