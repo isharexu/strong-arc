@@ -138,7 +138,7 @@ TransactionList.prototype.renderList = function renderList(keys){
   sel.enter().append('li')
     .attr('id', function(d){ return 'cx-mv-transaction-' + sha1(d)})
     .attr('data-id', function (d) { return d })
-    .attr('class', 'list-group-item transaction expanded')
+    .attr('class', 'list-group-item transaction')
     .each(function(){
 
       enterTransactionStats(this);
@@ -149,7 +149,7 @@ TransactionList.prototype.renderList = function renderList(keys){
         console.log('|  ----  : clicked it');
         console.log('|');
         console.log('|');
-        self.app.expanded[e.transaction] = true;
+        //self.app.expanded[e.transaction] = true;
         page(path.join(history.state.basePath, history.state.project, 'trace', encodeURIComponent(e.pfkey), '#' + slug(e.transaction)))
       });
     })
