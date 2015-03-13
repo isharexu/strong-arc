@@ -664,6 +664,11 @@ Tracing.directive('slTracingTransactionHistory', [
     return {
       templateUrl: './scripts/modules/tracing/templates/tracing.transaction.history.html',
       restrict: 'E',
+      controller: ['$scope', function($scope) {
+        $scope.updatePFKeyFromTransactionHistory = function(pfkey) {
+          $scope.currentPFKey = pfkey;
+        }
+      }],
       link: function(scope, el, attrs) {
 
         scope.transactionListView = TransactionList('[data-hook="transaction-list-cont"]', {});

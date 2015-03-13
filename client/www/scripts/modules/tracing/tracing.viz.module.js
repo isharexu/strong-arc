@@ -144,13 +144,18 @@ TransactionList.prototype.renderList = function renderList(keys){
       enterTransactionStats(this);
       this.timeseriesGraph = setupTimeseries(this);
       this.timeseriesGraph.on('click',function (e) {
+
+        var scope = angular.element($("#TracingTransactionHistoryContainer")).scope();
+        scope.$apply(function(){
+          scope.doIt(e.pfkey);// = 'Superhero';
+        });
+        //console.log('|: ' + scope);
         console.log('|');
-        console.log('|');
-        console.log('|  ----  : clicked it');
+        console.log('|  ----  : show trace view[' + e.pfkey + ']  transaction:[' + e.transaction + ']');
         console.log('|');
         console.log('|');
         //self.app.expanded[e.transaction] = true;
-        page(path.join(history.state.basePath, history.state.project, 'trace', encodeURIComponent(e.pfkey), '#' + slug(e.transaction)))
+       // page(path.join(history.state.basePath, history.state.project, 'trace', encodeURIComponent(e.pfkey), '#' + slug(e.transaction)))
       });
     })
     .select('svg')
@@ -255,8 +260,7 @@ function enterTransactionStats(el) {
   var transactionStatsTableEnter = transactionStatsEnter.append('table')
     .on('click', function(d,i) {
         var self = this;
-        jQuery(self.parentElement).toggleClass('expanded');
-        console.log('got the click: ');
+        jQuery(self.parentElement).toggleClass('expanded', 250);
       });
 
   var transactionStatsRowEnter = transactionStatsTableEnter.append('tr');
@@ -493,10 +497,8 @@ module.exports = function enhance(waterfall, options){
   var traceJsMicros = 0
   var traceOperatingTime = 0
   if( waterfall.waterfalls ){
-    console.log('|| we got waterfalls');
     var indexT = 0;
     waterfall.waterfalls.forEach(function handleWaterfall(w){
-      console.log('|| waterfall: ' + indexT);
       indexT++;
       w.fnSegs = w.segments.filter(function(d){ return d.type == 'fn'});
       w.waitSegs = w.segments.filter(function(d){return d.type == 'wait'});

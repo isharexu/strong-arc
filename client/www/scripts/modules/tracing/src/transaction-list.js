@@ -60,13 +60,11 @@ TransactionList.prototype.renderList = function renderList(keys){
       enterTransactionStats(this);
       this.timeseriesGraph = setupTimeseries(this);
       this.timeseriesGraph.on('click',function (e) {
-        console.log('|');
-        console.log('|');
-        console.log('|  ----  : clicked it');
-        console.log('|');
-        console.log('|');
-        //self.app.expanded[e.transaction] = true;
-        page(path.join(history.state.basePath, history.state.project, 'trace', encodeURIComponent(e.pfkey), '#' + slug(e.transaction)))
+
+        var scope = angular.element($("#TracingTransactionHistoryContainer")).scope();
+        scope.$apply(function(){
+          scope.updatePFKeyFromTransactionHistory(e.pfkey);// = 'Superhero';
+        });
       });
     })
     .select('svg')
@@ -171,8 +169,7 @@ function enterTransactionStats(el) {
   var transactionStatsTableEnter = transactionStatsEnter.append('table')
     .on('click', function(d,i) {
         var self = this;
-        jQuery(self.parentElement).toggleClass('expanded');
-        console.log('got the click: ');
+        jQuery(self.parentElement).toggleClass('expanded', 250);
       });
 
   var transactionStatsRowEnter = transactionStatsTableEnter.append('tr');
