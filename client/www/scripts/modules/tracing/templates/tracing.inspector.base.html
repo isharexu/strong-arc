@@ -3,8 +3,8 @@
     <div class="panel-heading">
       <h3 class="panel-title">Inspector</h3>
     </div>
-    <sl-tracing-inspector-costtree currentFunction.type == 'flame' || 'rawTree'"></sl-tracing-inspector-costtree>
-    <sl-tracing-inspector-eventloop ng-show="currentFunction.type == 'eventLoop'"></sl-tracing-inspector-eventloop>
+    <sl-tracing-inspector-costtree ng-show="currentCtx.currentFunction.type == 'flame' || 'rawTree'"></sl-tracing-inspector-costtree>
+    <sl-tracing-inspector-eventloop ng-show="currentCtx.currentFunction.type == 'eventLoop'"></sl-tracing-inspector-eventloop>
     <!--<sl-tracing-inspector-functions ng-show="currentFunction.type == 'rawTree'"></sl-tracing-inspector-functions>-->
     <ul class='list-group'>
       <li class='list-group-item'>Nothing selected</li>

@@ -1,8 +1,8 @@
 <div class='waterfall-summary'>
-  <h4>{{ currentWaterfall.costSummary.summaryText }}</h4>
-  <h5>Seen <strong>{{ currentWaterfall.instance_count }}x</strong> at <strong>{{ (currentWaterfall.stats['duration'] / 1000) }}</strong> for a total of <strong>{{ (currentWaterfall.stats['total_duration'] / 1000) }}</strong></h5>
+  <h4>{{ currentCtx.currentWaterfall.costSummary.summaryText }}</h4>
+  <h5>Seen <strong>{{ currentCtx.currentWaterfall.instance_count }}x</strong> at <strong>{{ (currentCtx.currentWaterfall.stats['duration'] / 1000) }}</strong> for a total of <strong>{{ (currentCtx.currentWaterfall.stats['total_duration'] / 1000) }}</strong></h5>
   <ul class='tagGroups'>
-    <li class='tagGroup' ng-repeat="tag in currentWaterfall.tags">
+    <li class='tagGroup' ng-repeat="tag in currentCtx.currentWaterfall.tags">
       {{ tag }}
     </li>
   </ul>

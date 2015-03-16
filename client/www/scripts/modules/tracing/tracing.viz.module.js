@@ -147,15 +147,8 @@ TransactionList.prototype.renderList = function renderList(keys){
 
         var scope = angular.element($("#TracingTransactionHistoryContainer")).scope();
         scope.$apply(function(){
-          scope.doIt(e.pfkey);// = 'Superhero';
+          scope.updatePFKeyFromTransactionHistory(e.pfkey);// = 'Superhero';
         });
-        //console.log('|: ' + scope);
-        console.log('|');
-        console.log('|  ----  : show trace view[' + e.pfkey + ']  transaction:[' + e.transaction + ']');
-        console.log('|');
-        console.log('|');
-        //self.app.expanded[e.transaction] = true;
-       // page(path.join(history.state.basePath, history.state.project, 'trace', encodeURIComponent(e.pfkey), '#' + slug(e.transaction)))
       });
     })
     .select('svg')

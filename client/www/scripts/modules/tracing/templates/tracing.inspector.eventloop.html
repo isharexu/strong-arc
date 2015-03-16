@@ -7,21 +7,21 @@
 
     <ul class='list-group'>
       <li class='list-group-item'>
-        <strong>Name: </strong>{{ currentFunction.item.name }}
+        <strong>Name: </strong>{{ currentCtx.currentFunction.item.name }}
       </li>
 
       <li class='list-group-item'>
-        <strong>Cost: </strong>{{ currentFunction.item.cost }}
+        <strong>Cost: </strong>{{ currentCtx.currentFunction.item.cost }}
       </li>
 
 
       <li class='top-costs list-group-item' ng-show="isShowTopCosts()">
         <strong>Top Costs</strong>
         <ul class='functions'>
-          <li ng-repeat="costItem in currentFunction.item.costSummary.topCosts" class="function" data-id='{{ costItem.id }}'>
+          <li ng-repeat="costItem in currentCtx.currentFunction.item.costSummary.topCosts" class="function" data-id='{{ costItem.id }}'>
             <div class='header row'>
               <div class='function-name col-md-12 col-lg-8'>
-                {{ currentTrace.functions[costItem.id].name }}
+                {{ currentCtx.currentTrace.functions[costItem.id].name }}
               </div>
               <div class='col-md-12 col-lg-4'>
                 <div class="progress">
@@ -30,7 +30,7 @@
                 </div>
               </div>
             </div>
-            {{ currentTrace.functions[costItem.id] ? fn({ item: costItem, fns: currentTrace.functions }) : 'asyncronous wait' }}
+            {{ currentCtx.currentTrace.functions[costItem.id] ? fn({ item: costItem, fns: currentCtx.currentTrace.functions }) : 'asyncronous wait' }}
           </li>
 
         </ul>

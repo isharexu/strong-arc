@@ -15,7 +15,7 @@
                 Total time executing javascript
               </td>
               <td id='summary-js-micros'>
-                {{ currentTrace.summary_stats.jsMicros }}
+                {{ currentCtx.currentTrace.summary_stats.jsMicros }}
               </td>
             </tr>
             <tr>
@@ -23,7 +23,7 @@
                 Profile time duration
               </td>
               <td id='summary-window-micros'>
-                {{currentTrace.summary_stats.windowMicros}}
+                {{currentCtx.currentTrace.summary_stats.windowMicros}}
               </td>
             </tr>
             <tr>
@@ -31,7 +31,7 @@
                 Synchronous code execution
               </td>
               <td id='summary-percent-blocked'>
-                {{currentTrace.summary_stats.percentBlocked.toFixed(2)}} %
+                {{currentCtx.currentTrace.summary_stats.percentBlocked.toFixed(2)}} %
               </td>
             </tr>
             <tr>
@@ -39,7 +39,7 @@
                 Asynchronous wait time
               </td>
               <td id='summary-percent-async'>
-                {{currentTrace.summary_stats.percentAsync.toFixed(2)}}%
+                {{currentCtx.currentTrace.summary_stats.percentAsync.toFixed(2)}}%
               </td>
             </tr>
             <tr>
@@ -47,7 +47,7 @@
                 Application execution
               </td>
               <td id='summary-percent-operating'>
-                {{currentTrace.summary_stats.percentOperating.toFixed(2)}}
+                {{currentCtx.currentTrace.summary_stats.percentOperating.toFixed(2)}}
               </td>
             </tr>
             <tr>
@@ -55,7 +55,7 @@
                 System idle
               </td>
               <td id='summary-percent-idle'>
-                {{currentTrace.summary_stats.percentIdle.toFixed(2)}}
+                {{currentCtx.currentTrace.summary_stats.percentIdle.toFixed(2)}}
               </td>
             </tr>
           </table>

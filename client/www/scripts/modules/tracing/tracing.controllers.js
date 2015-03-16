@@ -5,17 +5,29 @@ Tracing.controller('TracingMainController', [
   'TimeSeries',
   function($scope, $log, TracingServices, TimeSeries) {
     $log.debug('tracing controller');
-    $scope.currentTimeline = {};
-    $scope.currentTransactionKeys = [];
-    $scope.currentTransactionHistoryCollection = [];
-    $scope.currentApp = 'wfp:helloworld';
-    $scope.currentPFKey = '';
-    $scope.currentTrace = {};
-    $scope.currentWaterfallKey = '';
-    $scope.currentWaterfall = {};
-    $scope.currentFunction = {};
-    $scope.currentHostConfig = {};
-    $scope.currentPids = [];
+    //$scope.currentCtx.currentTimeline = {};
+    //$scope.currentTransactionKeys = [];
+    //$scope.currentTransactionHistoryCollection = [];
+    //$scope.currentApp = 'wfp:helloworld';
+    $scope.currentCtx = {
+      pfKey: '',
+      currentTrace: {},
+      currentWaterfallKey: '',
+      currentWaterfall: {},
+      currentFunction: {},
+      currentHostConfig: {},
+      currentPids: [],
+      currentTimeline: {},
+      currentTransactionKeys: [],
+      currentTransactionHistoryCollection: [],
+      currentApp: 'wfp:helloworld'
+    };
+    //$scope.currentTrace = {};
+    //$scope.currentWaterfallKey = '';
+    //$scope.currentWaterfall = {};
+    //$scope.currentFunction = {};
+    //$scope.currentHostConfig = {};
+    //$scope.currentPids = [];
 
     window.onresize = function() {
       window.setScrollView('.tracing-content-container');
@@ -32,16 +44,16 @@ Tracing.controller('TracingMainController', [
     * should probably be renamed to currentTracingContext
     *
     * */
-    $scope.$watch('currentHostConfig', function(newConfig, oldConfig) {
+    $scope.$watch('currentCtx.currentHostConfig', function(newConfig, oldConfig) {
       if (newConfig.host && newConfig.pid && newConfig.project) {
-        $scope.currentTimeline = TracingServices.getTimeline(newConfig)
+        $scope.currentCtx.currentTimeline = TracingServices.getTimeline(newConfig)
           .then(function(timeline) {
-            $scope.currentTimeline = timeline;
+            $scope.currentCtx.currentTimeline = timeline;
           });
       }
     }, true);
 
-    function init() {
+    $scope.init = function() {
 
       /*
 
@@ -56,7 +68,7 @@ Tracing.controller('TracingMainController', [
 
 
       */
-      $scope.hosts = TracingServices.fetchHosts({project:$scope.currentApp})
+      $scope.hosts = TracingServices.fetchHosts({project:$scope.currentCtx.currentApp})
         .then(function(response) {
 
           if (response.length && response.length > 0) {
@@ -66,17 +78,17 @@ Tracing.controller('TracingMainController', [
             var firstHost = TracingServices.getFirstHost();
 
             // set up the core data context
-            $scope.currentPids = firstHost.pids;
-            $scope.currentHostConfig = {
-              project: $scope.currentApp,
+            $scope.currentCtx.currentPids = firstHost.pids;
+            $scope.currentCtx.currentHostConfig = {
+              project: $scope.currentCtx.currentApp,
               host:firstHost.host,
               pid:firstHost.pids[0]
             };
 
 
-            $scope.currentTimeline = TracingServices.getTimeline($scope.currentHostConfig)
+            $scope.currentCtx.currentTimeline = TracingServices.getTimeline($scope.currentCtx.currentHostConfig)
               .then(function(timeline) {
-                $scope.currentTimeline = timeline;
+                $scope.currentCtx.currentTimeline = timeline;
               });
 
             /*
@@ -84,7 +96,7 @@ Tracing.controller('TracingMainController', [
             * Process the transaction history list
             *
             * */
-            TracingServices.getTransactionKeys({reqparams:$scope.currentHostConfig})
+            TracingServices.getTransactionKeys({reqparams:$scope.currentCtx.currentHostConfig})
               .then(function(response) {
 
 
@@ -104,10 +116,10 @@ Tracing.controller('TracingMainController', [
                    */
                   // var rawTransactionList = response.hosts[$scope.currentHostConfig.host] ? response.hosts[$scope.currentHostConfig.host][$scope.currentHostConfig.pid] : [];
                   // isolate the transactions for this pid
-                  $scope.currentTransactionKeys = response.hosts[$scope.currentHostConfig.host] ? response.hosts[$scope.currentHostConfig.host][$scope.currentHostConfig.pid] : [];
+                  $scope.currentCtx.currentTransactionKeys = response.hosts[$scope.currentCtx.currentHostConfig.host] ? response.hosts[$scope.currentCtx.currentHostConfig.host][$scope.currentCtx.currentHostConfig.pid] : [];
 
                   // iterate over the transaction keys
-                  $scope.currentTransactionKeys.map(function(transaction) {
+                  $scope.currentCtx.currentTransactionKeys.map(function(transaction) {
                     /*
                     *
                     *   Transaction key
@@ -118,14 +130,14 @@ Tracing.controller('TracingMainController', [
                     };
 
                     // history
-                    TracingServices.transactionHistory(encodeURIComponent(transaction), $scope.currentHostConfig.host, $scope.currentHostConfig.pid)
+                    TracingServices.transactionHistory(encodeURIComponent(transaction), $scope.currentCtx.currentHostConfig.host, $scope.currentCtx.currentHostConfig.pid)
                       .then(function(response){
 
                         // get the history data per transaction
                         var rawTransactionData = JSON.parse(response.data);
                         // assign history data to ui model
-                        transObj.history = rawTransactionData.hosts[$scope.currentHostConfig.host][$scope.currentHostConfig.pid];
-                        $scope.currentTransactionHistoryCollection.push(transObj);
+                        transObj.history = rawTransactionData.hosts[$scope.currentCtx.currentHostConfig.host][$scope.currentCtx.currentHostConfig.pid];
+                        $scope.currentCtx.currentTransactionHistoryCollection.push(transObj);
 
                       });
                   });
@@ -141,7 +153,7 @@ Tracing.controller('TracingMainController', [
           $log.warn('error: ' + error.message);
         });
     }
-    init();
+    $scope.init();
 
   }
 ]);
