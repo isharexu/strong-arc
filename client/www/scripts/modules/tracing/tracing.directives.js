@@ -3,18 +3,27 @@ Tracing.directive('expTimeSeries', [
   function($log) {
     return {
       restrict: 'E',
-      templateUrl: './scripts/modules/tracing/templates/tracing.exp.timeseries.html'
+      link: function(scope, el, attrs) {
+        scope.$watch('currentCtx.currentTimeline', function(newTimeline, oldTimeline) {
+          if (newTimeline.cpu) {
+            React.renderComponent(TracingTraceList({scope:scope}), el[0]);
+          }
+        }, true);
+      }
     }
   }
 ]);
 Tracing.directive('slTracingInspectorCosttree', [
   '$log',
-  function($log) {
+  '$timeout',
+  function($log, $timeout) {
     return {
       templateUrl: './scripts/modules/tracing/templates/tracing.inspector.costtree.html',
       restrict: 'E',
       link: function(scope, el, attrs) {
-
+        $timeout(function() {
+          window.setScrollView('.tracing-content-container');
+        }, 300);
       }
     }
 
@@ -118,7 +127,7 @@ Tracing.directive('slTracingWaterfallEventloop', [
 
           self.charts.forEach(function(chart) {
             if (chart.highlight) chart.highlight(scope.currentFunction.item)
-          })
+          });
         };
         scope.restore = function mouseLeave(){
           $log.debug('RESTORE');
@@ -605,11 +614,7 @@ Tracing.directive('slTracingTimeSeriesChart', [
           'Load Average': 'rgba(39,128,227, 1)',
           'Uptime': 'rgba(255,117,24, 1)'
         };
-        function detail(event) {
-          page('/' + this.app.socket.project + '/' + event.delegateTarget.dataset.id)
-          this.app.content.set(new DetailView(this.app, event.delegateTarget.dataset.id))
-          this.app.content.current.render()
-        }
+
         function color(name){
           return colormap[name] || '#00000'
         }
@@ -690,14 +695,12 @@ Tracing.directive('slTracingTransactionHistory', [
             scope.transactionListView.render(historyCollection, scope.currentCtx.currentHostConfig);
             //
             $timeout(function() {
-              window.setScrollView('.monitor-view');
+              window.setScrollView('.tracing-content-container');
             }, 200);
 
           }
         }, true);
-        window.onresize = function() {
-          window.setScrollView('.monitor-view');
-        };
+
       }
     }
   }
@@ -712,7 +715,9 @@ Tracing.directive('slTracingMainView', [
       templateUrl: './scripts/modules/tracing/templates/tracing.main.view.html',
       restrict: 'E',
       link: function(scope, el, attrs) {
-
+        window.onresize = function() {
+          window.setScrollView('.tracing-content-container');
+        };
       }
     }
   }
