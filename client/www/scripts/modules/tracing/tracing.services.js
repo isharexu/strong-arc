@@ -10,6 +10,7 @@ Tracing.service('TracingServices', [
   function($http, $log, Trace, TraceHost, TraceEnhance, TraceTimeline, TraceTransactionKey, TraceTransactionHistory) {
     var svc = this;
     var currTraceHosts = [];
+    var currentTimelineTimestamp;
 
     'use strict';
 
@@ -24,6 +25,9 @@ Tracing.service('TracingServices', [
       return this
     }
 
+    svc.getCurrentTimelineTimestamp = function() {
+      return currentTimelineTimestamp;
+    };
     svc.convertTimeseries = function(t){
       var ret = {};
       ret.mem = t.map(function(d){
@@ -55,6 +59,7 @@ Tracing.service('TracingServices', [
       return svc.fetchTimeline({reqparams:config})
         .then(function(timelineRaw) {
           var tHost = timelineRaw.hosts[config.host];
+          currentTimelineTimestamp = timelineRaw.timestamp;
           var dataArray = tHost[config.pid];
           if (dataArray) {
             return svc.convertTimeseries(dataArray);

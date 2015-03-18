@@ -2,7 +2,7 @@
   <div class="panel panel-primary">
     <div class="panel-heading">
       <h3 class="panel-title">
-        Summary statistics for &apos;<strong><span class='node-app-title'>{{currentCtx.currentApp}}</span></strong>&apos; <span>{{currentCtx.currentHostConfig.host}}:{{currentCtx.currentHostConfig.pid}}</span> from <span class='trace-timestamp'>{{tsText(currentCtx.currentTrace.metadata.timestamp)}}</span>
+        Summary statistics for &apos;<strong><span class='node-app-title'>{{tracingCtx.currentApp}}</span></strong>&apos; <span>{{tracingCtx.currentHostConfig.host}}:{{tracingCtx.currentHostConfig.pid}}</span> from <span class='trace-timestamp'>{{tsText(tracingCtx.currentTrace.metadata.timestamp)}}</span>
       </h3>
     </div>
 
@@ -15,7 +15,7 @@
                 Total time executing javascript
               </td>
               <td id='summary-js-micros'>
-                {{ msFormat(currentCtx.currentTrace.summary_stats.jsMicros) }}
+                {{ msFormat(tracingCtx.currentTrace.summary_stats.jsMicros) }}
               </td>
             </tr>
             <tr>
@@ -23,7 +23,7 @@
                 Profile time duration
               </td>
               <td id='summary-window-micros'>
-                {{msFormat(currentCtx.currentTrace.summary_stats.windowMicros)}}
+                {{msFormat(tracingCtx.currentTrace.summary_stats.windowMicros)}}
               </td>
             </tr>
             <tr>
@@ -31,7 +31,7 @@
                 Synchronous code execution
               </td>
               <td id='summary-percent-blocked'>
-                {{currentCtx.currentTrace.summary_stats.percentBlocked.toFixed(2)}} %
+                {{tracingCtx.currentTrace.summary_stats.percentBlocked.toFixed(2)}} %
               </td>
             </tr>
             <tr>
@@ -39,7 +39,7 @@
                 Asynchronous wait time
               </td>
               <td id='summary-percent-async'>
-                {{currentCtx.currentTrace.summary_stats.percentAsync.toFixed(2)}} %
+                {{tracingCtx.currentTrace.summary_stats.percentAsync.toFixed(2)}} %
               </td>
             </tr>
             <tr>
@@ -47,7 +47,7 @@
                 Application execution
               </td>
               <td id='summary-percent-operating'>
-                {{currentCtx.currentTrace.summary_stats.percentOperating.toFixed(2)}} %
+                {{tracingCtx.currentTrace.summary_stats.percentOperating.toFixed(2)}} %
               </td>
             </tr>
             <tr>
@@ -55,7 +55,7 @@
                 System idle
               </td>
               <td id='summary-percent-idle'>
-                {{currentCtx.currentTrace.summary_stats.percentIdle.toFixed(2)}} %
+                {{tracingCtx.currentTrace.summary_stats.percentIdle.toFixed(2)}} %
               </td>
             </tr>
           </table>

@@ -4,7 +4,7 @@ Tracing.directive('expTimeSeries', [
     return {
       restrict: 'E',
       link: function(scope, el, attrs) {
-        scope.$watch('currentCtx.currentTimeline', function(newTimeline, oldTimeline) {
+        scope.$watch('tracingCtx.currentTimeline', function(newTimeline, oldTimeline) {
           if (newTimeline.cpu) {
             React.renderComponent(TracingTraceList({scope:scope}), el[0]);
           }
@@ -107,7 +107,7 @@ Tracing.directive('slTracingWaterfallEventloop', [
 
         var inspector = new Inspector({
           app: {},
-          trace: scope.currentCtx.currentTrace,
+          trace: scope.tracingCtx.currentTrace,
           el: jQuery('[role=inspector]')[0]
         });
 
@@ -166,8 +166,8 @@ Tracing.directive('slTracingWaterfallEventloop', [
 
         scope.$watch('currentWaterfall', function(newWaterfall, oldVal) {
           if (newWaterfall && newWaterfall.id) {
-            eventloop.update(newWaterfall, scope.currentCtx.currentTrace.functions);
-            flame.update(newWaterfall, scope.currentCtx.currentTrace.functions);
+            eventloop.update(newWaterfall, scope.tracingCtx.currentTrace.functions);
+            flame.update(newWaterfall, scope.tracingCtx.currentTrace.functions);
             rawtree.update(newWaterfall);
             rawtree.update(newWaterfall);
           }
@@ -222,12 +222,12 @@ Tracing.directive('slTracingDetailView', [
           $scope.currentWaterfallKey = '';
         };
         $scope.previousWaterfall = function() {
-          var totalLen = $scope.currentCtx.currentTrace.waterfalls.length;
+          var totalLen = $scope.tracingCtx.currentTrace.waterfalls.length;
           for (var i = 0;i < totalLen; i++) {
-            var wf = $scope.currentCtx.currentTrace.waterfalls[i];
+            var wf = $scope.tracingCtx.currentTrace.waterfalls[i];
             if ((wf.id === $scope.currentWaterfallKey) || (Sha1(wf.id) === $scope.currentWaterfallKey)) {
               if (i > 0) {
-                $scope.currentWaterfallKey = $scope.currentCtx.currentTrace.waterfalls[i - 1].id;
+                $scope.currentWaterfallKey = $scope.tracingCtx.currentTrace.waterfalls[i - 1].id;
                 break;
               }
             }
@@ -240,12 +240,12 @@ Tracing.directive('slTracingDetailView', [
           return false;
         };
         $scope.nextWaterfall = function() {
-          var totalLen = $scope.currentCtx.currentTrace.waterfalls.length;
+          var totalLen = $scope.tracingCtx.currentTrace.waterfalls.length;
           for (var i = 0;i < totalLen; i++) {
-            var wf = $scope.currentCtx.currentTrace.waterfalls[i];
+            var wf = $scope.tracingCtx.currentTrace.waterfalls[i];
             if ((wf.id === $scope.currentWaterfallKey) || (Sha1(wf.id) === $scope.currentWaterfallKey)) {
-              if (i < ($scope.currentCtx.currentTrace.waterfalls.length - 2)) {
-                 $scope.currentWaterfallKey = $scope.currentCtx.currentTrace.waterfalls[i + 1].id;
+              if (i < ($scope.tracingCtx.currentTrace.waterfalls.length - 2)) {
+                 $scope.currentWaterfallKey = $scope.tracingCtx.currentTrace.waterfalls[i + 1].id;
                 break;
               }
             }
@@ -254,7 +254,7 @@ Tracing.directive('slTracingDetailView', [
         };
         $scope.loadWaterfallById = function(waterfallKey) {
           var waterfall = [];
-          $scope.currentCtx.currentTrace.waterfalls.map(function(w) {
+          $scope.tracingCtx.currentTrace.waterfalls.map(function(w) {
             if ((w.id === waterfallKey) || (Sha1(w.id) === waterfallKey)) {
               waterfall = w;
             }
@@ -332,7 +332,7 @@ Tracing.directive('slTracingTraceSummary', [
             });
           return collectionData;
         }
-        //$scope.mappedTransactions = $scope.mapTransactions($scope.currentCtx.currentTrace.transactions.transactions)
+        //$scope.mappedTransactions = $scope.mapTransactions($scope.tracingCtx.currentTrace.transactions.transactions)
         $scope.mappedTransactions = [];
 
 
@@ -383,8 +383,8 @@ Tracing.directive('slTracingTraceSummary', [
           *
           * */
 
-          asyncpie.update(traceToAsyncPie(scope.currentCtx.currentTrace));
-          idlepie.update(traceToIdlePie(scope.currentCtx.currentTrace));
+          asyncpie.update(traceToAsyncPie(scope.tracingCtx.currentTrace));
+          idlepie.update(traceToIdlePie(scope.tracingCtx.currentTrace));
 
           /*
           *
@@ -465,7 +465,7 @@ Tracing.directive('slTracingTraceSummary', [
             .attr('class', 'link-cmd')
             .on('click', function(d) {
               //var projectName = scope.currentApp;
-             // var pfKey = encodeURIComponent(scope.currentCtx.pfKey);
+             // var pfKey = encodeURIComponent(scope.tracingCtx.pfKey);
               var waterfallId = Sha1(d.id);
               scope.currentWaterfallKey = waterfallId;
               return false;
@@ -475,7 +475,7 @@ Tracing.directive('slTracingTraceSummary', [
             .append('div')
             .attr('class', 'panel-body')
             .each(function (waterfall) {
-              this.eventloop = EventLoop().init(this, { expanded: false, color: '#aa00aa' })
+              this.eventloop = EventLoop().init(this, { expanded: false, color: '#36952C' })
             });
 
           //exit set
@@ -514,7 +514,7 @@ Tracing.directive('slTracingTraceSummary', [
             if (1 == 1) {
               d3.select(this).selectAll('.waterfall .panel-body')
                 .each(function (waterfall) {
-                  this.eventloop.update(waterfall, scope.currentCtx.currentTrace.functions)
+                  this.eventloop.update(waterfall, scope.tracingCtx.currentTrace.functions)
                 })
             }
           })
@@ -539,12 +539,12 @@ Tracing.directive('slTracingTraceSummary', [
           }, 0)
         }
 
-        if (scope.currentCtx.currentTrace.summary_stats) {
+        if (scope.tracingCtx.currentTrace.summary_stats) {
           scope.asyncpie.update(scope.traceToAsyncPie(trace))
           scope.idlepie.update(scope.traceToIdlePie(trace))
         }
 
-        scope.$watch('currentCtx.currentTrace', function(newVal, oldVal) {
+        scope.$watch('tracingCtx.currentTrace', function(newVal, oldVal) {
           if (newVal.transactions) {
             scope.mappedTransactions = scope.mapTransactions(newVal.transactions.transactions)
             render();
@@ -564,27 +564,27 @@ Tracing.directive('slTracingTraceView', [
       templateUrl: './scripts/modules/tracing/templates/tracing.trace.view.html',
       controller: ['$scope', function($scope) {
         $scope.showTraceView = function() {
-          var retVal = $scope.currentCtx.currentPFKey;
+          var retVal = $scope.tracingCtx.currentPFKey;
           if (retVal && retVal.length > 0) {
             return true;
           }
           return false;
         };
         $scope.closeTraceView = function() {
-          $scope.currentCtx.currentPFKey = '';
+          $scope.tracingCtx.currentPFKey = '';
         };
       }],
       link: function(scope, el, attrs) {
 
-        scope.$watch('currentCtx.currentPFKey', function(pfKey, oldVal) {
+        scope.$watch('tracingCtx.currentPFKey', function(pfKey, oldVal) {
           if (pfKey) {
 
             // load trace view
             $log.debug('re-initialize trace view pfkey[' + pfKey + ']');
 
-            scope.currentCtx.currentTrace = TracingServices.fetchTrace({pfkey: pfKey})
+            scope.tracingCtx.currentTrace = TracingServices.fetchTrace({pfkey: pfKey})
               .then(function(trace) {
-                scope.currentCtx.currentTrace = trace;
+                scope.tracingCtx.currentTrace = trace;
                 $log.debug('trace update: ' + trace.metadata.account_key);
                 //$log.debug('new trace: ' + JSON.stringify(trace));
 
@@ -693,16 +693,16 @@ Tracing.directive('slTracingTransactionHistory', [
       restrict: 'E',
       controller: ['$scope', function($scope) {
         $scope.updatePFKeyFromTransactionHistory = function(pfkey) {
-          $scope.currentCtx.currentPFKey = pfkey;
+          $scope.tracingCtx.currentPFKey = pfkey;
         }
       }],
       link: function(scope, el, attrs) {
 
         scope.transactionListView = TransactionList('[data-hook="transaction-list-cont"]', {});
 
-        scope.$watch('currentCtx.currentTransactionHistoryCollection', function(historyCollection, oldVal) {
+        scope.$watch('tracingCtx.currentTransactionHistoryCollection', function(historyCollection, oldVal) {
           if (historyCollection && historyCollection.length) {
-            scope.transactionListView.render(historyCollection, scope.currentCtx.currentHostConfig);
+            scope.transactionListView.render(historyCollection, scope.tracingCtx.currentHostConfig);
             //
             $timeout(function() {
               window.setScrollView('.tracing-content-container');

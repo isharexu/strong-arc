@@ -1,11 +1,21 @@
 <div class="panel-heading clearfix tracing-header-container">
-  <span class="panel-title pull-left col-sm-8">Historical statistics for Node.js application 'wfp:helloworld'</span>
-  <select ng-model="currentCtx.currentHostConfig.host" ng-show="hosts">
+  <span class="panel-title pull-left col-sm-8">App name: {{ tracingCtx.currentApp.name }}</span>
+  <select ng-model="tracingCtx.currentHostConfig.host" ng-show="hosts">
     <option ng-repeat="host in hosts" value="{{ host.host }}">{{ host.host }}</option>
   </select>
-  <select ng-model="currentCtx.currentHostConfig.pid" ng-show="currentCtx.currentPids">
-      <option ng-repeat="pid in currentCtx.currentPids" value="{{ pid }}">{{ pid }}</option>
+  <select ng-model="tracingCtx.currentHostConfig.pid" ng-show="tracingCtx.currentPids">
+      <option ng-repeat="pid in tracingCtx.currentPids" value="{{ pid }}">{{ pid }}</option>
   </select>
+  <div>
+    <span>duration:
+      <span>{{ tracingCtx.currentTimelineDuration }}</span>
+    </span>
+  </div>
+  <div>
+    <span>last update:
+      <span>{{ tracingCtx.currentTimelineTimestamp }}</span>
+    </span>
+  </div>
 
 
     <!--<div ng-repeat="pid in host.pids">{{ pid }}</div>-->

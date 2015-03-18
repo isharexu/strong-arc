@@ -5,12 +5,14 @@ Tracing.controller('TracingMainController', [
   'TimeSeries',
   function($scope, $log, TracingServices, TimeSeries) {
     $log.debug('tracing controller');
-    //$scope.currentCtx.currentTimeline = {};
+    //$scope.tracingCtx.currentTimeline = {};
     //$scope.currentTransactionKeys = [];
     //$scope.currentTransactionHistoryCollection = [];
     //$scope.currentApp = 'wfp:helloworld';
-    $scope.currentCtx = {
+    $scope.tracingCtx = {
       currentPFKey: '',
+      currentTimelineTimestamp: '',
+      currentTimelineDuration: 0,
       currentTrace: {},
       currentWaterfallKey: '',
       currentWaterfall: {},
@@ -20,7 +22,15 @@ Tracing.controller('TracingMainController', [
       currentTimeline: {},
       currentTransactionKeys: [],
       currentTransactionHistoryCollection: [],
-      currentApp: 'wfp:helloworld'
+      currentApp: {name: 'wfp:helloworld'}
+    };
+    $scope.getCurrentTimelineDuration = function() {
+      if (!$scope.tracingCtx.currentTimeline) {
+        return 0;
+      }
+      var dataPointCount = $scope.tracingCtx.currentTimeline.cpu.length;
+      return $scope.tracingCtx.currentTimeline.cpu[dataPointCount - 1].Uptime
+
     };
     //$scope.currentTrace = {};
     //$scope.currentWaterfallKey = '';
@@ -32,7 +42,13 @@ Tracing.controller('TracingMainController', [
     window.onresize = function() {
       window.setScrollView('.tracing-content-container');
     };
+    function updateTimelineData(timeline) {
+      $scope.tracingCtx.currentTimeline = timeline;
+      $scope.tracingCtx.currentTimelineTimestamp = TracingServices.getCurrentTimelineTimestamp();
+      $scope.updateTransactionHistory();
+      $scope.tracingCtx.currentTimelineDuration = $scope.getCurrentTimelineDuration();
 
+    }
     /*
     *
     * update trigger
@@ -44,11 +60,12 @@ Tracing.controller('TracingMainController', [
     * should probably be renamed to currentTracingContext
     *
     * */
-    $scope.$watch('currentCtx.currentHostConfig', function(newConfig, oldConfig) {
+    $scope.$watch('tracingCtx.currentHostConfig', function(newConfig, oldConfig) {
       if (newConfig.host && newConfig.pid && newConfig.project) {
-        $scope.currentCtx.currentTimeline = TracingServices.getTimeline(newConfig)
+        $scope.tracingCtx.currentTimeline = TracingServices.getTimeline(newConfig)
           .then(function(timeline) {
-            $scope.currentCtx.currentTimeline = timeline;
+
+            updateTimelineData(timeline);
           });
       }
     }, true);
@@ -68,7 +85,7 @@ Tracing.controller('TracingMainController', [
 
 
       */
-      $scope.hosts = TracingServices.fetchHosts({project:$scope.currentCtx.currentApp})
+      $scope.hosts = TracingServices.fetchHosts({project:$scope.tracingCtx.currentApp.name})
         .then(function(response) {
 
           if (response.length && response.length > 0) {
@@ -78,71 +95,20 @@ Tracing.controller('TracingMainController', [
             var firstHost = TracingServices.getFirstHost();
 
             // set up the core data context
-            $scope.currentCtx.currentPids = firstHost.pids;
-            $scope.currentCtx.currentHostConfig = {
-              project: $scope.currentCtx.currentApp,
+            $scope.tracingCtx.currentPids = firstHost.pids;
+            $scope.tracingCtx.currentHostConfig = {
+              project: $scope.tracingCtx.currentApp.name,
               host:firstHost.host,
               pid:firstHost.pids[0]
             };
 
 
-            $scope.currentCtx.currentTimeline = TracingServices.getTimeline($scope.currentCtx.currentHostConfig)
+            $scope.tracingCtx.currentTimeline = TracingServices.getTimeline($scope.tracingCtx.currentHostConfig)
               .then(function(timeline) {
-                $scope.currentCtx.currentTimeline = timeline;
+                updateTimelineData(timeline);
               });
 
-            /*
-            *
-            * Process the transaction history list
-            *
-            * */
-            TracingServices.getTransactionKeys({reqparams:$scope.currentCtx.currentHostConfig})
-              .then(function(response) {
 
-
-                // make sure we get a list
-                if (response.hosts) {
-
-                  /*
-                   the current context list of transactions
-
-                   we need to iterate over them and create a deeper object than the simple one used by transaction-list component
-
-                   trasObj = {
-                    key: transaction,
-                    history: {object based on api call}
-                   };
-
-                   */
-                  // var rawTransactionList = response.hosts[$scope.currentHostConfig.host] ? response.hosts[$scope.currentHostConfig.host][$scope.currentHostConfig.pid] : [];
-                  // isolate the transactions for this pid
-                  $scope.currentCtx.currentTransactionKeys = response.hosts[$scope.currentCtx.currentHostConfig.host] ? response.hosts[$scope.currentCtx.currentHostConfig.host][$scope.currentCtx.currentHostConfig.pid] : [];
-
-                  // iterate over the transaction keys
-                  $scope.currentCtx.currentTransactionKeys.map(function(transaction) {
-                    /*
-                    *
-                    *   Transaction key
-                    *
-                    * */
-                    var transObj = {
-                      key: transaction
-                    };
-
-                    // history
-                    TracingServices.transactionHistory(encodeURIComponent(transaction), $scope.currentCtx.currentHostConfig.host, $scope.currentCtx.currentHostConfig.pid)
-                      .then(function(response){
-
-                        // get the history data per transaction
-                        var rawTransactionData = JSON.parse(response.data);
-                        // assign history data to ui model
-                        transObj.history = rawTransactionData.hosts[$scope.currentCtx.currentHostConfig.host][$scope.currentCtx.currentHostConfig.pid];
-                        $scope.currentCtx.currentTransactionHistoryCollection.push(transObj);
-
-                      });
-                  });
-                }
-              });
           }
           else {
             $log.debug('There are no tracing hosts');
@@ -152,10 +118,65 @@ Tracing.controller('TracingMainController', [
         .catch(function(error) {
           $log.warn('error: ' + error.message);
         });
-    }
+    };
+    $scope.updateTransactionHistory = function() {
+      $scope.tracingCtx.currentTransactionHistoryCollection = [];
+      /*
+       *
+       * Process the transaction history list
+       *
+       * */
+      TracingServices.getTransactionKeys({reqparams:$scope.tracingCtx.currentHostConfig})
+        .then(function(response) {
+
+
+          // make sure we get a list
+          if (response.hosts) {
+
+            /*
+             the current context list of transactions
+
+             we need to iterate over them and create a deeper object than the simple one used by transaction-list component
+
+             trasObj = {
+             key: transaction,
+             history: {object based on api call}
+             };
+
+             */
+            // var rawTransactionList = response.hosts[$scope.currentHostConfig.host] ? response.hosts[$scope.currentHostConfig.host][$scope.currentHostConfig.pid] : [];
+            // isolate the transactions for this pid
+            $scope.tracingCtx.currentTransactionKeys = response.hosts[$scope.tracingCtx.currentHostConfig.host] ? response.hosts[$scope.tracingCtx.currentHostConfig.host][$scope.tracingCtx.currentHostConfig.pid] : [];
+
+            // iterate over the transaction keys
+            $scope.tracingCtx.currentTransactionKeys.map(function(transaction) {
+              /*
+               *
+               *   Transaction key
+               *
+               * */
+              var transObj = {
+                key: transaction
+              };
+
+              // history
+              TracingServices.transactionHistory(encodeURIComponent(transaction), $scope.tracingCtx.currentHostConfig.host, $scope.tracingCtx.currentHostConfig.pid)
+                .then(function(response){
+
+                  // get the history data per transaction
+                  var rawTransactionData = JSON.parse(response.data);
+                  // assign history data to ui model
+                  transObj.history = rawTransactionData.hosts[$scope.tracingCtx.currentHostConfig.host][$scope.tracingCtx.currentHostConfig.pid];
+                  $scope.tracingCtx.currentTransactionHistoryCollection.push(transObj);
+
+                });
+            });
+          }
+        });
+    };
     $scope.setCurrentPFKey = function(key) {
-      $scope.currentCtx.currentPFKey = key;
-    }
+      $scope.tracingCtx.currentPFKey = key;
+    };
     $scope.init();
 
   }

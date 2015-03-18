@@ -21,7 +21,7 @@ var TracingTraceList = (TracingTraceList = React).createClass({
 
     var component = this;
 
-    var items = component.props.scope.currentCtx.currentTimeline.cpu.map(function(point) {
+    var items = component.props.scope.tracingCtx.currentTimeline.cpu.map(function(point) {
       //var uptime = ((point.Uptime / 60) / 60);
       return (<div data-ui-type="table">
         <div data-ui-type="row">
@@ -127,8 +127,8 @@ var TracingTraceList = (TracingTraceList = React).createClass({
         </div>
       </div>);
     });
-    var dataPointCount = component.props.scope.currentCtx.currentTimeline.cpu.length;
-    var totalUptime = component.props.scope.currentCtx.currentTimeline.cpu[dataPointCount - 1].Uptime;
+    var dataPointCount = component.props.scope.tracingCtx.currentTimeline.cpu.length;
+    var totalUptime = component.props.scope.tracingCtx.currentTimeline.cpu[dataPointCount - 1].Uptime;
     totalUptime = ((totalUptime / 60) / 60);
     var upHours = totalUptime.toFixed(1);
 
