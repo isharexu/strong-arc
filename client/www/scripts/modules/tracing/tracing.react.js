@@ -5,6 +5,18 @@ var TracingTraceList = (TracingTraceList = React).createClass({
       scope: this.props.scope
     }
   },
+  setPFKey: function(event) {
+    var component = this;
+    var scope = component.props.scope;
+    //var pfKeyVal = encodeURIComponent(event.target.attributes['data-pfkey'].value);
+    var pfKeyVal = event.target.attributes['data-pfkey'].value;
+    if (pfKeyVal) {
+      console.log(pfKeyVal);
+      scope.$apply(function() {
+        scope.setCurrentPFKey(pfKeyVal);
+      });
+    }
+  },
   render: function() {
 
     var component = this;
@@ -105,7 +117,9 @@ var TracingTraceList = (TracingTraceList = React).createClass({
             timestamp:
           </div>
           <div data-ui-type="cell">
-            {point._t}
+            <button className="cmd-link" data-pfkey={point.__data.pfkey} onClick={component.setPFKey}>
+              {point._t}
+            </button>
           </div>
           <div data-ui-type="cell">
 

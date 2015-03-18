@@ -204,7 +204,7 @@
     font-weight: bold;
   }
 
-  .transaction {
+  .transaction table{
 
     &:hover {
       background: rgba(0, 0, 0, 0.1);
@@ -213,7 +213,7 @@
     cursor: pointer;
 
     svg {
-      display: none;
+//      display: none;
     }
   }
 
@@ -224,7 +224,7 @@
     }
 
     svg {
-      display: block;
+//      display: block;
     }
 
     > table {
@@ -571,6 +571,12 @@
   .live-buttons {
     margin-top: -6px;
   }
+  .waterfall .panel-body {
+    width:800px;
+  }
+  [data-hook="eventloop"] {
+    width:100%;
+  }
 }
 /*
 
@@ -836,4 +842,12 @@
 
 .cxviz-rawtree-selected > div {
   background-color: #ffff66;
+}
+/*
+
+experiment
+
+*/
+.monitor-view .transaction svg {
+ // display:block;
 }

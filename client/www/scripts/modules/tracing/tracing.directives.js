@@ -291,11 +291,11 @@ Tracing.directive('slTracingTraceSummary', [
 
 
         $scope.msFormat = function(d){
-          return format(d/1000000) + 's'
+          return $scope.format(d/1000000) + 's';
         };
 
         $scope.tsText = function(ts){
-          return m(ts).fromNow() +' (' + m(ts).format('ddd, MMM Do YYYY, h:mm:ss a') + ')'
+          return moment(ts).fromNow() +' (' + moment(ts).format('ddd, MMM Do YYYY, h:mm:ss a') + ')'
         };
 
 
@@ -564,15 +564,19 @@ Tracing.directive('slTracingTraceView', [
       templateUrl: './scripts/modules/tracing/templates/tracing.trace.view.html',
       controller: ['$scope', function($scope) {
         $scope.showTraceView = function() {
-          return ($scope.currentCtx.pfKey && $scope.currentCtx.pfKey.length > 0);
+          var retVal = $scope.currentCtx.currentPFKey;
+          if (retVal && retVal.length > 0) {
+            return true;
+          }
+          return false;
         };
         $scope.closeTraceView = function() {
-          $scope.currentCtx.pfKey = '';
+          $scope.currentCtx.currentPFKey = '';
         };
       }],
       link: function(scope, el, attrs) {
 
-        scope.$watch('currentCtx.pfKey', function(pfKey, oldVal) {
+        scope.$watch('currentCtx.currentPFKey', function(pfKey, oldVal) {
           if (pfKey) {
 
             // load trace view
@@ -601,18 +605,24 @@ Tracing.directive('slTracingTimeSeriesChart', [
     return {
       scope: {
         chartName: '@',
-        loadTraceView: '&',
         internalCtx: '='
       },
       restrict: 'E',
       templateUrl: './scripts/modules/tracing/templates/tracing.time-series.viz.html',
       link: function(scope, el, attrs) {
+        //var colormap = {
+        //  'Process Heap Total': 'rgba(63,182,24, 1)',
+        //  'Process Heap Used': 'rgba(255,117,24, 1)',
+        //  'Process RSS': 'rgba(39,128,227, 1)',
+        //  'Load Average': 'rgba(39,128,227, 1)',
+        //  'Uptime': 'rgba(255,117,24, 1)'
+        //};
         var colormap = {
-          'Process Heap Total': 'rgba(63,182,24, 1)',
-          'Process Heap Used': 'rgba(255,117,24, 1)',
-          'Process RSS': 'rgba(39,128,227, 1)',
-          'Load Average': 'rgba(39,128,227, 1)',
-          'Uptime': 'rgba(255,117,24, 1)'
+          'Process Heap Total': '#7777ff',
+          'Process Heap Used': '#2ca02c',
+          'Process RSS': '#ff7f0e',
+          'Load Average': '#7777ff',
+          'Uptime': '#ff7f0e'
         };
 
         function color(name){
@@ -645,7 +655,7 @@ Tracing.directive('slTracingTimeSeriesChart', [
         };
         $log.debug('Chart Name:  ' + scope.chartName);
         function updateCurrentPFKey(data) {
-          scope.$parent.currentCtx.pfKey = data.pfkey;
+          scope.$parent.setCurrentPFKey(data.pfkey);
         }
         scope.cpugraph = TimeSeries('#cpu-history-cont', scope.cpuGraphOptions)
           .on('click', updateCurrentPFKey);
@@ -683,7 +693,7 @@ Tracing.directive('slTracingTransactionHistory', [
       restrict: 'E',
       controller: ['$scope', function($scope) {
         $scope.updatePFKeyFromTransactionHistory = function(pfkey) {
-          $scope.currentCtx.pfKey = pfkey;
+          $scope.currentCtx.currentPFKey = pfkey;
         }
       }],
       link: function(scope, el, attrs) {

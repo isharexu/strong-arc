@@ -93,10 +93,19 @@ var page       = require('page');
 var slug       = require('slug');
 
 
+//var colormap = {
+//  'Process Heap Total': '#379f15',
+//  'Process Heap Used': '#fe6600',
+//  'Process RSS': '#1862b5',
+//  'stddev': '#1862b5',
+//  'min\/max': '#636363',
+//  'mean': '#1862b5',
+//  'number of calls': '#379f15'
+//};
 var colormap = {
-  'Process Heap Total': '#379f15',
-  'Process Heap Used': '#fe6600',
-  'Process RSS': '#1862b5',
+  'Process Heap Total': '#7777ff',
+  'Process Heap Used': '#2ca02c',
+  'Process RSS': '#ff7f0e',
   'stddev': '#1862b5',
   'min\/max': '#636363',
   'mean': '#1862b5',
@@ -123,12 +132,12 @@ function TransactionList(el, app) {
     this.el.querySelector('header').classList.add('hidden');
   }
 }
-function togglePanel(event) {
-  var target = event.delegateTarget.parentElement
-  var id = target.dataset.id
-  this.app.expanded[id] = !this.app.expanded[id]
-  target.classList.toggle('expanded', this.app.expanded[id])
-}
+//function togglePanel(event) {
+//  var target = event.delegateTarget.parentElement
+//  var id = target.dataset.id
+//  this.app.expanded[id] = !this.app.expanded[id]
+//  target.classList.toggle('expanded', this.app.expanded[id])
+//}
 
 TransactionList.prototype.renderList = function renderList(keys){
   var self = this;
@@ -152,7 +161,8 @@ TransactionList.prototype.renderList = function renderList(keys){
       });
     })
     .select('svg')
-      .attr('class', 'viz');
+    .attr('class', 'viz')
+    .attr('height', 0);
   sel.exit().remove();
 };
 
@@ -247,14 +257,23 @@ function setupTimeseries(el){
 function isEdisonAccount(el){
   return false;
 }
+var toggleHeight = (function(){
+  var currentHeight = 0;
 
+  return function(){
+    currentHeight = currentHeight == 0 ? '100%' : 0;
+    d3.select(this.parentNode).select('svg').transition().style("height", currentHeight);
+  }
+})();
 function enterTransactionStats(el) {
   var transactionStatsEnter = d3.select(el);
   var transactionStatsTableEnter = transactionStatsEnter.append('table')
-    .on('click', function(d,i) {
-        var self = this;
-        jQuery(self.parentElement).toggleClass('expanded', 250);
-      });
+    .on('click', toggleHeight);
+//.on('click', function(d,i) {
+//    var self = this;
+//    d3.select(this.parentNode).select('svg').transition().attr('height','400');
+//    //jQuery('.monitor-view .transaction svg').toggle(400);
+//  });
 
   var transactionStatsRowEnter = transactionStatsTableEnter.append('tr');
   transactionStatsRowEnter.append('td').attr('class', 'transaction-route').text(function(d){ return d });

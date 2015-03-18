@@ -10,7 +10,7 @@ Tracing.controller('TracingMainController', [
     //$scope.currentTransactionHistoryCollection = [];
     //$scope.currentApp = 'wfp:helloworld';
     $scope.currentCtx = {
-      pfKey: '',
+      currentPFKey: '',
       currentTrace: {},
       currentWaterfallKey: '',
       currentWaterfall: {},
@@ -152,6 +152,9 @@ Tracing.controller('TracingMainController', [
         .catch(function(error) {
           $log.warn('error: ' + error.message);
         });
+    }
+    $scope.setCurrentPFKey = function(key) {
+      $scope.currentCtx.currentPFKey = key;
     }
     $scope.init();
 
