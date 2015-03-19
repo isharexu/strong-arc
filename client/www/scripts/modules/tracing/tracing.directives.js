@@ -266,6 +266,18 @@ Tracing.directive('slTracingDetailView', [
         scope.$watch('currentWaterfallKey', function(newVal, oldVal) {
           if (newVal && newVal.length > 0) {
             scope.currentWaterfall = scope.loadWaterfallById(newVal);
+            //jQuery('[data-id="TraceDetailView"]').offset().top;
+            /*
+            *
+            * modify the ui to provide good ux for nav
+            *
+            * get rid of memory chart
+            * get rid of transaction history
+            * shrink the cpu chart
+            * indicate which point in time is selected
+            * animate the scroll
+            *
+            * */
           }
         });
       }
@@ -460,14 +472,22 @@ Tracing.directive('slTracingTraceSummary', [
           var waterfallSyncEnter = waterfallHeadingTableEnter.append('td')
             .attr('class', 'waterfall-sync');
 
-          var waterfallBodyEnter = waterfall.append('button')
-            //.attr('href', function (d) { return path.join(history.state.basePath, history.state.project, 'trace', encodeURIComponent(history.state.pfkey), sha1(d.id)) })
-            .attr('class', 'link-cmd')
+          var waterfallBodyEnter = waterfall
+            //.append('button')
+            .attr('href', function (d) {
+              return '#';
+            })
+            //.attr('class', 'link-cmd')
             .on('click', function(d) {
               //var projectName = scope.currentApp;
              // var pfKey = encodeURIComponent(scope.tracingCtx.pfKey);
               var waterfallId = Sha1(d.id);
               scope.currentWaterfallKey = waterfallId;
+              // scroll to waterfall / detail view
+             // jQuery('html, body').animate({
+             //   scrollTop:
+           //   }, 1000);
+
               return false;
 
 
@@ -577,7 +597,36 @@ Tracing.directive('slTracingTraceView', [
       link: function(scope, el, attrs) {
 
         scope.$watch('tracingCtx.currentPFKey', function(pfKey, oldVal) {
-          if (pfKey) {
+          //jQuery('[data-id="TraceDetailView"]').offset().top;
+          /*
+           *
+           * modify the ui to provide good ux for nav
+           *
+           * get rid of memory chart
+           * get rid of transaction history
+           * shrink the cpu chart
+           * indicate which point in time is selected
+           * animate the scroll
+           *
+           * */
+          if (!pfKey) {
+            //
+            //d3.select('[data-id="ProcessTraceView"]')
+            //  .transition()
+            //  .attr("height",7000);
+            //$('[data-id="ProcessTraceView"]').show(500);
+            //$('[data-id="ProcessTraceView"]').offset().top;
+            $('#memory-history-cont').show();
+            $('[data-id="TraceHistoryTransactions"]').show(500);
+
+
+          }
+          else {
+
+
+            //$('[data-id="ProcessTraceView"]').offset({top:-175});
+            $('#memory-history-cont').hide();
+            $('[data-id="TraceHistoryTransactions"]').hide(400);
 
             // load trace view
             $log.debug('re-initialize trace view pfkey[' + pfKey + ']');

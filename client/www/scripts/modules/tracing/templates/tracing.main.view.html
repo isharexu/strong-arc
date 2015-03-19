@@ -1,5 +1,5 @@
-<div class='monitor-view'>
-  <sl-tracing-time-series-chart chart-name="cpu" internal-ctx="tracingCtx" ></sl-tracing-time-series-chart>
-  <sl-tracing-time-series-chart chart-name="mem" internal-ctx="tracingCtx"></sl-tracing-time-series-chart>
-  <sl-tracing-transaction-history></sl-tracing-transaction-history>
+<div class='monitor-view' data-id="ProcessTraceView">
+  <sl-tracing-time-series-chart data-id="TraceHistoryChart" chart-name="cpu" internal-ctx="tracingCtx" ></sl-tracing-time-series-chart>
+  <sl-tracing-time-series-chart data-id="TraceHeapChart" chart-name="mem" internal-ctx="tracingCtx"></sl-tracing-time-series-chart>
+  <sl-tracing-transaction-history data-id="TraceHistoryTransactions"></sl-tracing-transaction-history>
 </div>
