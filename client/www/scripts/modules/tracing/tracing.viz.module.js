@@ -23986,7 +23986,9 @@ Line.prototype.reset = function (options) {
   this.type = 'line';
   this.parentNode = this.parent.node()
   this.width = (this.parentNode && this.parentNode.offsetWidth) || 1000;
-  this.height = Math.round(this.width / DEFAULT_RATIO);
+  this.height = options.height || Math.round(this.width / DEFAULT_RATIO);
+  this.selectedTime = options.selectedTime || 0;
+  //this.height = Math.round(this.width / DEFAULT_RATIO);
   this.margin = {top: 20, right: 80, bottom: 30, left: 80}; // TODO better defaults?
 
   this.showXAxis = true;
@@ -24351,7 +24353,10 @@ Line.prototype._draw = function () {
             nextX += (d.length + 1) * 8;
             return offset;
           })
-          .style('fill', function (d) { return self.color(d) });
+          .style('fill', function (d) {
+                            console.log('GREAT NEWS: [' + d + ']' + self.color(d));
+                            return self.color(d);
+                          });
   }
 
   switch(this.type) {
@@ -24362,6 +24367,21 @@ Line.prototype._draw = function () {
     default:
       return new Error('Unknown chart type.');
   }
+
+
+   var ts = self.selectedTime;
+  if (ts) {
+    var rec = self.getRecordAt(ts);
+    var x = self.x(rec.date) | 0;
+    self.selectionX = x;
+    self.selectLine
+      .attr('x1', x).attr('x2', x)
+      .attr('style', 'display: visible')  ;
+  }
+
+   //
+
+
 
 }
 
@@ -24416,7 +24436,7 @@ Line.prototype._line = function () {
 
     self.selectLineGroup = self.graph.append('g')
       .attr('class', 'select-line')
-      .attr('style', self.selectionX ? 'display: visible' : 'display: none')
+      //.attr('style', self.selectionX ? 'display: visible' : 'display: none')
 
     self.selectLine = self.selectLineGroup.append('line')
       // TODO x1 to 0/0, or max/max?
@@ -24437,8 +24457,11 @@ Line.prototype._line = function () {
     var x = self.x(rec.date) | 0;
     self.selectionX = x
     self.selectLine
-      .attr('x1', x).attr('x2', x)
+      .attr('x1', x)
+      .attr('x2', x)
       .attr('style', 'display: visible')
+      .attr('stroke-width', 5)
+      .attr('stroke', '#ffff33')
     self.emit('click', rec.__data)
   }
 
@@ -24452,6 +24475,24 @@ Line.prototype._line = function () {
 
 Line.prototype.clearSelection = function clearSelection(){
   delete this.selectionX
+}
+Line.prototype.setSelection = function setSelection(timestamp){
+
+  var ts = timestamp
+  var rec = this.getRecordAt(ts)
+  var x = this.x(rec.date) | 0;
+//  self.selectionX = x
+console.log('|   x count: ' + x);
+  this.selectionX = x;
+ // self.emit('click', rec.__data);
+  self.selectLineGroup = self.graph.append('g')
+    .attr('class', 'select-line')
+  //.attr('style', self.selectionX ? 'display: visible' : 'display: none')
+
+  self.selectLine = self.selectLineGroup.append('line')
+    // TODO x1 to 0/0, or max/max?
+    .attr('x1', self.selectionX || self.innerWidth).attr('x2', self.selectionX || self.innerWidth)
+    .attr('y1', 0).attr('y2', self.innerHeight);
 }
 
 

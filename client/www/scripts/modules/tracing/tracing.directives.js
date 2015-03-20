@@ -13,6 +13,21 @@ Tracing.directive('expTimeSeries', [
     }
   }
 ]);
+Tracing.directive('expAbstractTimeline', [
+  '$log',
+  function($log) {
+    return {
+      restrict: 'E',
+      link: function(scope, el, attrs) {
+        scope.$watch('tracingCtx.currentPFKey', function(newTraceKey, oldTimeline) {
+         // if (newTraceKey) {
+            React.renderComponent(TracingAstractTimeline({scope:scope}), el[0]);
+        //  }
+        }, true);
+      }
+    }
+  }
+]);
 Tracing.directive('slTracingInspectorCosttree', [
   '$log',
   '$timeout',
@@ -590,9 +605,8 @@ Tracing.directive('slTracingTraceView', [
           }
           return false;
         };
-        $scope.closeTraceView = function() {
-          $scope.tracingCtx.currentPFKey = '';
-        };
+
+
       }],
       link: function(scope, el, attrs) {
 
@@ -616,16 +630,18 @@ Tracing.directive('slTracingTraceView', [
             //  .attr("height",7000);
             //$('[data-id="ProcessTraceView"]').show(500);
             //$('[data-id="ProcessTraceView"]').offset().top;
-            $('#memory-history-cont').show();
             $('[data-id="TraceHistoryTransactions"]').show(500);
-
-
+            $('#memory-history-cont').show(500);
+            $('#exp-history-cont').hide(500);
+            $('#cpu-history-cont').show(500);
           }
           else {
 
 
             //$('[data-id="ProcessTraceView"]').offset({top:-175});
-            $('#memory-history-cont').hide();
+            $('#memory-history-cont').hide(500);
+            $('#exp-history-cont').show(500);
+            $('#cpu-history-cont').hide(500);
             $('[data-id="TraceHistoryTransactions"]').hide(400);
 
             // load trace view
@@ -697,24 +713,95 @@ Tracing.directive('slTracingTimeSeriesChart', [
             }
           }
         };
+        var tts = 0;
+        if (scope.tracingCtx && scope.tracingCtx.currentTrace && scope.tracingCtx.currentTrace.metadata.timestamp) {
+          tts = scope.tracingCtx.currentTrace.metadata.timestamp;
+        }
+        scope.expGraphOptions = {
+          height: 100,
+          showY1Axis: false,
+          selectedTime: tts,
+          color: color,
+          format: {
+            'y': 'num',
+            'y1': 's'
+          },
+          keySchema: {
+            'Load Average': {
+              class: 'cx-monitor-loadavg',
+              type: 'line',
+              y: 'y'
+            },
+            'Uptime': {
+              class: 'cx-monitor-uptime',
+              type: 'line',
+              y: 'y1'
+            }
+          }
+        };
+
         scope.memGraphOptions = {
           yMin: 0,
           color: color,
           formatter: {}
         };
+
+        function getTimestampForPFKey(pfKey) {
+          if (scope.$parent.tracingCtx && scope.$parent.tracingCtx.currentTimeline && scope.$parent.tracingCtx.currentTimeline.cpu) {
+            for (var i = 0;i < scope.$parent.tracingCtx.currentTimeline.cpu.length;i++) {
+              var instance = scope.$parent.tracingCtx.currentTimeline.cpu[i];
+              if (instance.__data.pfkey === pfKey) {
+                return instance._t;
+              }
+            }
+            return 0;
+          }
+          return 0;
+        }
         $log.debug('Chart Name:  ' + scope.chartName);
         function updateCurrentPFKey(data) {
           scope.$parent.setCurrentPFKey(data.pfkey);
         }
         scope.cpugraph = TimeSeries('#cpu-history-cont', scope.cpuGraphOptions)
           .on('click', updateCurrentPFKey);
-        scope.memgraph = TimeSeries('#memory-history-cont', scope.memGraphOptions)
+        scope.expgraph = TimeSeries('#exp-history-cont', scope.expGraphOptions)
           .on('click', updateCurrentPFKey);
 
+        scope.memgraph = TimeSeries('#memory-history-cont', scope.memGraphOptions)
+          .on('click', updateCurrentPFKey);
+        scope.$watch('internalCtx.currentPFKey', function(pfKey, oldVal) {
+          if (pfKey) {
+            scope.expgraph.setSelection(getTimestampForPFKey(pfKey));
+
+          }
+        });
+        scope.$watch('internalCtx.currentPFKey', function(newKey, oldVal) {
+          var pfKeyTime = getTimestampForPFKey(newKey);
+          scope.expgraph.setSelection(pfKeyTime);
+        });
         scope.$watch('internalCtx.currentTimeline', function(tl, oldVal) {
           if (tl) {
             if( tl.cpu && (tl.cpu !== oldVal.cpu)){
+              var exp = [];
+              var tmp = tl.cpu;
+              tmp.map(function(item) {
+                exp.push({
+                  __data: {
+                    lm_a: item.__data.lm_a,
+                    p_ut: item.__data.p_ut
+                  },
+                  load: item['Load Average'],
+                  pfkey: item.__data.pfkey,
+                  timestamp: item._t
+                });
+
+              });
               scope.cpugraph.draw(tl.cpu);
+              scope.expgraph.draw(tl.cpu);
+              if (scope.tracingCtx && scope.tracingCtx.currentPFKey) {
+                var pfKeyTime = getTimestampForPFKey(scope.tracingCtx.currentPFKey);
+                scope.expgraph.setSelection(pfKeyTime);
+              }
             }
             if( tl.mem && (tl.mem !== oldVal.mem)){
               scope.memgraph.draw(tl.mem);

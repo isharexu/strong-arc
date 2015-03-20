@@ -1,4 +1,153 @@
 /** @jsx React.DOM */
+
+var TracingAstractTimeline = (TracingAstractTimeline = React).createClass({
+  getInitialState: function () {
+    return {
+      scope: this.props.scope
+    }
+  },
+  setPFKey: function(event) {
+    var component = this;
+    var scope = component.props.scope;
+    //var pfKeyVal = encodeURIComponent(event.target.attributes['data-pfkey'].value);
+    var pfKeyVal = event.target.attributes['data-pfkey'].value;
+    if (pfKeyVal) {
+      console.log(pfKeyVal);
+      scope.$apply(function() {
+        scope.setCurrentPFKey(pfKeyVal);
+      });
+    }
+  },
+  componentDidMount: function() {
+
+  },
+  //componentDidMount: function() {
+  //  var component = this;
+  //  var dataPointCount = component.props.scope.tracingCtx.currentTimeline.cpu.length;
+  //  var totalUptime = component.props.scope.tracingCtx.currentTimeline.cpu[dataPointCount - 1].Uptime;
+  //
+  //  var pfKey = component.props.scope.tracingCtx.currentPFKey;
+  //
+  //  var currentUptime = totalUptime;
+  //
+  //
+  //  // determine currentPFKey.Uptime
+  //  for (var i = 0;i < dataPointCount;i++) {
+  //    var point = component.props.scope.tracingCtx.currentTimeline.cpu[i];
+  //    if (point.__data.pfkey === pfKey) {
+  //      currentUptime = point.Uptime;
+  //      break;
+  //    }
+  //  }
+  //
+  //  //totalUptime = ((totalUptime / 60) / 60);
+  //  var selectPercent = Math.floor((currentUptime / totalUptime) * 100);
+  //
+  //  var items = '';
+  //
+  //  var dataSet = [];
+  //  var className = 'k-hot';
+  //  for (var k = 0;k < 100;k++) {
+  //    className = 'k-hot';
+  //
+  //    if (k === (selectPercent - 1)) {
+  //      className = 'k-selected';
+  //    }
+  //    if (k > (selectPercent - 1)) {
+  //      className = 'k-cold';
+  //    }
+  //    dataSet.push(className);
+  //
+  //
+  //  }
+  //
+  //
+  //  component.setState({
+  //    dataSet: dataSet,
+  //    dataPointCount:dataPointCount,
+  //    totalUptime: totalUptime,
+  //    pfKey:pfKey,
+  //    currentUptime: currentUptime
+  //  });
+  //},
+  render: function() {
+
+    var component = this;
+    var dataPointCount = 0;
+    var totalUptime = 0;
+    var pfKey = '';
+    var currentUptime = 0;
+    var selectPercent = 0;
+    var dataSet = [];
+    if (component.props.scope.tracingCtx.currentTimeline && component.props.scope.tracingCtx.currentTimeline.cpu) {
+      dataPointCount = component.props.scope.tracingCtx.currentTimeline.cpu.length;
+      totalUptime = component.props.scope.tracingCtx.currentTimeline.cpu[dataPointCount - 1].Uptime;
+
+      pfKey = component.props.scope.tracingCtx.currentPFKey;
+
+      currentUptime = totalUptime;
+
+
+      // determine currentPFKey.Uptime
+      for (var i = 0;i < dataPointCount;i++) {
+        var point = component.props.scope.tracingCtx.currentTimeline.cpu[i];
+        if (point.__data.pfkey === pfKey) {
+          currentUptime = point.Uptime;
+          break;
+        }
+      }
+
+      //totalUptime = ((totalUptime / 60) / 60);
+      selectPercent = Math.floor((currentUptime / totalUptime) * 100);
+
+      //var items = '';
+
+      var className = 'k-hot';
+
+      for (var k = 0;k < 100;k++) {
+        className = 'k-hot';
+
+        if (k === (selectPercent - 1)) {
+          className = 'k-selected';
+        }
+        if (k > (selectPercent - 1)) {
+          className = 'k-cold';
+        }
+        dataSet.push(className);
+
+
+      }
+
+    }
+
+
+    //component.setState({
+    //  dataSet: dataSet,
+    //  dataPointCount:dataPointCount,
+    //  totalUptime: totalUptime,
+    //  pfKey:pfKey,
+    //  currentUptime: currentUptime
+    //});
+
+    var dataSetTwo = dataSet;
+
+    var items = dataSetTwo.map(function(item) {
+      return (<li className={item}>&nbsp;</li>);
+    });
+
+
+    return (
+      <div>
+        <div id="Velo"></div>
+        <ul id="AbstractTimelineList">
+          {items}
+        </ul>
+        <span>uptime: {component.props.scope.tracingCtx.currentTimelineDuration}</span>
+      </div>
+    );
+  }
+});
+
 var TracingTraceList = (TracingTraceList = React).createClass({
   getInitialState: function () {
     return {

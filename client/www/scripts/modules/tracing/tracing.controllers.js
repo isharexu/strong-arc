@@ -13,6 +13,7 @@ Tracing.controller('TracingMainController', [
       currentPFKey: '',
       currentTimelineTimestamp: '',
       currentTimelineDuration: 0,
+      currentTimelineKeyCollection: [],
       currentTrace: {},
       currentWaterfallKey: '',
       currentWaterfall: {},
@@ -32,6 +33,23 @@ Tracing.controller('TracingMainController', [
       return $scope.tracingCtx.currentTimeline.cpu[dataPointCount - 1].Uptime
 
     };
+    $scope.prevPFKey = function() {
+      if ($scope.tracingCtx.currentTimelineKeyCollection) {
+        var currIndex = $scope.tracingCtx.currentTimelineKeyCollection.indexOf($scope.tracingCtx.currentPFKey);
+        if (currIndex > 1) {
+          $scope.tracingCtx.currentPFKey = $scope.tracingCtx.currentTimelineKeyCollection[currIndex - 1];
+        }
+      }
+
+    };
+    $scope.nextPFKey = function() {
+      if ($scope.tracingCtx.currentTimelineKeyCollection) {
+        var currIndex = $scope.tracingCtx.currentTimelineKeyCollection.indexOf($scope.tracingCtx.currentPFKey);
+        if (currIndex < ($scope.tracingCtx.currentTimelineKeyCollection.length - 2)) {
+          $scope.tracingCtx.currentPFKey = $scope.tracingCtx.currentTimelineKeyCollection[currIndex + 1];
+        }
+      }
+    };
     //$scope.currentTrace = {};
     //$scope.currentWaterfallKey = '';
     //$scope.currentWaterfall = {};
@@ -44,6 +62,12 @@ Tracing.controller('TracingMainController', [
     };
     function updateTimelineData(timeline) {
       $scope.tracingCtx.currentTimeline = timeline;
+      if (timeline.cpu) {
+        $scope.tracingCtx.currentTimelineKeyCollection = [];
+        timeline.cpu.map(function(trace) {
+          $scope.tracingCtx.currentTimelineKeyCollection.push(trace.__data.pfkey);
+        });
+      }
       $scope.tracingCtx.currentTimelineTimestamp = TracingServices.getCurrentTimelineTimestamp();
       $scope.updateTransactionHistory();
       $scope.tracingCtx.currentTimelineDuration = $scope.getCurrentTimelineDuration();
@@ -69,6 +93,10 @@ Tracing.controller('TracingMainController', [
           });
       }
     }, true);
+
+    $scope.closeTraceView = function() {
+      $scope.tracingCtx.currentPFKey = '';
+    };
 
     $scope.init = function() {
 

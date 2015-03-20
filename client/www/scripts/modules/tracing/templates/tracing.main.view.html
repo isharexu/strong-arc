@@ -1,5 +1,11 @@
 <div class='monitor-view' data-id="ProcessTraceView">
+  <exp-abstract-timeline></exp-abstract-timeline>
+  <span>
+    <button ng-click="prevPFKey()"><<</button>
+    <button ng-click="nextPFKey()">>></button>
+  </span>
   <sl-tracing-time-series-chart data-id="TraceHistoryChart" chart-name="cpu" internal-ctx="tracingCtx" ></sl-tracing-time-series-chart>
-  <sl-tracing-time-series-chart data-id="TraceHeapChart" chart-name="mem" internal-ctx="tracingCtx"></sl-tracing-time-series-chart>
+  <!--<sl-tracing-time-series-chart data-id="TraceExpChart" chart-name="exp" internal-ctx="tracingCtx" ></sl-tracing-time-series-chart>-->
+  <!--<sl-tracing-time-series-chart data-id="TraceHeapChart" chart-name="mem" internal-ctx="tracingCtx"></sl-tracing-time-series-chart>-->
   <sl-tracing-transaction-history data-id="TraceHistoryTransactions"></sl-tracing-transaction-history>
 </div>
