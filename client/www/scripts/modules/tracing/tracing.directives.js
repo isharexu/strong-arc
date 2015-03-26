@@ -5,7 +5,7 @@ Tracing.directive('expTimeSeries', [
       restrict: 'E',
       link: function(scope, el, attrs) {
         scope.$watch('tracingCtx.currentTimeline', function(newTimeline, oldTimeline) {
-          if (newTimeline.cpu) {
+          if (newTimeline && newTimeline.length) {
             React.renderComponent(TracingTraceList({scope:scope}), el[0]);
           }
         }, true);
@@ -20,9 +20,9 @@ Tracing.directive('expAbstractTimeline', [
       restrict: 'E',
       link: function(scope, el, attrs) {
         scope.$watch('tracingCtx.currentPFKey', function(newTraceKey, oldTimeline) {
-         // if (newTraceKey) {
+          if (newTraceKey) {
             React.renderComponent(TracingAstractTimeline({scope:scope}), el[0]);
-        //  }
+          }
         }, true);
       }
     }
@@ -647,10 +647,10 @@ Tracing.directive('slTracingTraceView', [
             // load trace view
             $log.debug('re-initialize trace view pfkey[' + pfKey + ']');
 
-            scope.tracingCtx.currentTrace = TracingServices.fetchTrace({pfkey: pfKey})
+            scope.tracingCtx.currentTrace = scope.fetchTrace({pfkey: pfKey})
               .then(function(trace) {
                 scope.tracingCtx.currentTrace = trace;
-                $log.debug('trace update: ' + trace.metadata.account_key);
+
                 //$log.debug('new trace: ' + JSON.stringify(trace));
 
               });
@@ -747,10 +747,10 @@ Tracing.directive('slTracingTimeSeriesChart', [
         };
 
         function getTimestampForPFKey(pfKey) {
-          if (scope.$parent.tracingCtx && scope.$parent.tracingCtx.currentTimeline && scope.$parent.tracingCtx.currentTimeline.cpu) {
-            for (var i = 0;i < scope.$parent.tracingCtx.currentTimeline.cpu.length;i++) {
-              var instance = scope.$parent.tracingCtx.currentTimeline.cpu[i];
-              if (instance.__data.pfkey === pfKey) {
+          if (scope.$parent.tracingCtx && scope.$parent.tracingCtx.currentTimeline.length) {
+            for (var i = 0;i < scope.$parent.tracingCtx.currentTimeline.length;i++) {
+              var instance = scope.$parent.tracingCtx.currentTimeline[i];
+              if (instance.pfkey === pfKey) {
                 return instance._t;
               }
             }
@@ -764,47 +764,50 @@ Tracing.directive('slTracingTimeSeriesChart', [
         }
         scope.cpugraph = TimeSeries('#cpu-history-cont', scope.cpuGraphOptions)
           .on('click', updateCurrentPFKey);
-        scope.expgraph = TimeSeries('#exp-history-cont', scope.expGraphOptions)
-          .on('click', updateCurrentPFKey);
+        //scope.expgraph = TimeSeries('#exp-history-cont', scope.expGraphOptions)
+        //  .on('click', updateCurrentPFKey);
 
-        scope.memgraph = TimeSeries('#memory-history-cont', scope.memGraphOptions)
-          .on('click', updateCurrentPFKey);
+        //scope.memgraph = TimeSeries('#memory-history-cont', scope.memGraphOptions)
+        //  .on('click', updateCurrentPFKey);
         scope.$watch('internalCtx.currentPFKey', function(pfKey, oldVal) {
           if (pfKey) {
-            scope.expgraph.setSelection(getTimestampForPFKey(pfKey));
+            //scope.expgraph.setSelection(getTimestampForPFKey(pfKey));
 
           }
         });
         scope.$watch('internalCtx.currentPFKey', function(newKey, oldVal) {
           var pfKeyTime = getTimestampForPFKey(newKey);
-          scope.expgraph.setSelection(pfKeyTime);
+          if (pfKeyTime > 0) {
+            //scope.expgraph.setSelection(pfKeyTime);
+          }
+
         });
         scope.$watch('internalCtx.currentTimeline', function(tl, oldVal) {
           if (tl) {
-            if( tl.cpu && (tl.cpu !== oldVal.cpu)){
+            if( tl && (tl !== oldVal)){
               var exp = [];
-              var tmp = tl.cpu;
-              tmp.map(function(item) {
-                exp.push({
-                  __data: {
-                    lm_a: item.__data.lm_a,
-                    p_ut: item.__data.p_ut
-                  },
-                  load: item['Load Average'],
-                  pfkey: item.__data.pfkey,
-                  timestamp: item._t
-                });
+              var tmp = tl;
+              //tmp.map(function(item) {
+              //  exp.push({
+              //    __data: {
+              //      lm_a: item.lm_a,
+              //      p_ut: item.p_ut
+              //    },
+              //    load: item['Load Average'],
+              //    pfkey: item.pfkey,
+              //    timestamp: item._t
+              //  });
 
-              });
-              scope.cpugraph.draw(tl.cpu);
-              scope.expgraph.draw(tl.cpu);
+              //});
+              scope.cpugraph.draw(tl);
+              //scope.expgraph.draw(tl);
               if (scope.tracingCtx && scope.tracingCtx.currentPFKey) {
-                var pfKeyTime = getTimestampForPFKey(scope.tracingCtx.currentPFKey);
-                scope.expgraph.setSelection(pfKeyTime);
+                //var pfKeyTime = getTimestampForPFKey(scope.tracingCtx.currentPFKey);
+                //scope.expgraph.setSelection(pfKeyTime);
               }
             }
-            if( tl.mem && (tl.mem !== oldVal.mem)){
-              scope.memgraph.draw(tl.mem);
+            if( tl && (tl !== oldVal)){
+              //scope.memgraph.draw(tl);
             }
           }
 

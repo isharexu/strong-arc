@@ -39,7 +39,17 @@
     "path": "^0.11.14",
     "page": "^1.6.1",
     "slug": "^0.8.0",
-    "node-underscorify": "0.0.14"
+    "node-underscorify": "0.0.14",
+    "cxviz-timeseries": "^0.1.13",
+    "strong-trace-waterfalldata": "0.0.14",
+    "cxviz-eventloop": "^0.1.11",
+    "cxviz-color": "0.0.8",
+    "cxviz-format": "^0.1.10",
+    "cxviz-rawtree": "^0.2.9",
+    "cxviz-pie": "^0.1.8",
+    "cxviz-flame": "^0.2.13",
+    "strong-trace-waterfalltransform": "^1.0.13",
+    "strong-trace-waterfall": "^1.1.5"
   },
   "description": "A visual suite for the StrongLoop API Platform",
   "devDependencies": {

@@ -1,9 +1,19 @@
 Tracing.controller('TracingMainController', [
   '$scope',
   '$log',
+  '$location',
   'TracingServices',
   'TimeSeries',
-  function($scope, $log, TracingServices, TimeSeries) {
+  function($scope, $log, $location, TracingServices, TimeSeries) {
+    var PMClient = require('strong-mesh-models').Client;
+    $scope.pm = new PMClient('http://' + $location.host() + ':8701');
+    //
+    //
+    //('http://' + $location.host() + ':' + $location.port() + '/manager');
+
+
+
+
     $log.debug('tracing controller');
     //$scope.tracingCtx.currentTimeline = {};
     //$scope.currentTransactionKeys = [];
@@ -19,6 +29,7 @@ Tracing.controller('TracingMainController', [
       currentWaterfall: {},
       currentFunction: {},
       currentHostConfig: {},
+      currentProcess: {},
       currentPids: [],
       currentTimeline: {},
       currentTransactionKeys: [],
@@ -29,9 +40,13 @@ Tracing.controller('TracingMainController', [
       if (!$scope.tracingCtx.currentTimeline) {
         return 0;
       }
-      var dataPointCount = $scope.tracingCtx.currentTimeline.cpu.length;
-      return $scope.tracingCtx.currentTimeline.cpu[dataPointCount - 1].Uptime
+      var dataPointCount = $scope.tracingCtx.currentTimeline.length;
+      if (dataPointCount > 0) {
+        return $scope.tracingCtx.currentTimeline[dataPointCount - 1].Uptime
 
+      }
+
+      return 0;
     };
     $scope.prevPFKey = function() {
       if ($scope.tracingCtx.currentTimelineKeyCollection) {
@@ -62,12 +77,15 @@ Tracing.controller('TracingMainController', [
     };
     function updateTimelineData(timeline) {
       $scope.tracingCtx.currentTimeline = timeline;
-      if (timeline.cpu) {
-        $scope.tracingCtx.currentTimelineKeyCollection = [];
-        timeline.cpu.map(function(trace) {
-          $scope.tracingCtx.currentTimelineKeyCollection.push(trace.__data.pfkey);
-        });
-      }
+      $scope.tracingCtx.currentTimelineKeyCollection = [];
+      $scope.tracingCtx.currentTimeline.map(function(trace) {
+        var t = trace;
+        $scope.tracingCtx.currentTimelineKeyCollection.push(trace.pfkey);
+        trace._t = moment(trace.ts).unix();
+        trace.Uptime = trace.p_ut;
+        trace['Load Average'] = trace.s_la;
+      });
+
       $scope.tracingCtx.currentTimelineTimestamp = TracingServices.getCurrentTimelineTimestamp();
       $scope.updateTransactionHistory();
       $scope.tracingCtx.currentTimelineDuration = $scope.getCurrentTimelineDuration();
@@ -98,6 +116,55 @@ Tracing.controller('TracingMainController', [
       $scope.tracingCtx.currentPFKey = '';
     };
 
+
+    $scope.ginit = function() {
+
+
+      $scope.pm.instanceFind('1', function(err, instance) {
+        if (err) {
+          $log.debug('error finding instance 1: ' + err.message);
+          return;
+        }
+        instance.processes(function(err, processes) {
+          $scope.tracingCtx.currentProcess = processes[1];
+
+          $scope.tracingCtx.currentProcess.getTimeline(function(err, rawResponse) {
+
+            /*
+            *
+            * For now we need to process the redundant wrapper code
+            *
+            * */
+            var trueResponse = rawResponse;
+
+            updateTimelineData(trueResponse);
+          });
+
+
+          //process.getMetaTransactions(function(err, metaTxs) {
+          //
+          //});
+          //process.getTransaction(txId, function(err, txs) {
+          //
+          //});
+          //
+          //process.getTrace(pfKey, function(err, timeline) {
+          //
+          //});
+        });
+      });
+    };
+    $scope.fetchTrace = function(key) {
+
+      return $scope.tracingCtx.currentProcess.getTrace(key, function(err, trace) {
+        if (err) {
+          $log.warn('bad get Trace: ' + err.message);
+          return;
+        }
+        return trace;
+      });
+
+    };
     $scope.init = function() {
 
       /*
@@ -149,63 +216,131 @@ Tracing.controller('TracingMainController', [
     };
     $scope.updateTransactionHistory = function() {
       $scope.tracingCtx.currentTransactionHistoryCollection = [];
+
+      $scope.tracingCtx.currentProcess.getMetaTransactions(function(err, response) {
+        if (err) {
+          $log.warn('bad get meta transactions: ' + err.message);
+        }
+        if (response && response.length) {
+
+          /*
+           the current context list of transactions
+
+           we need to iterate over them and create a deeper object than the simple one used by transaction-list component
+
+           trasObj = {
+           key: transaction,
+           history: {object based on api call}
+           };
+
+           */
+          // var rawTransactionList = response.hosts[$scope.currentHostConfig.host] ? response.hosts[$scope.currentHostConfig.host][$scope.currentHostConfig.pid] : [];
+          // isolate the transactions for this pid
+          $scope.tracingCtx.currentTransactionKeys = response || [];
+
+          // iterate over the transaction keys
+          $scope.tracingCtx.currentTransactionKeys.map(function(transaction) {
+
+
+            $scope.tracingCtx.currentProcess.getTransaction(encodeURIComponent(transaction), function(err, history) {
+              if (err) {
+                $log.warn('bad get history: ' + err.message);
+              }
+              transObj = {
+                history: history,
+                key: transaction
+              };
+              $scope.tracingCtx.currentTransactionHistoryCollection.push(transObj);
+            });
+
+
+
+
+
+            /*
+             *
+             *   Transaction key
+             *
+             * */
+            //var transObj = {
+            //  key: transaction
+            //};
+            //
+            //// history
+            //TracingServices.transactionHistory(encodeURIComponent(transaction), $scope.tracingCtx.currentHostConfig.host, $scope.tracingCtx.currentHostConfig.pid)
+            //  .then(function(response){
+            //
+            //    // get the history data per transaction
+            //    var rawTransactionData = JSON.parse(response.data);
+            //    // assign history data to ui model
+            //    transObj.history = rawTransactionData.hosts[$scope.tracingCtx.currentHostConfig.host][$scope.tracingCtx.currentHostConfig.pid];
+            //    $scope.tracingCtx.currentTransactionHistoryCollection.push(transObj);
+            //
+            //  });
+          });
+        }
+        else {
+          $log.warn('no response or length meta transactions: ');
+        }
+      });
+
       /*
        *
        * Process the transaction history list
        *
        * */
-      TracingServices.getTransactionKeys({reqparams:$scope.tracingCtx.currentHostConfig})
-        .then(function(response) {
-
-
-          // make sure we get a list
-          if (response.hosts) {
-
-            /*
-             the current context list of transactions
-
-             we need to iterate over them and create a deeper object than the simple one used by transaction-list component
-
-             trasObj = {
-             key: transaction,
-             history: {object based on api call}
-             };
-
-             */
-            // var rawTransactionList = response.hosts[$scope.currentHostConfig.host] ? response.hosts[$scope.currentHostConfig.host][$scope.currentHostConfig.pid] : [];
-            // isolate the transactions for this pid
-            $scope.tracingCtx.currentTransactionKeys = response.hosts[$scope.tracingCtx.currentHostConfig.host] ? response.hosts[$scope.tracingCtx.currentHostConfig.host][$scope.tracingCtx.currentHostConfig.pid] : [];
-
-            // iterate over the transaction keys
-            $scope.tracingCtx.currentTransactionKeys.map(function(transaction) {
-              /*
-               *
-               *   Transaction key
-               *
-               * */
-              var transObj = {
-                key: transaction
-              };
-
-              // history
-              TracingServices.transactionHistory(encodeURIComponent(transaction), $scope.tracingCtx.currentHostConfig.host, $scope.tracingCtx.currentHostConfig.pid)
-                .then(function(response){
-
-                  // get the history data per transaction
-                  var rawTransactionData = JSON.parse(response.data);
-                  // assign history data to ui model
-                  transObj.history = rawTransactionData.hosts[$scope.tracingCtx.currentHostConfig.host][$scope.tracingCtx.currentHostConfig.pid];
-                  $scope.tracingCtx.currentTransactionHistoryCollection.push(transObj);
-
-                });
-            });
-          }
-        });
+      //TracingServices.getTransactionKeys({reqparams:$scope.tracingCtx.currentHostConfig})
+      //  .then(function(response) {
+      //
+      //
+      //    // make sure we get a list
+      //    if (response.hosts) {
+      //
+      //      /*
+      //       the current context list of transactions
+      //
+      //       we need to iterate over them and create a deeper object than the simple one used by transaction-list component
+      //
+      //       trasObj = {
+      //       key: transaction,
+      //       history: {object based on api call}
+      //       };
+      //
+      //       */
+      //      // var rawTransactionList = response.hosts[$scope.currentHostConfig.host] ? response.hosts[$scope.currentHostConfig.host][$scope.currentHostConfig.pid] : [];
+      //      // isolate the transactions for this pid
+      //      $scope.tracingCtx.currentTransactionKeys = response.hosts[$scope.tracingCtx.currentHostConfig.host] ? response.hosts[$scope.tracingCtx.currentHostConfig.host][$scope.tracingCtx.currentHostConfig.pid] : [];
+      //
+      //      // iterate over the transaction keys
+      //      $scope.tracingCtx.currentTransactionKeys.map(function(transaction) {
+      //        /*
+      //         *
+      //         *   Transaction key
+      //         *
+      //         * */
+      //        var transObj = {
+      //          key: transaction
+      //        };
+      //
+      //        // history
+      //        TracingServices.transactionHistory(encodeURIComponent(transaction), $scope.tracingCtx.currentHostConfig.host, $scope.tracingCtx.currentHostConfig.pid)
+      //          .then(function(response){
+      //
+      //            // get the history data per transaction
+      //            var rawTransactionData = JSON.parse(response.data);
+      //            // assign history data to ui model
+      //            transObj.history = rawTransactionData.hosts[$scope.tracingCtx.currentHostConfig.host][$scope.tracingCtx.currentHostConfig.pid];
+      //            $scope.tracingCtx.currentTransactionHistoryCollection.push(transObj);
+      //
+      //          });
+      //      });
+      //    }
+      //  });
     };
     $scope.setCurrentPFKey = function(key) {
       $scope.tracingCtx.currentPFKey = key;
     };
-    $scope.init();
+    $scope.ginit();
 
   }
 ]);

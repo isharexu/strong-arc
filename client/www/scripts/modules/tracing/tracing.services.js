@@ -17,13 +17,13 @@ Tracing.service('TracingServices', [
     //var ajax = require('component-ajax')
    // var enhance = require('concurix-waterfalltransform').enhanceWaterfall
 
-
-    function API(options) {
-      var opts = options || {}
-      this.base = opts.base || '/'
-      this.project = opts.project || ''
-      return this
-    }
+    //
+    //function API(options) {
+    //  var opts = options || {}
+    //  this.base = opts.base || '/'
+    //  this.project = opts.project || ''
+    //  return this
+    //}
 
     svc.getCurrentTimelineTimestamp = function() {
       return currentTimelineTimestamp;

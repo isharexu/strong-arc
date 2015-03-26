@@ -8,7 +8,7 @@ var TracingViz = angular.module('TracingViz', [])
   .value('FlameGraph', require('cxviz-flame'))
   .value('RawTree', require('cxviz-rawtree'))
   .value('Slug', require('slug'))
-  .value('TraceEnhance',   require('concurix-waterfalltransform').enhanceWaterfall)
+  .value('TraceEnhance',   require('strong-trace-waterfalltransform').enhanceWaterfall)
   .value('MSFormat', require('./format').msFormat)
   .value('Inspector', require('./inspector'))
   .value('TransactionList', require('./transaction-list'));

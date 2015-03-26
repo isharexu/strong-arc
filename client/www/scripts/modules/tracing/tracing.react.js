@@ -34,7 +34,7 @@ var TracingAstractTimeline = (TracingAstractTimeline = React).createClass({
   //  // determine currentPFKey.Uptime
   //  for (var i = 0;i < dataPointCount;i++) {
   //    var point = component.props.scope.tracingCtx.currentTimeline.cpu[i];
-  //    if (point.__data.pfkey === pfKey) {
+  //    if (point.pfkey === pfKey) {
   //      currentUptime = point.Uptime;
   //      break;
   //    }
@@ -79,9 +79,9 @@ var TracingAstractTimeline = (TracingAstractTimeline = React).createClass({
     var currentUptime = 0;
     var selectPercent = 0;
     var dataSet = [];
-    if (component.props.scope.tracingCtx.currentTimeline && component.props.scope.tracingCtx.currentTimeline.cpu) {
-      dataPointCount = component.props.scope.tracingCtx.currentTimeline.cpu.length;
-      totalUptime = component.props.scope.tracingCtx.currentTimeline.cpu[dataPointCount - 1].Uptime;
+    if (component.props.scope.tracingCtx.currentTimeline && component.props.scope.tracingCtx.currentTimeline) {
+      dataPointCount = component.props.scope.tracingCtx.currentTimeline.length;
+      totalUptime = component.props.scope.tracingCtx.currentTimeline[dataPointCount - 1].Uptime;
 
       pfKey = component.props.scope.tracingCtx.currentPFKey;
 
@@ -90,8 +90,8 @@ var TracingAstractTimeline = (TracingAstractTimeline = React).createClass({
 
       // determine currentPFKey.Uptime
       for (var i = 0;i < dataPointCount;i++) {
-        var point = component.props.scope.tracingCtx.currentTimeline.cpu[i];
-        if (point.__data.pfkey === pfKey) {
+        var point = component.props.scope.tracingCtx.currentTimeline[i];
+        if (point.pfkey === pfKey) {
           currentUptime = point.Uptime;
           break;
         }
@@ -170,7 +170,7 @@ var TracingTraceList = (TracingTraceList = React).createClass({
 
     var component = this;
 
-    var items = component.props.scope.tracingCtx.currentTimeline.cpu.map(function(point) {
+    var items = component.props.scope.tracingCtx.currentTimeline.map(function(point) {
       //var uptime = ((point.Uptime / 60) / 60);
       return (<div data-ui-type="table">
         <div data-ui-type="row">
@@ -178,7 +178,7 @@ var TracingTraceList = (TracingTraceList = React).createClass({
             rss
           </div>
           <div data-ui-type="cell">
-            {point.__data.p_mr}
+            {point.p_mr}
           </div>
           <div data-ui-type="cell">
             rss
@@ -189,7 +189,7 @@ var TracingTraceList = (TracingTraceList = React).createClass({
             lm_a:
           </div>
           <div data-ui-type="cell">
-            {point.__data.lm_a}
+            {point.lm_a}
           </div>
           <div data-ui-type="cell">
             // latent model a value (if 2, orange triangle is shown.  usually 0)
@@ -200,7 +200,7 @@ var TracingTraceList = (TracingTraceList = React).createClass({
             p_mr:
           </div>
           <div data-ui-type="cell">
-            {point.__data.p_mr}
+            {point.p_mr}
           </div>
           <div data-ui-type="cell">
             // process.memory.rss
@@ -211,7 +211,7 @@ var TracingTraceList = (TracingTraceList = React).createClass({
             p_mt:
           </div>
           <div data-ui-type="cell">
-            {point.__data.p_mt}
+            {point.p_mt}
           </div>
           <div data-ui-type="cell">
             // process.memory.total
@@ -222,7 +222,7 @@ var TracingTraceList = (TracingTraceList = React).createClass({
             p_mu:
           </div>
           <div data-ui-type="cell">
-            {point.__data.p_mu}
+            {point.p_mu}
           </div>
           <div data-ui-type="cell">
             // process.memory.used heap
@@ -233,7 +233,7 @@ var TracingTraceList = (TracingTraceList = React).createClass({
             p_ut:
           </div>
           <div data-ui-type="cell">
-            {point.__data.p_ut}
+            {point.p_ut}
           </div>
           <div data-ui-type="cell">
             // process.uptime
@@ -255,7 +255,7 @@ var TracingTraceList = (TracingTraceList = React).createClass({
             s_la:
           </div>
           <div data-ui-type="cell">
-            {point.__data.s_la}
+            {point.s_la}
           </div>
           <div data-ui-type="cell">
             // load average
@@ -266,7 +266,7 @@ var TracingTraceList = (TracingTraceList = React).createClass({
             timestamp:
           </div>
           <div data-ui-type="cell">
-            <button className="cmd-link" data-pfkey={point.__data.pfkey} onClick={component.setPFKey}>
+            <button className="cmd-link" data-pfkey={point.pfkey} onClick={component.setPFKey}>
               {point._t}
             </button>
           </div>
@@ -276,8 +276,8 @@ var TracingTraceList = (TracingTraceList = React).createClass({
         </div>
       </div>);
     });
-    var dataPointCount = component.props.scope.tracingCtx.currentTimeline.cpu.length;
-    var totalUptime = component.props.scope.tracingCtx.currentTimeline.cpu[dataPointCount - 1].Uptime;
+    var dataPointCount = component.props.scope.tracingCtx.currentTimeline.length;
+    var totalUptime = component.props.scope.tracingCtx.currentTimeline[dataPointCount - 1].Uptime;
     totalUptime = ((totalUptime / 60) / 60);
     var upHours = totalUptime.toFixed(1);
 
