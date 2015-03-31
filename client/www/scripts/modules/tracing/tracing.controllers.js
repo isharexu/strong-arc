@@ -4,7 +4,8 @@ Tracing.controller('TracingMainController', [
   '$location',
   'TracingServices',
   'TimeSeries',
-  function($scope, $log, $location, TracingServices, TimeSeries) {
+  'TraceEnhance',
+  function($scope, $log, $location, TracingServices, TimeSeries, TraceEnhance) {
     var PMClient = require('strong-mesh-models').Client;
     $scope.pm = new PMClient('http://' + $location.host() + ':8701');
     //
@@ -21,6 +22,7 @@ Tracing.controller('TracingMainController', [
     //$scope.currentApp = 'wfp:helloworld';
     $scope.tracingCtx = {
       currentPFKey: '',
+      currentTraceToggleBool: false,
       currentTimelineTimestamp: '',
       currentTimelineDuration: 0,
       currentTimelineKeyCollection: [],
@@ -60,9 +62,13 @@ Tracing.controller('TracingMainController', [
     $scope.nextPFKey = function() {
       if ($scope.tracingCtx.currentTimelineKeyCollection) {
         var currIndex = $scope.tracingCtx.currentTimelineKeyCollection.indexOf($scope.tracingCtx.currentPFKey);
-        if (currIndex < ($scope.tracingCtx.currentTimelineKeyCollection.length - 2)) {
-          $scope.tracingCtx.currentPFKey = $scope.tracingCtx.currentTimelineKeyCollection[currIndex + 1];
+        var len = $scope.tracingCtx.currentTimelineKeyCollection.length;
+        if (len > 0) {
+          if (currIndex < (len - 2)) {
+            $scope.tracingCtx.currentPFKey = $scope.tracingCtx.currentTimelineKeyCollection[currIndex + 1];
+          }
         }
+
       }
     };
     //$scope.currentTrace = {};
@@ -76,14 +82,19 @@ Tracing.controller('TracingMainController', [
       window.setScrollView('.tracing-content-container');
     };
     function updateTimelineData(timeline) {
-      $scope.tracingCtx.currentTimeline = timeline;
+      var self = this;
+      self.timeline = timeline;
       $scope.tracingCtx.currentTimelineKeyCollection = [];
-      $scope.tracingCtx.currentTimeline.map(function(trace) {
+      self.timeline.map(function(trace) {
         var t = trace;
-        $scope.tracingCtx.currentTimelineKeyCollection.push(trace.pfkey);
-        trace._t = moment(trace.ts).unix();
-        trace.Uptime = trace.p_ut;
-        trace['Load Average'] = trace.s_la;
+        $scope.tracingCtx.currentTimelineKeyCollection.push(trace.__data.pfkey);
+        //trace._t = moment(trace.ts).unix();
+        //trace.Uptime = trace.p_ut;
+        //trace['Load Average'] = trace.s_la;
+      });
+      $scope.$apply(function() {
+        $scope.tracingCtx.currentTimeline = self.timeline;
+
       });
 
       $scope.tracingCtx.currentTimelineTimestamp = TracingServices.getCurrentTimelineTimestamp();
@@ -116,6 +127,28 @@ Tracing.controller('TracingMainController', [
       $scope.tracingCtx.currentPFKey = '';
     };
 
+    $scope.$watch('tracingCtx.currentPFKey', function(newKey, oldVal) {
+
+      if (newKey) {
+        $scope.tracingCtx.currentProcess.getTrace(newKey, function(err, trace) {
+          if (err) {
+            $log.warn('bad get trace: ' + err.message);
+            return {};
+          }
+          var obj = JSON.parse(trace);
+          var TE = TraceEnhance(obj);
+          $scope.tracingCtx.currentTrace = TE;
+          // too expensive to compare the trace
+          $scope.$apply(function() {
+            $scope.tracingCtx.currentTraceToggleBool = !$scope.tracingCtx.currentTraceToggleBool;
+
+          });
+
+        });
+
+      }
+
+    });
 
     $scope.ginit = function() {
 
@@ -135,9 +168,12 @@ Tracing.controller('TracingMainController', [
             * For now we need to process the redundant wrapper code
             *
             * */
-            var trueResponse = rawResponse;
+            var trueResponse = TracingServices.convertTimeseries(rawResponse);
 
-            updateTimelineData(trueResponse);
+       //     $scope.$apply(function() {
+              updateTimelineData(trueResponse.cpu);
+
+           // });
           });
 
 

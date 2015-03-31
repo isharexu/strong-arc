@@ -14,6 +14,7 @@ var TracingAstractTimeline = (TracingAstractTimeline = React).createClass({
     if (pfKeyVal) {
       console.log(pfKeyVal);
       scope.$apply(function() {
+        console.log('|-- react --|');
         scope.setCurrentPFKey(pfKeyVal);
       });
     }
@@ -135,7 +136,7 @@ var TracingAstractTimeline = (TracingAstractTimeline = React).createClass({
       return (<li className={item}>&nbsp;</li>);
     });
 
-
+console.log('|-- react render --|');
     return (
       <div>
         <div id="Velo"></div>

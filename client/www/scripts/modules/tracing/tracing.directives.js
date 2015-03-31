@@ -116,7 +116,7 @@ Tracing.directive('slTracingWaterfallEventloop', [
 
 
 
-        eventloop.init('[data-hook="eventloop"]', { expanded: true, color: '#1234af' });
+        eventloop.init('[data-hook="eventloop"]', { expanded: true, color: Color });
         flame.init('[data-hook="flame"]', {colors: Color, disableZoom: true});
         rawtree.init('[data-hook="rawtree"]', {colors: Color});
 
@@ -179,7 +179,7 @@ Tracing.directive('slTracingWaterfallEventloop', [
         };
         setupListeners([rawtree, eventloop, flame]);
 
-        scope.$watch('currentWaterfall', function(newWaterfall, oldVal) {
+        scope.$watch('tracingCtx.currentWaterfall', function(newWaterfall, oldVal) {
           if (newWaterfall && newWaterfall.id) {
             eventloop.update(newWaterfall, scope.tracingCtx.currentTrace.functions);
             flame.update(newWaterfall, scope.tracingCtx.currentTrace.functions);
@@ -231,18 +231,18 @@ Tracing.directive('slTracingDetailView', [
       controller: ['$scope', function($scope) {
         $scope.currentFunction = {};
         $scope.showDetailView = function() {
-          return ($scope.currentWaterfallKey && $scope.currentWaterfallKey.length > 0);
+          return ($scope.tracingCtx.currentWaterfallKey && $scope.tracingCtx.currentWaterfallKey.length > 0);
         };
         $scope.closeDetailView = function() {
-          $scope.currentWaterfallKey = '';
+          $scope.tracingCtx.currentWaterfallKey = '';
         };
         $scope.previousWaterfall = function() {
           var totalLen = $scope.tracingCtx.currentTrace.waterfalls.length;
           for (var i = 0;i < totalLen; i++) {
             var wf = $scope.tracingCtx.currentTrace.waterfalls[i];
-            if ((wf.id === $scope.currentWaterfallKey) || (Sha1(wf.id) === $scope.currentWaterfallKey)) {
+            if ((wf.id === $scope.tracingCtx.currentWaterfallKey) || (Sha1(wf.id) === $scope.tracingCtx.currentWaterfallKey)) {
               if (i > 0) {
-                $scope.currentWaterfallKey = $scope.tracingCtx.currentTrace.waterfalls[i - 1].id;
+                $scope.tracingCtx.currentWaterfallKey = $scope.tracingCtx.currentTrace.waterfalls[i - 1].id;
                 break;
               }
             }
@@ -258,9 +258,9 @@ Tracing.directive('slTracingDetailView', [
           var totalLen = $scope.tracingCtx.currentTrace.waterfalls.length;
           for (var i = 0;i < totalLen; i++) {
             var wf = $scope.tracingCtx.currentTrace.waterfalls[i];
-            if ((wf.id === $scope.currentWaterfallKey) || (Sha1(wf.id) === $scope.currentWaterfallKey)) {
+            if ((wf.id === $scope.tracingCtx.currentWaterfallKey) || (Sha1(wf.id) === $scope.tracingCtx.currentWaterfallKey)) {
               if (i < ($scope.tracingCtx.currentTrace.waterfalls.length - 2)) {
-                 $scope.currentWaterfallKey = $scope.tracingCtx.currentTrace.waterfalls[i + 1].id;
+                 $scope.tracingCtx.currentWaterfallKey = $scope.tracingCtx.currentTrace.waterfalls[i + 1].id;
                 break;
               }
             }
@@ -278,9 +278,9 @@ Tracing.directive('slTracingDetailView', [
         }
       }],
       link: function(scope, el, attrs) {
-        scope.$watch('currentWaterfallKey', function(newVal, oldVal) {
+        scope.$watch('tracingCtx.currentWaterfallKey', function(newVal, oldVal) {
           if (newVal && newVal.length > 0) {
-            scope.currentWaterfall = scope.loadWaterfallById(newVal);
+            scope.tracingCtx.currentWaterfall = scope.loadWaterfallById(newVal);
             //jQuery('[data-id="TraceDetailView"]').offset().top;
             /*
             *
@@ -305,66 +305,42 @@ Tracing.directive('slTracingTraceSummary', [
   'EventLoop',
   'PieChart',
   'MSFormat',
+  'TracingServices',
+  '$timeout',
   'Color',
   'Slug',
-  function($log, Sha1, EventLoop, PieChart, msFormat, color, slug) {
+  function($log, Sha1, EventLoop, PieChart, msFormat, TracingServices, $timeout, Color, slug) {
     return {
       templateUrl: './scripts/modules/tracing/templates/tracing.trace.summary.html',
       restrict: 'E',
-      controller: ['$scope', function($scope) {
+      link: function(scope, el, attrs) {
+        scope.mappedTransactions = [];
+        scope.format = d3.format('.3s');
 
-        $scope.format = d3.format('.3s');
+        scope.$watch('tracingCtx.currentTraceToggleBool', function(newVal, oldVal) {
+          if (scope.tracingCtx.currentTrace && scope.tracingCtx.currentTrace.transactions) {
+        //    $log.debug('WAIT FOR IT');
+           // $timeout(function() {
+              scope.mappedTransactions = TracingServices.getMappedTransactions(scope.tracingCtx.currentTrace.transactions.transactions);
+              render();
 
+         //   }, 4000);
 
+          }
+        }, true);
 
-        $scope.msFormat = function(d){
-          return $scope.format(d/1000000) + 's';
+        scope.msFormat = function(d){
+          return scope.format(d/1000000) + 's';
         };
 
-        $scope.tsText = function(ts){
+        scope.tsText = function(ts){
           return moment(ts).fromNow() +' (' + moment(ts).format('ddd, MMM Do YYYY, h:mm:ss a') + ')'
         };
 
 
-        $scope.mapTransactions = function(transactions) {
-          var collectionData = Object.keys(transactions)
-            .filter(function (key) {
-              if (key === 'concurix.send') return false
-              if (key === 'concurix.assemble') return false
-              return transactions.hasOwnProperty(key)
-            })
-            .map(function (key) {
-              return {
-                id: key,
-                stats: transactions[key].stats,
-                waterfalls: transactions[key].waterfalls
-              }
-            })
-            .filter(function(d){
-              return d.waterfalls
-            })
-            .sort(function (a, b) {
-              //waterfalls can be null if they did not happen in this trace file
-              if( a.waterfalls && b.waterfalls ){
-                return b.waterfalls.summary_stats.totalMicros - a.waterfalls.summary_stats.totalMicros
-              } else if( a.waterfalls ){
-                return -1
-              } else if( b.waterfalls ){
-                return 1
-              } else if( a.stats && b.stats ){
-                return b.stats.mean - a.stats.mean
-              } else {
-                return a.id.localeCompare(b.id)
-              }
-            });
-          return collectionData;
-        }
         //$scope.mappedTransactions = $scope.mapTransactions($scope.tracingCtx.currentTrace.transactions.transactions)
-        $scope.mappedTransactions = [];
 
 
-      }],
-      link: function(scope, el, attrs) {
         var traceToAsyncPie = function(trace){
           var data = [
             {
@@ -377,9 +353,9 @@ Tracing.directive('slTracingTraceSummary', [
               value: trace.summary_stats.percentBlocked,
               fillClass: 'blocked'
             }
-          ]
+          ];
           return data
-        }
+        };
 
         var traceToIdlePie = function(trace){
           var data = [
@@ -393,9 +369,9 @@ Tracing.directive('slTracingTraceSummary', [
               value: trace.summary_stats.percentOperating,
               fillClass: 'operating'
             }
-          ]
+          ];
           return data
-        }
+        };
 
         var asyncpie = new PieChart();
         var idlepie = new PieChart();
@@ -403,6 +379,7 @@ Tracing.directive('slTracingTraceSummary', [
         asyncpie.init('[role="summary-async-pie"]', {fixedWidth: 200, fixedHeight: 200});
         idlepie.init('[role=summary-idle-pie]', {fixedWidth: 200, fixedHeight: 200});
         function render() {
+          $log.debug('|--- render ---|');
           /*
           *
           * Pie Charts
@@ -460,11 +437,11 @@ Tracing.directive('slTracingTraceSummary', [
 
           var waterfallHeadingTableEnter = waterfall.append('div')
             .attr('class', 'panel-heading')
-            .append('table')
+            .append('table');
 
           var waterfallTableHeaderEnter = waterfallHeadingTableEnter
             .append('thead')
-            .append('tr')
+            .append('tr');
 
           waterfallTableHeaderEnter.append('th').text('Code Path')
           waterfallTableHeaderEnter.append('th').text('JS')
@@ -494,10 +471,11 @@ Tracing.directive('slTracingTraceSummary', [
             })
             //.attr('class', 'link-cmd')
             .on('click', function(d) {
+              $log.debug('|--- wtf ---|');
               //var projectName = scope.currentApp;
              // var pfKey = encodeURIComponent(scope.tracingCtx.pfKey);
               var waterfallId = Sha1(d.id);
-              scope.currentWaterfallKey = waterfallId;
+              scope.tracingCtx.currentWaterfallKey = waterfallId;
               // scroll to waterfall / detail view
              // jQuery('html, body').animate({
              //   scrollTop:
@@ -510,7 +488,8 @@ Tracing.directive('slTracingTraceSummary', [
             .append('div')
             .attr('class', 'panel-body')
             .each(function (waterfall) {
-              this.eventloop = EventLoop().init(this, { expanded: false, color: '#36952C' })
+              this.eventloop = EventLoop().init(this, { expanded: false, color: Color })
+              //Color
             });
 
           //exit set
@@ -549,10 +528,16 @@ Tracing.directive('slTracingTraceSummary', [
             if (1 == 1) {
               d3.select(this).selectAll('.waterfall .panel-body')
                 .each(function (waterfall) {
-                  this.eventloop.update(waterfall, scope.tracingCtx.currentTrace.functions)
+                  if (this.eventloop) {
+                    this.eventloop.update(waterfall, scope.tracingCtx.currentTrace.functions)
+
+                  }
+                  else {
+                    $log.debug('|   -----  EVENTLOOP?');
+                  }
                 })
             }
-          })
+          });
 
           //finally, sort the array
           trans.sort(function(a, b){
@@ -579,13 +564,7 @@ Tracing.directive('slTracingTraceSummary', [
           scope.idlepie.update(scope.traceToIdlePie(trace))
         }
 
-        scope.$watch('tracingCtx.currentTrace', function(newVal, oldVal) {
-          if (newVal.transactions) {
-            scope.mappedTransactions = scope.mapTransactions(newVal.transactions.transactions)
-            render();
 
-          }
-        });
       }
     }
   }
@@ -601,6 +580,9 @@ Tracing.directive('slTracingTraceView', [
         $scope.showTraceView = function() {
           var retVal = $scope.tracingCtx.currentPFKey;
           if (retVal && retVal.length > 0) {
+            if ($scope.tracingCtx.currentWaterfallKey && $scope.tracingCtx.currentWaterfallKey.length > 0) {
+              return false;
+            }
             return true;
           }
           return false;
@@ -647,13 +629,6 @@ Tracing.directive('slTracingTraceView', [
             // load trace view
             $log.debug('re-initialize trace view pfkey[' + pfKey + ']');
 
-            scope.tracingCtx.currentTrace = scope.fetchTrace({pfkey: pfKey})
-              .then(function(trace) {
-                scope.tracingCtx.currentTrace = trace;
-
-                //$log.debug('new trace: ' + JSON.stringify(trace));
-
-              });
 
           }
         }, true);
@@ -751,6 +726,7 @@ Tracing.directive('slTracingTimeSeriesChart', [
             for (var i = 0;i < scope.$parent.tracingCtx.currentTimeline.length;i++) {
               var instance = scope.$parent.tracingCtx.currentTimeline[i];
               if (instance.pfkey === pfKey) {
+                $log.debug('|--- check me ---|');
                 return instance._t;
               }
             }
@@ -769,13 +745,13 @@ Tracing.directive('slTracingTimeSeriesChart', [
 
         //scope.memgraph = TimeSeries('#memory-history-cont', scope.memGraphOptions)
         //  .on('click', updateCurrentPFKey);
-        scope.$watch('internalCtx.currentPFKey', function(pfKey, oldVal) {
+        scope.$watch('tracingCtx.currentPFKey', function(pfKey, oldVal) {
           if (pfKey) {
             //scope.expgraph.setSelection(getTimestampForPFKey(pfKey));
 
           }
         });
-        scope.$watch('internalCtx.currentPFKey', function(newKey, oldVal) {
+        scope.$watch('tracingCtx.currentPFKey', function(newKey, oldVal) {
           var pfKeyTime = getTimestampForPFKey(newKey);
           if (pfKeyTime > 0) {
             //scope.expgraph.setSelection(pfKeyTime);
