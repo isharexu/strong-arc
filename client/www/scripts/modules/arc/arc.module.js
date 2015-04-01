@@ -85,6 +85,11 @@ Arc.config([
         templateUrl: './scripts/modules/metrics/templates/metrics.main.html',
         controller: 'MetricsMainController'
       })
+      .state('metrics/api', {
+        url: '/metrics/api',
+        templateUrl: './scripts/modules/metrics/api/templates/metrics.api.main.html',
+        controller: 'MetricsApiController'
+      })
       .state('process-manager', {
         url: '/process-manager',
         templateUrl: './scripts/modules/manager/templates/manager.main.html',
