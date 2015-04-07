@@ -1,26 +1,10 @@
 <div ng-controller="TracingMainController">
   <sl-tracing-header></sl-tracing-header>
-  <!--<tabset>-->
-    <!--<tab select="init()">-->
-      <!--<tab-heading>-->
-        <!--Original-->
-      <!--</tab-heading>-->
-      <div class="tracing-content-container">
-        <sl-tracing-main-view></sl-tracing-main-view>
-        <sl-tracing-trace-view></sl-tracing-trace-view>
-        <sl-tracing-detail-view></sl-tracing-detail-view>
-      </div>
-    <!--</tab>-->
-    <!--<tab select="init()">-->
-      <!--<tab-heading>-->
-        <!--alt-->
-      <!--</tab-heading>-->
-      <!--<exp-time-series></exp-time-series>-->
-    <!--</tab>-->
-
-  <!--</tabset>-->
-
-
+  <div class="tracing-content-container">
+    <sl-tracing-timeline-view></sl-tracing-timeline-view>
+    <sl-tracing-trace-view></sl-tracing-trace-view>
+    <sl-tracing-waterfall-view></sl-tracing-waterfall-view>
+  </div>
 </div>
 
 

@@ -181,10 +181,8 @@ TransactionList.prototype.renderItem = function renderItem(key, history){
     });
 };
 
-TransactionList.prototype.render = function (transactions, hostConfig) {
+TransactionList.prototype.render = function (transactions) {
   var self = this;
-  var host = hostConfig.host;
-  var pid = hostConfig.pid;
   this.transactions = transactions || this.transactions; // new transaction structure
   var keys = [];
   this.transactions.map(function(transaction) {
@@ -21991,7 +21989,8 @@ Line.prototype._line = function () {
 
     self.hoverLine = self.hoverLineGroup.append('line')
       // TODO x1 to 0/0, or max/max?
-      .attr('x1', self.innerWidth).attr('x2', self.innerWidth)
+      .attr('x1', self.innerWidth)
+      .attr('x2', self.innerWidth)
       .attr('y1', 0).attr('y2', self.innerHeight);
 
     self.selectLineGroup = self.graph.append('g')
@@ -22012,14 +22011,15 @@ Line.prototype._line = function () {
   }
   function handleClick(){
     var coords = d3.mouse(this)
-    var ts = self.x.invert(coords[0]).getTime()
-    var rec = self.getRecordAt(ts)
+    var ts = self.x.invert(coords[0]).getTime();
+    var rec = self.getRecordAt(ts);
     var x = self.x(rec.date) | 0;
-    self.selectionX = x
+    self.selectionX = x;
     self.selectLine
-      .attr('x1', x).attr('x2', x)
-      .attr('style', 'display: visible')
-    self.emit('click', rec.__data)
+      .attr('x1', x)
+      .attr('x2', x)
+      .attr('style', 'display: visible');
+    self.emit('click', rec.__data);
   }
 
   function getHoverX() {
@@ -22048,6 +22048,25 @@ Line.prototype.getRecordAt = function getRecordAt(timestamp){
   return record
 }
 
+Line.prototype.setSelection = function(timestamp) {
+  var self = this;
+
+  var record = self.getRecordAt(timestamp)
+
+  var x = self.x(record.date) | 0;
+
+  self.hoverLine
+    .attr('x1', x)
+    .attr('x2', x)
+    .attr('stroke', function (d, i) { return record.__data.lm_a ? 'red' : 'black' })
+    .attr('stroke-width', 1);
+
+  self.selectionX = x;
+  self.selectLine
+    .attr('x1', x)
+    .attr('x2', x)
+    .attr('style', 'display: visible');
+}
 // TODO emit/listen for highlight events when other graphs are highlighting
 Line.prototype.hoverAt = function (timestamp) {
   var self = this;

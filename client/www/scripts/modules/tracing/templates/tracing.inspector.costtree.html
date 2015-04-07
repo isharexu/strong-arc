@@ -2,49 +2,45 @@
 <div class="inspector">
   <div class='panel panel-primary'>
 
-    <div class="panel-heading">
-      <h3 class="panel-title">Cost Tree</h3>
-    </div>
-
     <ul class='list-group'>
 
       <li class='list-group-item'>
-        <strong>Name: </strong>{{ tracingCtx.currentFunction.item.name }}
+        <strong>Name: </strong>{{ inspectorModel.item.name }}
       </li>
 
       <!--<% if (trace.functions[item.id].start) { }}-->
         <!--<% if (trace.functions[item.id].module) { }}-->
-        <li ng-show="tracingCtx.currentTrace.functions[currentFunction.item.id].module" class='list-group-item'><strong>Module: </strong>{{ trace.functions[item.id].module.name }}</li>
-        <li ng-show="tracingCtx.currentTrace.functions[currentFunction.item.id].module" class='list-group-item'><strong>Version: </strong>{{ trace.functions[item.id].module.version }}</li>
+        <li ng-show="tracingCtx.currentTrace.functions[inspectorModel.item.id].module" class='list-group-item'><strong>Module: </strong>{{ trace.functions[item.id].module.name }}</li>
+        <li ng-show="tracingCtx.currentTrace.functions[inspectorModel.item.id].module" class='list-group-item'><strong>Version: </strong>{{ trace.functions[item.id].module.version }}</li>
         <!--<% } }}-->
-      <li ng-show="!tracingCtx.currentTrace.functions[currentFunction.item.id].module" class='list-group-item'><strong>Filename: </strong>{{ trace.functions[item.id].module.filename }}</li>
-      <li ng-show="!tracingCtx.currentTrace.functions[currentFunction.item.id].module" class='list-group-item'><strong>Line: </strong>{{ trace.functions[item.id].start.line }}</li>
-      <li ng-show="!tracingCtx.currentTrace.functions[currentFunction.item.id].module" class='list-group-item'><strong>Column: </strong>{{ trace.functions[item.id].start.column }}</li>
+      <li ng-show="!tracingCtx.currentTrace.functions[inspectorModel.item.id].module" class='list-group-item'><strong>Filename: </strong>{{ trace.functions[item.id].module.filename }}</li>
+      <li ng-show="!tracingCtx.currentTrace.functions[inspectorModel.item.id].module" class='list-group-item'><strong>Line: </strong>{{ trace.functions[item.id].start.line }}</li>
+      <li ng-show="!tracingCtx.currentTrace.functions[inspectorModel.item.id].module" class='list-group-item'><strong>Column: </strong>{{ trace.functions[item.id].start.column }}</li>
       <!--<% } }}-->
 
 
       <li class='list-group-item'>
-        <strong>Total Cost: </strong>{{ tracingCtx.currentFunction.item.cost }}
+        <strong>Total Cost: </strong>{{ inspectorModel.item.cost }}
       </li>
 
       <li class='list-group-item'>
-        <strong>Self Cost: </strong>{{ tracingCtx.currentFunction.item.selfCost }}
+        <strong>Self Cost: </strong>{{ inspectorModel.item.selfCost }}
       </li>
 
       <li class='list-group-item'>
-        <strong>Child Cost: </strong>{{ tracingCtx.currentFunction.item.childCost }}
+        <strong>Child Cost: </strong>{{ inspectorModel.item.childCost }}
       </li>
 
       <li class='list-group-item'>
-        <strong>Total Percentage: </strong>{{ tracingCtx.currentFunction.item.totalPct }}%
+        <strong>Total Percentage: </strong>{{ inspectorModel.item.totalPct }}%
       </li>
 
       <li class='list-group-item'>
-        <strong>Self Percentage: </strong>{{ tracingCtx.currentFunction.item.selfPct }}%
+        <strong>Self Percentage: </strong>{{ inspectorModel.item.selfPct }}%
       </li>
 
       <li class='list-group-item'>
-        <strong>Child Percentage: </strong>{{ tracingCtx.currentFunction.item.childPct }}%
+        <strong>Child Percentage: </strong>{{ inspectorModel.item.childPct }}%
       </li>
 
     </ul>

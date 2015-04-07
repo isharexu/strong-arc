@@ -1,25 +1,26 @@
-<div class="panel-heading clearfix tracing-header-container">
-  <button class="l" ng-click="closeTraceView()">back</button><span class="panel-title pull-left col-sm-8">App name: {{ tracingCtx.currentApp.name }}</span>
-  <select ng-model="tracingCtx.currentHostConfig.host" ng-show="hosts">
-    <option ng-repeat="host in hosts" value="{{ host.host }}">{{ host.host }}</option>
-  </select>
-  <select ng-model="tracingCtx.currentHostConfig.pid" ng-show="tracingCtx.currentPids">
-      <option ng-repeat="pid in tracingCtx.currentPids" value="{{ pid }}">{{ pid }}</option>
-  </select>
-  <div>
-    <span>duration:
-      <span>{{ tracingCtx.currentTimelineDuration }}</span>
-    </span>
+<div class="tracing-header-container row">
+  <div class="col-sm-5">
+    <button ng-click="clearFeedback()" class="link-cmd pull-left">*</button>
+    <h2 class="panel-title" ng-show="tracingCtx.currentPMInstance.applicationName">{{ tracingCtx.currentPMInstance.applicationName }}</h2>
   </div>
-  <div>
-    <span>last update:
-      <span>{{ tracingCtx.currentTimelineTimestamp }}</span>
-    </span>
+  <div class="col-sm-5">
+    <select ng-model="selectedPMHost"
+            ng-options="host as host.host for host in managerHosts"
+            ng-change="changePMHost()">
+    </select>
   </div>
+  <div class="col-sm-1">
+    <select ng-model="selectedProcess"
+            ng-options="process as process.pid for process in tracingCtx.currentProcesses"
+            ng-change="changePid()"
+            ng-show="tracingCtx.currentProcesses">
+    </select>
+  </div>
+  <div class="col-sm-1">
 
-
-
-
-  <!--<div ng-repeat="pid in host.pids">{{ pid }}</div>-->
-
+    <button ng-hide="!tracingCtx.currentPFKey" class="l" ng-click="closeTraceView()">back</button>
+  </div>
 </div>
+
+
+

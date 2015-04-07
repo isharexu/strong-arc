@@ -1,43 +1,176 @@
 Tracing.controller('TracingMainController', [
   '$scope',
   '$log',
+  '$timeout',
+  '$interval',
   '$location',
   'TracingServices',
   'TimeSeries',
   'TraceEnhance',
-  function($scope, $log, $location, TracingServices, TimeSeries, TraceEnhance) {
-    var PMClient = require('strong-mesh-models').Client;
-    $scope.pm = new PMClient('http://' + $location.host() + ':8701');
-    //
-    //
-    //('http://' + $location.host() + ':' + $location.port() + '/manager');
-
-
-
-
+  function($scope, $log, $timeout, $interval, $location, TracingServices, TimeSeries, TraceEnhance) {
     $log.debug('tracing controller');
-    //$scope.tracingCtx.currentTimeline = {};
-    //$scope.currentTransactionKeys = [];
-    //$scope.currentTransactionHistoryCollection = [];
-    //$scope.currentApp = 'wfp:helloworld';
-    $scope.tracingCtx = {
-      currentPFKey: '',
-      currentTraceToggleBool: false,
-      currentTimelineTimestamp: '',
-      currentTimelineDuration: 0,
-      currentTimelineKeyCollection: [],
-      currentTrace: {},
-      currentWaterfallKey: '',
-      currentWaterfall: {},
-      currentFunction: {},
-      currentHostConfig: {},
-      currentProcess: {},
-      currentPids: [],
-      currentTimeline: {},
-      currentTransactionKeys: [],
-      currentTransactionHistoryCollection: [],
-      currentApp: {name: 'wfp:helloworld'}
+    var PMClient = require('strong-mesh-models').Client;
+    $scope.pm = {};
+
+    $scope.managerHosts = [];    // $location.host()
+    $scope.selectedPMHost = {};
+
+   // var hostName = 'ec2-54-67-79-53.us-west-1.compute.amazonaws.com';
+
+
+    $scope.resetTracingCtx = function() {
+      $scope.tracingCtx = {
+        currentPFKey: '',
+        currentPMHost: {},
+        currentTraceToggleBool: false,
+        currentTimelineTimestamp: '',
+        currentTimelineDuration: 0,
+        currentTimelineKeyCollection: [],
+        currentTrace: {},
+        currentWaterfallKey: '',
+        currentWaterfall: {},
+        currentFunction: {},
+        currentProcesses: [],
+        currentProcess: {},
+        currentPids: [],
+        currentTimeline: {},
+        currentTransactionKeys: [],
+        currentTransactionHistoryCollection: [],
+        currentApp: {name: 'wfp:helloworld'}
+      };
     };
+    $scope.selectedProcess = {};
+    /*
+     *
+     * Feedback
+     *
+     * */
+    var sFeedback = [];
+    $scope.systemFeedback = [];
+    $scope.closeFeedback = function() {
+      $scope.systemFeedback = [];
+    };
+
+    var bWriteFeedback = true;
+    var writeFeedback = function() {
+
+      if (bWriteFeedback) {
+        $scope.$apply(function() {
+          $scope.systemFeedback = sFeedback;
+        });
+      }
+
+    };
+    var qFeedback = function(message) {
+
+      $scope.systemFeedback.push(message);
+
+
+    };
+
+    $scope.mesh = require('strong-mesh-client')('http://' + $location.host() + ':' + $location.port() + '/manager');
+    qFeedback('trace: check for available pm hosts');
+    $log.debug('trace: check for available pm hosts');
+
+
+    $scope.init = function() {
+      $scope.resetTracingCtx();
+      $scope.mesh.models.ManagerHost.find(function(err, hosts) {
+        qFeedback('trace: found at least one');
+
+        if (hosts && hosts.map) {
+          // qFeedback('[experiement] init available PM host instances (may or may not be running): ' +  hosts.length);
+          $scope.managerHosts = hosts;
+          $scope.managerHosts.map(function(h)  {
+            $log.debug('host: ' + h.host);
+          });
+
+
+          /*
+           *
+           * We have a list of hosts
+           *
+           *
+           * set default selected
+           *
+           * */
+
+
+          if (!$scope.tracingCtx.currentPMHost.host) {
+            $scope.tracingCtx.currentPMHost = $scope.selectedPMHost = $scope.managerHosts[0];
+          }
+
+          $scope.main();
+        }
+      });
+    };
+
+
+
+
+
+    $scope.main = function() {
+
+      qFeedback('trace: init');
+
+
+      var hostName = $scope.tracingCtx.currentPMHost.host;
+      var hostPort = $scope.tracingCtx.currentPMHost.port;
+      qFeedback('trace: get pm instance');
+      $scope.pm = new PMClient('http://' + hostName + ':' + hostPort );
+
+
+      qFeedback('trace: pm.instanceFind id=1');
+      $scope.pm.instanceFind('1', function(err, instance) {
+        if (err) {
+          $log.warn('trace: error finding pm instance: ' + err.message);
+          qFeedback('trace: error finding pm instance: ' + err.message);
+          return;
+        }
+        if (!instance){
+          $log.warn('trace: no instance returned: ');
+          qFeedback('trace: no instance returned: ');
+          return;
+        }
+        qFeedback('trace: assign pm instance to currentInstance');
+        qFeedback('trace: check for running processes');
+        $scope.tracingCtx.currentPMInstance = instance;
+        $scope.tracingCtx.currentPMInstance.processes(function(err, processes) {
+          if (err) {
+            $log.warn('bad get processes: ' + err.message);
+            return;
+          }
+          if (!processes) {
+            $log.warn('no processes');
+
+          }
+          /*
+          *
+          * we have processes but they need to be filtered
+          *
+          * */
+
+          var filteredProcesses = [];
+
+          // get rid of the supervisor
+          processes.map(function(proc) {
+            if (proc.workerId !== 0) {
+              filteredProcesses.push(proc);
+            }
+          });
+
+          qFeedback('trace: running processes: ' + filteredProcesses.length);
+          $scope.tracingCtx.currentProcesses = filteredProcesses;
+          qFeedback('trace: assign first process as default');
+          $scope.tracingCtx.currentProcess = filteredProcesses[1];  //default
+          $scope.selectedProcess = filteredProcesses[1];
+          qFeedback('trace: trigger timeline initialization');
+          $scope.refreshTimelineProcess();
+
+        });
+      });
+    };
+
     $scope.getCurrentTimelineDuration = function() {
       if (!$scope.tracingCtx.currentTimeline) {
         return 0;
@@ -45,38 +178,9 @@ Tracing.controller('TracingMainController', [
       var dataPointCount = $scope.tracingCtx.currentTimeline.length;
       if (dataPointCount > 0) {
         return $scope.tracingCtx.currentTimeline[dataPointCount - 1].Uptime
-
       }
-
       return 0;
     };
-    $scope.prevPFKey = function() {
-      if ($scope.tracingCtx.currentTimelineKeyCollection) {
-        var currIndex = $scope.tracingCtx.currentTimelineKeyCollection.indexOf($scope.tracingCtx.currentPFKey);
-        if (currIndex > 1) {
-          $scope.tracingCtx.currentPFKey = $scope.tracingCtx.currentTimelineKeyCollection[currIndex - 1];
-        }
-      }
-
-    };
-    $scope.nextPFKey = function() {
-      if ($scope.tracingCtx.currentTimelineKeyCollection) {
-        var currIndex = $scope.tracingCtx.currentTimelineKeyCollection.indexOf($scope.tracingCtx.currentPFKey);
-        var len = $scope.tracingCtx.currentTimelineKeyCollection.length;
-        if (len > 0) {
-          if (currIndex < (len - 2)) {
-            $scope.tracingCtx.currentPFKey = $scope.tracingCtx.currentTimelineKeyCollection[currIndex + 1];
-          }
-        }
-
-      }
-    };
-    //$scope.currentTrace = {};
-    //$scope.currentWaterfallKey = '';
-    //$scope.currentWaterfall = {};
-    //$scope.currentFunction = {};
-    //$scope.currentHostConfig = {};
-    //$scope.currentPids = [];
 
     window.onresize = function() {
       window.setScrollView('.tracing-content-container');
@@ -102,28 +206,11 @@ Tracing.controller('TracingMainController', [
       $scope.tracingCtx.currentTimelineDuration = $scope.getCurrentTimelineDuration();
 
     }
-    /*
-    *
-    * update trigger
-    * if anything changes in the view context
-    * - app name /version
-    * - pm host
-    * - pid
-    *
-    * should probably be renamed to currentTracingContext
-    *
-    * */
-    $scope.$watch('tracingCtx.currentHostConfig', function(newConfig, oldConfig) {
-      if (newConfig.host && newConfig.pid && newConfig.project) {
-        $scope.tracingCtx.currentTimeline = TracingServices.getTimeline(newConfig)
-          .then(function(timeline) {
 
-            updateTimelineData(timeline);
-          });
-      }
-    }, true);
 
     $scope.closeTraceView = function() {
+      // need a better way to do this
+
       $scope.tracingCtx.currentPFKey = '';
     };
 
@@ -150,45 +237,83 @@ Tracing.controller('TracingMainController', [
 
     });
 
-    $scope.ginit = function() {
+
+    $scope.clearFeedback = function() {
+      $scope.systemFeedback = [];
+    };
+    $scope.changePMHost = function() {
+      if ($scope.selectedPMHost.host) {
+        $scope.resetTracingCtx();
+        $scope.tracingCtx.currentPMHost = $scope.selectedPMHost;
+        $scope.main();
+      }
+    };
 
 
-      $scope.pm.instanceFind('1', function(err, instance) {
+    $scope.changePid = function() {
+      $scope.tracingCtx.currentProcess = $scope.selectedProcess;
+      if ($scope.tracingCtx.currentProcess) {
+        $scope.refreshTimelineProcess();
+      }
+    };
+
+    $scope.refreshTimelineProcess = function() {
+      $scope.tracingCtx.currentProcess.getTimeline(function(err, rawResponse) {
+
         if (err) {
-          $log.debug('error finding instance 1: ' + err.message);
+          $log.warn('bad get timeline: ' + err.message);
           return;
         }
-        instance.processes(function(err, processes) {
-          $scope.tracingCtx.currentProcess = processes[1];
-
-          $scope.tracingCtx.currentProcess.getTimeline(function(err, rawResponse) {
-
-            /*
-            *
-            * For now we need to process the redundant wrapper code
-            *
-            * */
-            var trueResponse = TracingServices.convertTimeseries(rawResponse);
-
-       //     $scope.$apply(function() {
-              updateTimelineData(trueResponse.cpu);
-
-           // });
-          });
 
 
-          //process.getMetaTransactions(function(err, metaTxs) {
-          //
-          //});
-          //process.getTransaction(txId, function(err, txs) {
-          //
-          //});
-          //
-          //process.getTrace(pfKey, function(err, timeline) {
-          //
-          //});
-        });
+        var seconds  = 0;
+
+        if (rawResponse.length && rawResponse.length > 0) {
+          var seconds = rawResponse[rawResponse.length - 1].p_ut;
+
+        }
+
+        var message = '';
+        if (seconds > 604800) {
+          message = 'more than a week';
+        }
+        if (seconds > 86400) {
+          message = 'more than a day';
+        }
+        if (seconds > 3600) {
+          message = 'more than an hour';
+        }
+        if (seconds > 59) {
+          message = 'more than a minute';
+        }
+        else {
+          message = seconds + ' seconds';
+        }
+
+
+
+        $scope.tracingCtx.timelineDuration =  message;
+       // $scope.tracingCtx.timelineStart = rawResponse[0].ts;
+        $scope.tracingCtx.timelineStart = 0;
+        if (seconds > 0) {
+          $scope.tracingCtx.timelineStart = rawResponse[0].ts;
+        }
+
+        /*
+         *
+         *  process the response
+         *
+         * */
+        var trueResponse = TracingServices.convertTimeseries(rawResponse);
+
+        updateTimelineData(trueResponse.cpu);
       });
+    };
+    $scope.changeProcess = function(process) {
+      if (process) {
+        $scope.tracingCtx.currentProcess = process;
+        $scope.refreshTimelineProcess();
+      }
     };
     $scope.fetchTrace = function(key) {
 
@@ -201,63 +326,27 @@ Tracing.controller('TracingMainController', [
       });
 
     };
-    $scope.init = function() {
 
-      /*
-
-      first things first - kick the server to see if there are any hosts
-      - there are no hosts then we can't populate the host selector
-      - assumes a project / app context - for now
-      - will map to mesh model: service - deploymentInfo
-
-      v1 will use the current strong-pm pattern of choosing the host first
-      - single host / single app
-      - the strong-pm instance will report the app
-
-
-      */
-      $scope.hosts = TracingServices.fetchHosts({project:$scope.tracingCtx.currentApp.name})
-        .then(function(response) {
-
-          if (response.length && response.length > 0) {
-            $scope.hosts = response;
-
-            // pre select the first one
-            var firstHost = TracingServices.getFirstHost();
-
-            // set up the core data context
-            $scope.tracingCtx.currentPids = firstHost.pids;
-            $scope.tracingCtx.currentHostConfig = {
-              project: $scope.tracingCtx.currentApp.name,
-              host:firstHost.host,
-              pid:firstHost.pids[0]
-            };
-
-
-            $scope.tracingCtx.currentTimeline = TracingServices.getTimeline($scope.tracingCtx.currentHostConfig)
-              .then(function(timeline) {
-                updateTimelineData(timeline);
-              });
-
-
-          }
-          else {
-            $log.debug('There are no tracing hosts');
-          }
-
-        })
-        .catch(function(error) {
-          $log.warn('error: ' + error.message);
-        });
-    };
+    /*
+    *
+    *   TRANSACTION HISTORY
+    *
+    *
+    *
+    * */
     $scope.updateTransactionHistory = function() {
       $scope.tracingCtx.currentTransactionHistoryCollection = [];
 
       $scope.tracingCtx.currentProcess.getMetaTransactions(function(err, response) {
         if (err) {
           $log.warn('bad get meta transactions: ' + err.message);
+          return;
         }
-        if (response && response.length) {
+       // $scope.$apply(function() {
+        $scope.tracingCtx.currentTransactionKeys = response;
+
+        //});
+
 
           /*
            the current context list of transactions
@@ -270,15 +359,21 @@ Tracing.controller('TracingMainController', [
            };
 
            */
-          // var rawTransactionList = response.hosts[$scope.currentHostConfig.host] ? response.hosts[$scope.currentHostConfig.host][$scope.currentHostConfig.pid] : [];
+          //var rawTransactionList = response.hosts[$scope.currentHostConfig.host] ? response.hosts[$scope.currentHostConfig.host][$scope.currentHostConfig.pid] : [];
           // isolate the transactions for this pid
-          $scope.tracingCtx.currentTransactionKeys = response || [];
 
           // iterate over the transaction keys
-          $scope.tracingCtx.currentTransactionKeys.map(function(transaction) {
+        $scope.tracingCtx.currentTransactionKeys.map(function(transaction) {
+          /*
+           *
+           * Transaction History
+           *
+           * - TODO expensive so only do it on demand
+           *
+           * */
 
-
-            $scope.tracingCtx.currentProcess.getTransaction(encodeURIComponent(transaction), function(err, history) {
+          $scope.tracingCtx.currentProcess.getTransaction(encodeURIComponent(transaction),
+            function (err, history) {
               if (err) {
                 $log.warn('bad get history: ' + err.message);
               }
@@ -288,98 +383,41 @@ Tracing.controller('TracingMainController', [
               };
               $scope.tracingCtx.currentTransactionHistoryCollection.push(transObj);
             });
+        });
 
-
-
-
-
-            /*
-             *
-             *   Transaction key
-             *
-             * */
-            //var transObj = {
-            //  key: transaction
-            //};
-            //
-            //// history
-            //TracingServices.transactionHistory(encodeURIComponent(transaction), $scope.tracingCtx.currentHostConfig.host, $scope.tracingCtx.currentHostConfig.pid)
-            //  .then(function(response){
-            //
-            //    // get the history data per transaction
-            //    var rawTransactionData = JSON.parse(response.data);
-            //    // assign history data to ui model
-            //    transObj.history = rawTransactionData.hosts[$scope.tracingCtx.currentHostConfig.host][$scope.tracingCtx.currentHostConfig.pid];
-            //    $scope.tracingCtx.currentTransactionHistoryCollection.push(transObj);
-            //
-            //  });
-          });
-        }
-        else {
-          $log.warn('no response or length meta transactions: ');
-        }
       });
 
-      /*
-       *
-       * Process the transaction history list
-       *
-       * */
-      //TracingServices.getTransactionKeys({reqparams:$scope.tracingCtx.currentHostConfig})
-      //  .then(function(response) {
-      //
-      //
-      //    // make sure we get a list
-      //    if (response.hosts) {
-      //
-      //      /*
-      //       the current context list of transactions
-      //
-      //       we need to iterate over them and create a deeper object than the simple one used by transaction-list component
-      //
-      //       trasObj = {
-      //       key: transaction,
-      //       history: {object based on api call}
-      //       };
-      //
-      //       */
-      //      // var rawTransactionList = response.hosts[$scope.currentHostConfig.host] ? response.hosts[$scope.currentHostConfig.host][$scope.currentHostConfig.pid] : [];
-      //      // isolate the transactions for this pid
-      //      $scope.tracingCtx.currentTransactionKeys = response.hosts[$scope.tracingCtx.currentHostConfig.host] ? response.hosts[$scope.tracingCtx.currentHostConfig.host][$scope.tracingCtx.currentHostConfig.pid] : [];
-      //
-      //      // iterate over the transaction keys
-      //      $scope.tracingCtx.currentTransactionKeys.map(function(transaction) {
-      //        /*
-      //         *
-      //         *   Transaction key
-      //         *
-      //         * */
-      //        var transObj = {
-      //          key: transaction
-      //        };
-      //
-      //        // history
-      //        TracingServices.transactionHistory(encodeURIComponent(transaction), $scope.tracingCtx.currentHostConfig.host, $scope.tracingCtx.currentHostConfig.pid)
-      //          .then(function(response){
-      //
-      //            // get the history data per transaction
-      //            var rawTransactionData = JSON.parse(response.data);
-      //            // assign history data to ui model
-      //            transObj.history = rawTransactionData.hosts[$scope.tracingCtx.currentHostConfig.host][$scope.tracingCtx.currentHostConfig.pid];
-      //            $scope.tracingCtx.currentTransactionHistoryCollection.push(transObj);
-      //
-      //          });
-      //      });
-      //    }
-      //  });
+
     };
     $scope.setCurrentPFKey = function(key) {
       $scope.tracingCtx.currentPFKey = key;
     };
-    $scope.ginit();
+    $scope.prevPFKey = function() {
+      if ($scope.tracingCtx.currentTimelineKeyCollection) {
+        var currIndex = $scope.tracingCtx.currentTimelineKeyCollection.indexOf($scope.tracingCtx.currentPFKey);
+        if (currIndex > 1) {
+          $scope.tracingCtx.currentPFKey = $scope.tracingCtx.currentTimelineKeyCollection[currIndex - 1];
+        }
+      }
 
+    };
+    $scope.nextPFKey = function() {
+      if ($scope.tracingCtx.currentTimelineKeyCollection) {
+        var currIndex = $scope.tracingCtx.currentTimelineKeyCollection.indexOf($scope.tracingCtx.currentPFKey);
+        var len = $scope.tracingCtx.currentTimelineKeyCollection.length;
+        if (len > 0) {
+          if (currIndex < (len - 2)) {
+            $scope.tracingCtx.currentPFKey = $scope.tracingCtx.currentTimelineKeyCollection[currIndex + 1];
+          }
+        }
+
+      }
+    };
+
+    $scope.init();
   }
 ]);
+
 Tracing.controller('TracingMonitorController', [
   '$scope',
   '$log',

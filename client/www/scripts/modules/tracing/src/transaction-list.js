@@ -97,10 +97,8 @@ TransactionList.prototype.renderItem = function renderItem(key, history){
     });
 };
 
-TransactionList.prototype.render = function (transactions, hostConfig) {
+TransactionList.prototype.render = function (transactions) {
   var self = this;
-  var host = hostConfig.host;
-  var pid = hostConfig.pid;
   this.transactions = transactions || this.transactions; // new transaction structure
   var keys = [];
   this.transactions.map(function(transaction) {
