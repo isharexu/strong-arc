@@ -1,4 +1,4 @@
-Metrics.controller('MetricsApiController', [
+ApiMetrics.controller('MetricsApiController', [
     '$scope',
     '$state',
     '$log',
@@ -10,7 +10,7 @@ Metrics.controller('MetricsApiController', [
         var options = getChartOptions();
         var data = getChartData();
 
-        $scope.chart = {
+        $scope.apiChart = {
             data: data,
             options: options
         };
@@ -34,12 +34,17 @@ Metrics.controller('MetricsApiController', [
             verbs.forEach(function(verb){
                 var i = 0;
                 var values = [];
-                var now = moment();
+                var now = new Date();
+                var x;
+                var y;
 
                 while ( i < 10 ) {
+                    x = i;
+                    y = Math.round(Math.random() * 10);
+
                     values.push({
-                        x: moment(now).add(i, 'minutes'),
-                        y: Math.round(Math.random() * 10)
+                        x: x,
+                        y: y
                     });
 
                     i++;
