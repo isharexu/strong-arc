@@ -42,12 +42,13 @@ Tracing.service('TracingServices', [
       });
       ret.mem = ret.mem.sort(function(a,b){ return a._t - b._t;});
 
+      // note: item values are displayed in chart legend
       ret.cpu = t.map(function(d){
         var item = {
           _t: moment(d.ts).unix()*1000,
           'Load Average': d['s_la'],
-          'Uptime': d['p_mu'],
-          __data: d
+          'Uptime': d['p_ut'],
+          '__data': d
         };
         return item;
       });

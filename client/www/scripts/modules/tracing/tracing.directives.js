@@ -721,6 +721,7 @@ Tracing.directive('slTracingTimeSeriesCharts', [
           height: 100,
           showY1Axis: false,
           selectedTime: tts,
+
           color: color,
           format: {
             'y': 'num',
@@ -750,7 +751,7 @@ Tracing.directive('slTracingTimeSeriesCharts', [
           if (scope.tracingCtx && scope.tracingCtx.currentTimeline.length) {
             for (var i = 0;i < scope.tracingCtx.currentTimeline.length;i++) {
               var instance = scope.tracingCtx.currentTimeline[i];
-              if (instance.__data.pfkey === pfKey) {
+              if (instance.__data && (instance.__data.pfkey === pfKey)) {
                 $log.debug('|--- check me ---|');
                 return instance._t;
               }

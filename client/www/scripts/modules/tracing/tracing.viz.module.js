@@ -21569,6 +21569,7 @@ Line.prototype.reset = function (options) {
 
   this.showXAxis = true;
   this.showYAxis = true;
+  this.isHoverLineEnabled = true;
   this.xGridTicks = 0;
   this.yGridTicks = 1;
   this.yAxisTicks = 10;
@@ -22018,7 +22019,10 @@ Line.prototype._line = function () {
     self.selectLine
       .attr('x1', x)
       .attr('x2', x)
+      .attr('stroke', function (d, i) { return rec.__data.lm_a ? 'red' : 'black' })
+      .attr('stroke-width', 1)
       .attr('style', 'display: visible');
+    self.disableHoverLine();
     self.emit('click', rec.__data);
   }
 
@@ -22047,7 +22051,10 @@ Line.prototype.getRecordAt = function getRecordAt(timestamp){
   }
   return record
 }
-
+Line.prototype.disableHoverLine = function() {
+  var self = this;
+  self.isHoverLineEnabled = false;
+}
 Line.prototype.setSelection = function(timestamp) {
   var self = this;
 
@@ -22055,17 +22062,24 @@ Line.prototype.setSelection = function(timestamp) {
 
   var x = self.x(record.date) | 0;
 
-  self.hoverLine
-    .attr('x1', x)
-    .attr('x2', x)
-    .attr('stroke', function (d, i) { return record.__data.lm_a ? 'red' : 'black' })
-    .attr('stroke-width', 1);
+  //self.hoverLine
+  //  .attr('x1', x)
+  //  .attr('x2', x)
+  //  .attr('stroke', function (d, i) { return record.__data.lm_a ? 'red' : 'black' })
+  //  .attr('stroke-width', 1);
 
+
+ // var rec = record;
+ // var x = self.x(rec.date) | 0;
   self.selectionX = x;
   self.selectLine
     .attr('x1', x)
     .attr('x2', x)
+    .attr('stroke', function (d, i) { return record.__data.lm_a ? 'red' : 'black' })
+    .attr('stroke-width', 1)
     .attr('style', 'display: visible');
+
+  self.disableHoverLine();
 }
 // TODO emit/listen for highlight events when other graphs are highlighting
 Line.prototype.hoverAt = function (timestamp) {
@@ -22074,13 +22088,15 @@ Line.prototype.hoverAt = function (timestamp) {
   var record = self.getRecordAt(timestamp)
 
   var x = self.x(record.date) | 0;
-
-  self.hoverLine
-    .attr('x1', x)
-    .attr('x2', x)
-    .attr('stroke', function (d, i) { return record.__data.lm_a ? 'red' : 'black' })
-    .attr('stroke-width', 1)
-
+  if (this.isHoverLineEnabled) {
+    self.hoverLine
+      .attr('x1', x)
+      .attr('x2', x)
+      .attr('stroke', function (d, i) {
+        return record.__data.lm_a ? 'red' : 'black'
+      })
+      .attr('stroke-width', 1);
+  }
   var formattedDate = self.formatDate(record.date);
 
   var colors = [];
