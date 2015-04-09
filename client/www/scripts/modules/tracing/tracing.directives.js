@@ -621,46 +621,46 @@ Tracing.directive('slTracingTraceView', [
       }],
       link: function(scope, el, attrs) {
 
-        scope.$watch('tracingCtx.currentPFKey', function(pfKey, oldVal) {
-          //jQuery('[data-id="TraceDetailView"]').offset().top;
-          /*
-           *
-           * modify the ui to provide good ux for nav
-           *
-           * get rid of memory chart
-           * get rid of transaction history
-           * shrink the cpu chart
-           * indicate which point in time is selected
-           * animate the scroll
-           *
-           * */
-          if (!pfKey) {
-            //
-            //d3.select('[data-id="ProcessTraceView"]')
-            //  .transition()
-            //  .attr("height",7000);
-            //$('[data-id="ProcessTraceView"]').show(500);
-            //$('[data-id="ProcessTraceView"]').offset().top;
-            $('[data-id="TraceHistoryTransactions"]').show(500);
-            $('#memory-history-cont').show(500);
-            $('#exp-history-cont').hide(500);
-            $('#cpu-history-cont').show(500);
-          }
-          else {
-
-
-            //$('[data-id="ProcessTraceView"]').offset({top:-175});
-            $('#memory-history-cont').hide(500);
-            $('#exp-history-cont').show(500);
-            $('#cpu-history-cont').hide(500);
-            $('[data-id="TraceHistoryTransactions"]').hide(400);
-
-            // load trace view
-            $log.debug('re-initialize trace view pfkey[' + pfKey + ']');
-
-
-          }
-        }, true);
+        //scope.$watch('tracingCtx.currentPFKey', function(pfKey, oldVal) {
+        //  //jQuery('[data-id="TraceDetailView"]').offset().top;
+        //  /*
+        //   *
+        //   * modify the ui to provide good ux for nav
+        //   *
+        //   * get rid of memory chart
+        //   * get rid of transaction history
+        //   * shrink the cpu chart
+        //   * indicate which point in time is selected
+        //   * animate the scroll
+        //   *
+        //   * */
+        //  if (!pfKey) {
+        //    //
+        //    //d3.select('[data-id="ProcessTraceView"]')
+        //    //  .transition()
+        //    //  .attr("height",7000);
+        //    //$('[data-id="ProcessTraceView"]').show(500);
+        //    //$('[data-id="ProcessTraceView"]').offset().top;
+        //    $('[data-id="TraceHistoryTransactions"]').show(500);
+        //    $('#memory-history-cont').show(500);
+        //    $('#exp-history-cont').hide(500);
+        //    $('#cpu-history-cont').show(500);
+        //  }
+        //  else {
+        //
+        //
+        //    //$('[data-id="ProcessTraceView"]').offset({top:-175});
+        //    $('#memory-history-cont').hide(500);
+        //    $('#exp-history-cont').show(500);
+        //    $('#cpu-history-cont').hide(500);
+        //    $('[data-id="TraceHistoryTransactions"]').hide(400);
+        //
+        //    // load trace view
+        //    $log.debug('re-initialize trace view pfkey[' + pfKey + ']');
+        //
+        //
+        //  }
+        //}, true);
 
       }
     }
@@ -717,29 +717,7 @@ Tracing.directive('slTracingTimeSeriesCharts', [
         if (scope.tracingCtx && scope.tracingCtx.currentTrace && scope.tracingCtx.currentTrace.metadata && scope.tracingCtx.currentTrace.metadata.timestamp) {
           tts = scope.tracingCtx.currentTrace.metadata.timestamp;
         }
-        scope.expGraphOptions = {
-          height: 100,
-          showY1Axis: false,
-          selectedTime: tts,
 
-          color: color,
-          format: {
-            'y': 'num',
-            'y1': 's'
-          },
-          keySchema: {
-            'Load Average': {
-              class: 'cx-monitor-loadavg',
-              type: 'line',
-              y: 'y'
-            },
-            'Uptime': {
-              class: 'cx-monitor-uptime',
-              type: 'line',
-              y: 'y1'
-            }
-          }
-        };
 
         scope.memGraphOptions = {
           yMin: 0,
@@ -762,51 +740,105 @@ Tracing.directive('slTracingTimeSeriesCharts', [
         }
         $log.debug('Chart Name:  ' + scope.chartName);
         function updateCurrentPFKey(data) {
+          console.log('|  --- B --- |');
+
           scope.setCurrentPFKey(data.pfkey);
         }
-        scope.cpugraph = TimeSeries('#cpu-history-cont', scope.cpuGraphOptions)
-          .on('click', updateCurrentPFKey);
-        scope.expgraph = TimeSeries('#exp-history-cont', scope.expGraphOptions)
+        scope.cpugraph = new TimeSeries('#cpu-history-cont', scope.cpuGraphOptions)
           .on('click', updateCurrentPFKey);
 
-        //scope.memgraph = TimeSeries('#memory-history-cont', scope.memGraphOptions)
-        //  .on('click', updateCurrentPFKey);
-        //scope.$watch('tracingCtx.currentPFKey', function(pfKey, oldVal) {
-        //  if (pfKey) {
-        //    scope.expgraph.setSelection(getTimestampForPFKey(pfKey));
-        //
-        //  }
-        //});
         scope.$watch('tracingCtx.currentPFKey', function(newKey, oldVal) {
-          var pfKeyTime = getTimestampForPFKey(newKey);
-          if (pfKeyTime > 0) {
-            scope.expgraph.setSelection(pfKeyTime);
+
+          if (!newKey) {
+            if (scope.tracingCtx.currentTimeline) {
+              scope.cpuGraphOptions = {
+                height:250,
+                color: color,
+                format: {
+                  'y': 'num',
+                  'y1': 's'
+                },
+                keySchema: {
+                  'Load Average': {
+                    class: 'cx-monitor-loadavg',
+                    type: 'line',
+                    y: 'y'
+                  },
+                  'Uptime': {
+                    class: 'cx-monitor-uptime',
+                    type: 'line',
+                    y: 'y1'
+                  }
+                }
+              };
+              scope.cpugraph = new TimeSeries('#cpu-history-cont', scope.cpuGraphOptions)
+                .on('click', updateCurrentPFKey);
+              scope.cpugraph.draw(scope.tracingCtx.currentTimeline);
+              $('[data-id="TraceHistoryTransactions"]').show(400);
+              var pfKeyTime = getTimestampForPFKey(newKey);
+              if (pfKeyTime > 0) {
+                console.log('|  --- A --- |');
+                scope.cpugraph.setSelection(pfKeyTime);
+              }
+            }
           }
+          else {
+            scope.cpuGraphOptions = {
+              height: 100,
+              color: color,
+              format: {
+                'y': 'num',
+                'y1': 's'
+              },
+              keySchema: {
+                'Load Average': {
+                  class: 'cx-monitor-loadavg',
+                  type: 'line',
+                  y: 'y'
+                },
+                'Uptime': {
+                  class: 'cx-monitor-uptime',
+                  type: 'line',
+                  y: 'y1'
+                }
+              }
+            };
+            scope.cpugraph = new TimeSeries('#cpu-history-cont', scope.cpuGraphOptions)
+              .on('click', updateCurrentPFKey);
+            scope.cpugraph.draw(scope.tracingCtx.currentTimeline);
+            $('[data-id="TraceHistoryTransactions"]').hide(400);
+            var pfKeyTime = getTimestampForPFKey(newKey);
+            if (pfKeyTime > 0) {
+              console.log('|  --- A --- |');
+              scope.cpugraph.setSelection(pfKeyTime);
+            }
+          }
+
 
         });
         scope.$watch('tracingCtx.currentTimeline', function(tl, oldVal) {
           if (tl) {
             if( tl.length && (tl !== oldVal)){
-              var exp = [];
-              var tmp = tl;
-              tmp.map(function(item) {
-                exp.push({
-                  __data: {
-                    lm_a: item.lm_a,
-                    p_ut: item.p_ut
-                  },
-                  load: item['Load Average'],
-                  pfkey: item.pfkey,
-                  timestamp: item._t
-                });
-
-              });
+              //var exp = [];
+              //var tmp = tl;
+              //tmp.map(function(item) {
+              //  exp.push({
+              //    __data: {
+              //      lm_a: item.lm_a,
+              //      p_ut: item.p_ut
+              //    },
+              //    load: item['Load Average'],
+              //    pfkey: item.pfkey,
+              //    timestamp: item._t
+              //  });
+              //
+              //});
               scope.cpugraph.draw(tl);
-              scope.expgraph.draw(tl);
-              if (scope.tracingCtx && scope.tracingCtx.currentPFKey) {
-                var pfKeyTime = getTimestampForPFKey(scope.tracingCtx.currentPFKey);
-                scope.expgraph.setSelection(pfKeyTime);
-              }
+              //scope.expgraph.draw(tl);
+              //if (scope.tracingCtx && scope.tracingCtx.currentPFKey) {
+              //  var pfKeyTime = getTimestampForPFKey(scope.tracingCtx.currentPFKey);
+              //  scope.expgraph.setSelection(pfKeyTime);
+              //}
             }
             if( tl && (tl !== oldVal)){
               //scope.memgraph.draw(tl);

@@ -22022,7 +22022,7 @@ Line.prototype._line = function () {
       .attr('stroke', function (d, i) { return rec.__data.lm_a ? 'red' : 'black' })
       .attr('stroke-width', 1)
       .attr('style', 'display: visible');
-    self.disableHoverLine();
+   // self.disableHoverLine();
     self.emit('click', rec.__data);
   }
 
@@ -22062,11 +22062,12 @@ Line.prototype.setSelection = function(timestamp) {
 
   var x = self.x(record.date) | 0;
 
-  //self.hoverLine
-  //  .attr('x1', x)
-  //  .attr('x2', x)
-  //  .attr('stroke', function (d, i) { return record.__data.lm_a ? 'red' : 'black' })
-  //  .attr('stroke-width', 1);
+  console.log('TimeSeries: setSelection: ' + x);
+  self.hoverLine
+    .attr('x1', x)
+    .attr('x2', x)
+    .attr('stroke', function (d, i) { return record.__data.lm_a ? 'red' : 'black' })
+    .attr('stroke-width', 1);
 
 
  // var rec = record;
@@ -22077,6 +22078,7 @@ Line.prototype.setSelection = function(timestamp) {
     .attr('x2', x)
     .attr('stroke', function (d, i) { return record.__data.lm_a ? 'red' : 'black' })
     .attr('stroke-width', 1)
+    .attr('y1', 0).attr('y2', self.innerHeight)
     .attr('style', 'display: visible');
 
   self.disableHoverLine();
