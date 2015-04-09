@@ -257,7 +257,7 @@ Tracing.directive('slTracingWaterfallView', [
             scope.inspectorModel = d;
 
           });
-          $log.debug('PREVIEW: ' + scope.tracingCtx.currentFunction.type);
+
           /*
            *
            * need to switch on type
@@ -272,7 +272,6 @@ Tracing.directive('slTracingWaterfallView', [
           });
         };
         scope.restore = function mouseLeave(){
-          $log.debug('RESTORE');
           // scope.currentFunction = '';
 
           scope.$apply(function() {
@@ -348,7 +347,6 @@ Tracing.directive('slTracingTraceSummary', [
 
         scope.$watch('tracingCtx.currentTraceToggleBool', function(newVal, oldVal) {
           if (scope.tracingCtx.currentTrace && scope.tracingCtx.currentTrace.transactions) {
-        //    $log.debug('WAIT FOR IT');
            // $timeout(function() {
               scope.mappedTransactions = TracingServices.getMappedTransactions(scope.tracingCtx.currentTrace.transactions.transactions);
               render();
@@ -408,7 +406,6 @@ Tracing.directive('slTracingTraceSummary', [
         asyncpie.init('[role="summary-async-pie"]', {fixedWidth: 200, fixedHeight: 200});
         idlepie.init('[role=summary-idle-pie]', {fixedWidth: 200, fixedHeight: 200});
         function render() {
-          $log.debug('|--- render ---|');
           /*
           *
           * Pie Charts
@@ -494,25 +491,16 @@ Tracing.directive('slTracingTraceSummary', [
             .attr('class', 'waterfall-sync');
 
           var waterfallBodyEnter = waterfall
-            //.append('button')
             .attr('href', function (d) {
               return '#';
             })
             //.attr('class', 'link-cmd')
             .on('click', function(d) {
-              $log.debug('|--- wtf ---|');
-              //var projectName = scope.currentApp;
-             // var pfKey = encodeURIComponent(scope.tracingCtx.pfKey);
+
               var waterfallId = Sha1(d.id);
               scope.tracingCtx.currentWaterfallKey = waterfallId;
-              // scroll to waterfall / detail view
-             // jQuery('html, body').animate({
-             //   scrollTop:
-           //   }, 1000);
 
               return false;
-
-
             })
             .append('div')
             .attr('class', 'panel-body')
@@ -553,19 +541,16 @@ Tracing.directive('slTracingTraceSummary', [
 
           // only update visible eventloops
           trans.each(function (transaction) {
-//            if (self.app.expanded[transaction.id]) {
-            if (1 == 1) {
-              d3.select(this).selectAll('.waterfall .panel-body')
-                .each(function (waterfall) {
-                  if (this.eventloop) {
-                    this.eventloop.update(waterfall, scope.tracingCtx.currentTrace.functions)
+            d3.select(this).selectAll('.waterfall .panel-body')
+              .each(function (waterfall) {
+                if (this.eventloop) {
+                  this.eventloop.update(waterfall, scope.tracingCtx.currentTrace.functions)
 
-                  }
-                  else {
-                    $log.debug('|   -----  EVENTLOOP?');
-                  }
-                })
-            }
+                }
+                else {
+                  $log.debug('no event loop');
+                }
+              });
           });
 
           //finally, sort the array
@@ -621,47 +606,6 @@ Tracing.directive('slTracingTraceView', [
       }],
       link: function(scope, el, attrs) {
 
-        //scope.$watch('tracingCtx.currentPFKey', function(pfKey, oldVal) {
-        //  //jQuery('[data-id="TraceDetailView"]').offset().top;
-        //  /*
-        //   *
-        //   * modify the ui to provide good ux for nav
-        //   *
-        //   * get rid of memory chart
-        //   * get rid of transaction history
-        //   * shrink the cpu chart
-        //   * indicate which point in time is selected
-        //   * animate the scroll
-        //   *
-        //   * */
-        //  if (!pfKey) {
-        //    //
-        //    //d3.select('[data-id="ProcessTraceView"]')
-        //    //  .transition()
-        //    //  .attr("height",7000);
-        //    //$('[data-id="ProcessTraceView"]').show(500);
-        //    //$('[data-id="ProcessTraceView"]').offset().top;
-        //    $('[data-id="TraceHistoryTransactions"]').show(500);
-        //    $('#memory-history-cont').show(500);
-        //    $('#exp-history-cont').hide(500);
-        //    $('#cpu-history-cont').show(500);
-        //  }
-        //  else {
-        //
-        //
-        //    //$('[data-id="ProcessTraceView"]').offset({top:-175});
-        //    $('#memory-history-cont').hide(500);
-        //    $('#exp-history-cont').show(500);
-        //    $('#cpu-history-cont').hide(500);
-        //    $('[data-id="TraceHistoryTransactions"]').hide(400);
-        //
-        //    // load trace view
-        //    $log.debug('re-initialize trace view pfkey[' + pfKey + ']');
-        //
-        //
-        //  }
-        //}, true);
-
       }
     }
   }
@@ -675,6 +619,7 @@ Tracing.directive('slTracingTimeSeriesCharts', [
       restrict: 'E',
       templateUrl: './scripts/modules/tracing/templates/tracing.timeseries.charts.html',
       link: function(scope, el, attrs) {
+        // original concurix
         //var colormap = {
         //  'Process Heap Total': 'rgba(63,182,24, 1)',
         //  'Process Heap Used': 'rgba(255,117,24, 1)',
@@ -730,18 +675,15 @@ Tracing.directive('slTracingTimeSeriesCharts', [
             for (var i = 0;i < scope.tracingCtx.currentTimeline.length;i++) {
               var instance = scope.tracingCtx.currentTimeline[i];
               if (instance.__data && (instance.__data.pfkey === pfKey)) {
-                $log.debug('|--- check me ---|');
                 return instance._t;
+
               }
             }
             return 0;
           }
           return 0;
         }
-        $log.debug('Chart Name:  ' + scope.chartName);
         function updateCurrentPFKey(data) {
-          console.log('|  --- B --- |');
-
           scope.setCurrentPFKey(data.pfkey);
         }
         scope.cpugraph = new TimeSeries('#cpu-history-cont', scope.cpuGraphOptions)
@@ -750,7 +692,7 @@ Tracing.directive('slTracingTimeSeriesCharts', [
         scope.$watch('tracingCtx.currentPFKey', function(newKey, oldVal) {
 
           if (!newKey) {
-            if (scope.tracingCtx.currentTimeline) {
+            if (scope.tracingCtx.currentTimeline && scope.tracingCtx.currentTimeline.length) {
               scope.cpuGraphOptions = {
                 height:250,
                 color: color,
@@ -774,10 +716,9 @@ Tracing.directive('slTracingTimeSeriesCharts', [
               scope.cpugraph = new TimeSeries('#cpu-history-cont', scope.cpuGraphOptions)
                 .on('click', updateCurrentPFKey);
               scope.cpugraph.draw(scope.tracingCtx.currentTimeline);
-              $('[data-id="TraceHistoryTransactions"]').show(400);
+
               var pfKeyTime = getTimestampForPFKey(newKey);
               if (pfKeyTime > 0) {
-                console.log('|  --- A --- |');
                 scope.cpugraph.setSelection(pfKeyTime);
               }
             }
@@ -806,10 +747,9 @@ Tracing.directive('slTracingTimeSeriesCharts', [
             scope.cpugraph = new TimeSeries('#cpu-history-cont', scope.cpuGraphOptions)
               .on('click', updateCurrentPFKey);
             scope.cpugraph.draw(scope.tracingCtx.currentTimeline);
-            $('[data-id="TraceHistoryTransactions"]').hide(400);
+
             var pfKeyTime = getTimestampForPFKey(newKey);
             if (pfKeyTime > 0) {
-              console.log('|  --- A --- |');
               scope.cpugraph.setSelection(pfKeyTime);
             }
           }
@@ -819,35 +759,13 @@ Tracing.directive('slTracingTimeSeriesCharts', [
         scope.$watch('tracingCtx.currentTimeline', function(tl, oldVal) {
           if (tl) {
             if( tl.length && (tl !== oldVal)){
-              //var exp = [];
-              //var tmp = tl;
-              //tmp.map(function(item) {
-              //  exp.push({
-              //    __data: {
-              //      lm_a: item.lm_a,
-              //      p_ut: item.p_ut
-              //    },
-              //    load: item['Load Average'],
-              //    pfkey: item.pfkey,
-              //    timestamp: item._t
-              //  });
-              //
-              //});
+
               scope.cpugraph.draw(tl);
-              //scope.expgraph.draw(tl);
-              //if (scope.tracingCtx && scope.tracingCtx.currentPFKey) {
-              //  var pfKeyTime = getTimestampForPFKey(scope.tracingCtx.currentPFKey);
-              //  scope.expgraph.setSelection(pfKeyTime);
-              //}
             }
             if( tl && (tl !== oldVal)){
               //scope.memgraph.draw(tl);
             }
           }
-
-          //if((scope.chartName === 'mem') && timeline.mem){
-          //  scope.memgraph.draw(timeline.mem);
-          //}
         }, true);
 
 
@@ -856,8 +774,7 @@ Tracing.directive('slTracingTimeSeriesCharts', [
     }
   }
 ]);
-//  new experimental transaction history
-
+//  experimental transaction history
 Tracing.directive('slTracingTransactionHistory2', [
   '$log',
   '$timeout',
@@ -885,10 +802,6 @@ Tracing.directive('slTracingTransactionHistory2', [
 
 ]);
 
-
-
-
-//
 Tracing.directive('slTracingTransactionHistory', [
   '$log',
   '$timeout',

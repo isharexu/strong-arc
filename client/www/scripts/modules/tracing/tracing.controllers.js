@@ -8,7 +8,6 @@ Tracing.controller('TracingMainController', [
   'TimeSeries',
   'TraceEnhance',
   function($scope, $log, $timeout, $interval, $location, TracingServices, TimeSeries, TraceEnhance) {
-    $log.debug('tracing controller');
     var PMClient = require('strong-mesh-models').Client;
     $scope.pm = {};
 
@@ -70,8 +69,6 @@ Tracing.controller('TracingMainController', [
 
     $scope.mesh = require('strong-mesh-client')('http://' + $location.host() + ':' + $location.port() + '/manager');
     qFeedback('trace: check for available pm hosts');
-    $log.debug('trace: check for available pm hosts');
-
 
     $scope.init = function() {
       $scope.resetTracingCtx();
@@ -81,9 +78,6 @@ Tracing.controller('TracingMainController', [
         if (hosts && hosts.map) {
           // qFeedback('[experiement] init available PM host instances (may or may not be running): ' +  hosts.length);
           $scope.managerHosts = hosts;
-          $scope.managerHosts.map(function(h)  {
-            $log.debug('host: ' + h.host);
-          });
 
 
           /*

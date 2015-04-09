@@ -108,7 +108,6 @@ Tracing.service('TracingServices', [
         .$promise
         .then(function(trace) {
           var rData = JSON.parse(trace.data);
-         // $log.debug('TRACE DATA: ' + rData);
           return TraceEnhance(rData);
         })
         .catch(function(error) {

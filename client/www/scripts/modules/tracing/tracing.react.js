@@ -12,9 +12,7 @@ var TracingAstractTimeline = (TracingAstractTimeline = React).createClass({
     //var pfKeyVal = encodeURIComponent(event.target.attributes['data-pfkey'].value);
     var pfKeyVal = event.target.attributes['data-pfkey'].value;
     if (pfKeyVal) {
-      console.log(pfKeyVal);
       scope.$apply(function() {
-        console.log('|-- react --|');
         scope.setCurrentPFKey(pfKeyVal);
       });
     }
@@ -136,7 +134,6 @@ var TracingAstractTimeline = (TracingAstractTimeline = React).createClass({
       return (<li className={item}>&nbsp;</li>);
     });
 
-console.log('|-- react render --|');
     return (
       <div>
         <div id="Velo"></div>
@@ -161,7 +158,6 @@ var TracingTraceList = (TracingTraceList = React).createClass({
     //var pfKeyVal = encodeURIComponent(event.target.attributes['data-pfkey'].value);
     var pfKeyVal = event.target.attributes['data-pfkey'].value;
     if (pfKeyVal) {
-      console.log(pfKeyVal);
       scope.$apply(function() {
         scope.setCurrentPFKey(pfKeyVal);
       });
