@@ -675,6 +675,7 @@ Tracing.directive('slTracingTimeSeriesCharts', [
         }
 
         scope.cpuGraphOptions = {
+          height: 100,
           color: color,
           format: {
             'y': 'num',
@@ -717,7 +718,7 @@ Tracing.directive('slTracingTimeSeriesCharts', [
           if (!newKey) {
             if (scope.tracingCtx.currentTimeline && scope.tracingCtx.currentTimeline.length) {
               scope.cpuGraphOptions = {
-                height:250,
+                height: 100,
                 color: color,
                 format: {
                   'y': 'num',
