@@ -1,0 +1,8 @@
+<div data-id="TracingBreadcrumbsContainer">
+  <h2>
+    <button class="link-cmd" ng-click="backToTimeline()">{{tracingCtx.currentBreadcrumbs[0].label}}</button>
+  </h2>
+  <h3>
+    <button class="link-cmd" ng-show="tracingCtx.currentBreadcrumbs[1].label" ng-click="backToTrace()">{{tracingCtx.currentBreadcrumbs[1].label}}</button>
+  </h3>
+</div>

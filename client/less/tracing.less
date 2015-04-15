@@ -1,5 +1,17 @@
 [data-id="TracingContainer"] {
 
+  g {
+    &.y {
+      &.axis {
+        display:none;
+      }
+    }
+    &.y1 {
+      &.axis {
+        display:none;
+      }
+    }
+  }
   .panel-heading {
     padding:4px 4px;
   }
@@ -24,6 +36,10 @@
 .tracing-header-container {
   position:relative;
 
+  &.section-header {
+    background-color:#ffffff;
+  }
+
   .pm-host-select {
     padding-top:2rem;
   }
@@ -42,6 +58,11 @@
       float:left;
     }
     //    float:right;
+  }
+}
+[data-id="TracingTimeseriesChart"] {
+  svg {
+    cursor: pointer;
   }
 }
 [data-id="TracingSystemFeedback"] {

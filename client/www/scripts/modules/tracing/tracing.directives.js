@@ -13,6 +13,32 @@ Tracing.directive('expTimeSeries', [
     }
   }
 ]);
+Tracing.directive('slTracingBreadcrumbs', [
+  '$log',
+  function($log) {
+    return {
+      restrict: 'E',
+      templateUrl: './scripts/modules/tracing/templates/tracing.breadcrumbs.html',
+      controller: [
+        '$scope',
+        function($scope) {
+          $log.debug('Tracing Breadcrumbs');
+        }
+      ],
+      link: function(scope, el, attrs) {
+        scope.$watch('tracingCtx.currentPFKey', function(newPFKey, oldKey) {
+          var xxx = scope.getTimestampForPFKey(newPFKey);
+          var yyy = moment(xxx,"YYYY-MM-DD HH:mm");
+
+          scope.tracingCtx.currentBreadcrumbs[1] = {
+            instance: newPFKey,
+            label: yyy._d
+          };
+        }, true);
+      }
+    }
+  }
+]);
 Tracing.directive('slTracingProcesses', [
   function(){
     return {
@@ -372,9 +398,7 @@ Tracing.directive('slTracingTraceSummary', [
           return scope.format(d/1000000) + 's';
         };
 
-        scope.tsText = function(ts){
-          return moment(ts).fromNow() +' (' + moment(ts).format('ddd, MMM Do YYYY, h:mm:ss a') + ')'
-        };
+
 
 
         //$scope.mappedTransactions = $scope.mapTransactions($scope.tracingCtx.currentTrace.transactions.transactions)
@@ -681,19 +705,7 @@ Tracing.directive('slTracingTimeSeriesCharts', [
           formatter: {}
         };
 
-        function getTimestampForPFKey(pfKey) {
-          if (scope.tracingCtx && scope.tracingCtx.currentTimeline.length) {
-            for (var i = 0;i < scope.tracingCtx.currentTimeline.length;i++) {
-              var instance = scope.tracingCtx.currentTimeline[i];
-              if (instance.__data && (instance.__data.pfkey === pfKey)) {
-                return instance._t;
 
-              }
-            }
-            return 0;
-          }
-          return 0;
-        }
         function updateCurrentPFKey(data) {
           scope.setCurrentPFKey(data.pfkey);
         }
@@ -728,7 +740,7 @@ Tracing.directive('slTracingTimeSeriesCharts', [
                 .on('click', updateCurrentPFKey);
               scope.cpugraph.draw(scope.tracingCtx.currentTimeline);
 
-              var pfKeyTime = getTimestampForPFKey(newKey);
+              var pfKeyTime = scope.getTimestampForPFKey(newKey);
               if (pfKeyTime > 0) {
                 scope.cpugraph.setSelection(pfKeyTime);
               }
@@ -759,7 +771,7 @@ Tracing.directive('slTracingTimeSeriesCharts', [
               .on('click', updateCurrentPFKey);
             scope.cpugraph.draw(scope.tracingCtx.currentTimeline);
 
-            var pfKeyTime = getTimestampForPFKey(newKey);
+            var pfKeyTime = scope.getTimestampForPFKey(newKey);
             if (pfKeyTime > 0) {
               scope.cpugraph.setSelection(pfKeyTime);
             }

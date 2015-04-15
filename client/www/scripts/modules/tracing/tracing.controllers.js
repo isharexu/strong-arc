@@ -27,6 +27,7 @@ Tracing.controller('TracingMainController', [
         currentTimelineDuration: 0,
         currentTimelineKeyCollection: [],
         currentTrace: {},
+        currentBreadcrumbs: [],
         currentWaterfallKey: '',
         currentWaterfall: {},
         currentFunction: {},
@@ -103,6 +104,19 @@ Tracing.controller('TracingMainController', [
 
 
 
+    $scope.getTimestampForPFKey = function(pfKey) {
+      if ($scope.tracingCtx && $scope.tracingCtx.currentTimeline.length) {
+        for (var i = 0;i < $scope.tracingCtx.currentTimeline.length;i++) {
+          var instance = $scope.tracingCtx.currentTimeline[i];
+          if (instance.__data && (instance.__data.pfkey === pfKey)) {
+            return instance._t;
+
+          }
+        }
+        return 0;
+      }
+      return 0;
+    };
 
     $scope.main = function() {
 
@@ -130,6 +144,10 @@ Tracing.controller('TracingMainController', [
         qFeedback('trace: assign pm instance to currentInstance');
         qFeedback('trace: check for running processes');
         $scope.tracingCtx.currentPMInstance = instance;
+        $scope.tracingCtx.currentBreadcrumbs[0] = {
+          instance: $scope.tracingCtx.currentPMInstance,
+          label: $scope.tracingCtx.currentPMInstance.applicationName
+        };
         $scope.tracingCtx.currentPMInstance.processes(function(err, processes) {
           if (err) {
             $log.warn('bad get processes: ' + err.message);
@@ -167,6 +185,12 @@ Tracing.controller('TracingMainController', [
       });
     };
 
+    $scope.backToTimeline = function() {
+      $scope.tracingCtx.currentPFKey = '';
+    };
+    $scope.backToTrace = function() {
+      $scope.tracingCtx.currentWaterfallKey = '';
+    };
     $scope.getCurrentTimelineDuration = function() {
       if (!$scope.tracingCtx.currentTimeline) {
         return 0;
@@ -267,7 +291,7 @@ Tracing.controller('TracingMainController', [
           return;
         }
 
-
+        $scope.tracingCtx.currentPFKey = '';
         var seconds  = 0;
 
         if (rawResponse.length && rawResponse.length > 0) {
@@ -399,9 +423,13 @@ Tracing.controller('TracingMainController', [
         var currIndex = $scope.tracingCtx.currentTimelineKeyCollection.indexOf($scope.tracingCtx.currentPFKey);
         if (currIndex > 1) {
           $scope.tracingCtx.currentPFKey = $scope.tracingCtx.currentTimelineKeyCollection[currIndex - 1];
+          $scope.tracingCtx.currentWaterfallKey = '';
         }
       }
 
+    };
+    $scope.tsText = function(ts){
+      return moment(ts).fromNow() +' (' + moment(ts).format('ddd, MMM Do YYYY, h:mm:ss a') + ')'
     };
     $scope.nextPFKey = function() {
       if ($scope.tracingCtx.currentTimelineKeyCollection) {
@@ -410,6 +438,7 @@ Tracing.controller('TracingMainController', [
         if (len > 0) {
           if (currIndex < (len - 2)) {
             $scope.tracingCtx.currentPFKey = $scope.tracingCtx.currentTimelineKeyCollection[currIndex + 1];
+            $scope.tracingCtx.currentWaterfallKey = '';
           }
         }
 

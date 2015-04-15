@@ -1,6 +1,6 @@
 <div class="tracing-header-container row panel-heading section-header">
   <div class="col-sm-5">
-    <h2 ng-show="tracingCtx.currentPMInstance.applicationName">{{ tracingCtx.currentPMInstance.applicationName }}</h2>
+    <sl-tracing-breadcrumbs></sl-tracing-breadcrumbs>
   </div>
   <div class="col-sm-2">
     <div class="btn-group pm-host-select" dropdown is-open="status.isopen">
@@ -14,16 +14,10 @@
       </ul>
     </div>
   </div>
-  <div class="col-sm-4">
+  <div class="col-sm-5">
     <div class="sl-pid-selector">
       <sl-tracing-processes></sl-tracing-processes>
     </div>
-  </div>
-  <div class="col-sm-1">
-
-    <button ng-hide="!tracingCtx.currentPFKey" class="ui-btn secondary small" ng-click="closeTraceView()">
-      <i class="glyphicon glyphicon-arrow-up"></i>
-    </button>
   </div>
 </div>
 
