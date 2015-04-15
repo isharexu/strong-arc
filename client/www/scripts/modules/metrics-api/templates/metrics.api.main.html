@@ -1,7 +1,16 @@
-<div class="metrics">
-    <h1>API Metrics</h1>
-    <section>
-        <h2>Level 2</h2>
-        <nvd3 class="metrics-chart" options="apiChart.options" data="apiChart.data"></nvd3>
-    </section>
+<div data-ui-type="table" data-id="MainBody">
+  <div data-ui-type="row">
+    <div data-ui-type="cell"
+         data-id="MainContentContainer"
+         class="top-level-container">
+      <div class="common-instance-view-container">
+        <div class="metrics-api">
+            <h1>API Metrics</h1>
+            <section>
+                <sl-api-metrics-chart data="apiChart.data"></sl-api-metrics-chart>
+            </section>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
