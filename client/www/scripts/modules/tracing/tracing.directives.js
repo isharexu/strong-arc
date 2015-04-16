@@ -51,6 +51,14 @@ Tracing.directive('slTracingProcesses', [
   }
 
 ]);
+Tracing.directive('slTracingPrevNext', [
+  function() {
+    return {
+      restrict: 'E',
+      templateUrl: './scripts/modules/tracing/templates/tracing.prev.next.html'
+    }
+  }
+]);
 Tracing.directive('expAbstractTimeline', [
   '$log',
   function($log) {

@@ -1,13 +1,4 @@
 <div>
-  <div class="timeline-nav-container" ng-hide="!tracingCtx.currentPFKey">
-    <button class="ui-btn secondary small" ng-click="prevPFKey()">
-      <i class="sl-icon glyphicon glyphicon-backward"></i>
-    </button>
-    <button class="ui-btn secondary small" ng-click="nextPFKey()">
-      <i class="sl-icon glyphicon glyphicon-forward"></i>
-    </button>
-  </div>
   <div id='cpu-history-cont' data-id="TracingTimeseriesChart" data-hook='cpumonitor'></div>
-  <label>select a timeframe to view available traces</label>
-  <div id='memory-history-cont' data-hook='memmonitor'></div>
+  <label ng-hide="tracingCtx.currentPFKey" ng-show="tracingCtx.currentTimeline.length">select a timeframe to view available traces</label>
 </div>

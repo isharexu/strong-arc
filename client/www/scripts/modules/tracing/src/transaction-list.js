@@ -5,8 +5,6 @@ var sha1       = require('sha1');
 var Timeseries = require('cxviz-timeseries');
 var format     = require('cxviz-format');
 var path       = require('path');
-var page       = require('page');
-var slug       = require('slug');
 
 
 //var colormap = {

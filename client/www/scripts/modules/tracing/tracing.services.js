@@ -39,7 +39,7 @@ Tracing.service('TracingServices', [
         var item = {
           _t: moment(d.ts).unix()*1000,
           'Load Average': d['s_la'],
-          'Uptime': d['p_ut'],
+          'Uptime': d['p_mu'],
           '__data': d
         };
         return item;

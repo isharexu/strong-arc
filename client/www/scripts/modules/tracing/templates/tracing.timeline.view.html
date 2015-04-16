@@ -1,8 +1,4 @@
 <div class='monitor-view' data-id="ProcessTraceView">
-  <!--<exp-abstract-timeline></exp-abstract-timeline>-->
-
-  <!--<div ng-show="tracingCtx.currentPFKey">current key: {{ tracingCtx.currentPFKey }}</div>-->
-  <!--<div>start time: {{tracingCtx.timelineStart}}   duration: {{tracingCtx.timelineDuration}}</div>-->
   <sl-tracing-time-series-charts data-id="TraceHistoryChart" chart-name="cpu" internal-ctx="tracingCtx" ></sl-tracing-time-series-charts>
   <sl-tracing-transaction-history data-id="TraceHistoryTransactions" ng-show="tracingCtx.currentTimeline.length && !tracingCtx.currentPFKey"></sl-tracing-transaction-history>
 </div>
