@@ -37,7 +37,7 @@ Tracing.controller('TracingMainController', [
         currentTimeline: {},
         currentTransactionKeys: [],
         currentTransactionHistoryCollection: [],
-        currentApp: {name: 'wfp:helloworld'}
+        currentApp: {name: ''}
       };
     };
     $scope.selectedProcess = {};
@@ -101,23 +101,6 @@ Tracing.controller('TracingMainController', [
       });
     };
 
-
-
-
-    $scope.getTimestampForPFKey = function(pfKey) {
-      if ($scope.tracingCtx && $scope.tracingCtx.currentTimeline.length) {
-        for (var i = 0;i < $scope.tracingCtx.currentTimeline.length;i++) {
-          var instance = $scope.tracingCtx.currentTimeline[i];
-          if (instance.__data && (instance.__data.pfkey === pfKey)) {
-            return instance._t;
-
-          }
-        }
-        return 0;
-      }
-      return 0;
-    };
-
     $scope.main = function() {
 
       qFeedback('trace: init');
@@ -176,13 +159,26 @@ Tracing.controller('TracingMainController', [
           qFeedback('trace: running processes: ' + filteredProcesses.length);
           $scope.tracingCtx.currentProcesses = filteredProcesses;
           qFeedback('trace: assign first process as default');
-          $scope.tracingCtx.currentProcess = filteredProcesses[1];  //default
-          $scope.selectedProcess = filteredProcesses[1];
+          $scope.tracingCtx.currentProcess = filteredProcesses[0];  //default
+          $scope.selectedProcess = filteredProcesses[0];
           qFeedback('trace: trigger timeline initialization');
           $scope.refreshTimelineProcess();
 
         });
       });
+    };
+    $scope.getTimestampForPFKey = function(pfKey) {
+      if ($scope.tracingCtx && $scope.tracingCtx.currentTimeline.length) {
+        for (var i = 0;i < $scope.tracingCtx.currentTimeline.length;i++) {
+          var instance = $scope.tracingCtx.currentTimeline[i];
+          if (instance.__data && (instance.__data.pfkey === pfKey)) {
+            return instance._t;
+
+          }
+        }
+        return 0;
+      }
+      return 0;
     };
 
     $scope.backToTimeline = function() {
@@ -202,9 +198,6 @@ Tracing.controller('TracingMainController', [
       return 0;
     };
 
-    window.onresize = function() {
-      window.setScrollView('.tracing-content-container');
-    };
     function updateTimelineData(timeline) {
       var self = this;
       self.timeline = timeline;
@@ -443,6 +436,9 @@ Tracing.controller('TracingMainController', [
         }
 
       }
+    };
+    window.onresize = function() {
+      window.setScrollView('.tracing-content-container');
     };
 
     $scope.init();
