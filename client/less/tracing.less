@@ -25,7 +25,24 @@
   }
 
 }
+[data-id="TracingBreadcrumbsList"] {
+  padding-top:2.9rem;
 
+  button {
+    font-size:120%;
+
+    &.readonly-crumb {
+      color:#888888;
+      border:0;
+      background:transparent;
+      cursor: default;
+      &:hover {
+        cursor: default;
+        text-decoration: none;
+      }
+    }
+  }
+}
 /*
 
   Prototyping - port
@@ -40,7 +57,7 @@
   }
 
   .pm-host-select {
-    padding-top:2rem;
+    padding-top:2.8rem;
   }
 
   .sl-pid-selector {
@@ -107,7 +124,9 @@
 }
 .timeline-nav-container {
 
+  float:right;
   text-align: center;
+
   button {
     margin:0 auto 0 auto;
   }
@@ -126,6 +145,8 @@
     }
   }
 }
+
+.toggle-control
 
 
 /*
@@ -511,7 +532,33 @@
       border-color: #ffffff;
     }
 
+    .list-group-item {
+      button {
+        &.transaction-route {
 
+          text-align: left;
+        }
+      }
+    }
+
+  }
+  ul.transactions {
+
+    td.toggle-control {
+      width:3rem;
+
+      i {
+        padding-top:.45rem;
+      }
+    }
+
+    ul.waterfalls {
+      display:none;
+
+      &.expanded {
+        display:block;
+      }
+    }
   }
   .transaction-badge {
     .badge {
@@ -524,6 +571,7 @@
 
     .transaction-route {
       width: 63%;
+      text-align:left;
     }
 
     .transaction-jsmicros,
@@ -583,12 +631,22 @@
   .waterfall {
     margin-top: 10px;
 
+    .help-text {
+      display:none;
+    }
     a:hover {
       text-decoration: none;
     }
 
     &:hover {
       background: rgba(0, 0, 0, 0.1);
+      .help-text {
+        display:inline-block;
+        font-size:90%;
+        margin-left:3rem;
+        font-style: italic;
+        color:#888888;
+      }
     }
 
     .panel-heading {

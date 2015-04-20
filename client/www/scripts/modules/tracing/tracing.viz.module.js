@@ -21562,12 +21562,13 @@ Line.prototype.reset = function (options) {
   this.type = 'line';
   this.parentNode = this.parent.node()
   this.width = (this.parentNode && this.parentNode.offsetWidth) || 1000;
-  this.height = Math.round(this.width / DEFAULT_RATIO);
+  this.height = options.height || Math.round(this.width / DEFAULT_RATIO);
+  this.selectedTime = options.selectedTime || 0;
+  //this.height = Math.round(this.width / DEFAULT_RATIO);
   this.margin = {top: 20, right: 80, bottom: 30, left: 80}; // TODO better defaults?
 
   this.showXAxis = true;
   this.showYAxis = true;
-  this.isHoverLineEnabled = true;
   this.xGridTicks = 0;
   this.yGridTicks = 1;
   this.yAxisTicks = 10;
@@ -21680,25 +21681,17 @@ Line.prototype.draw = function (data) {
     if (series.length > MAX_SERIES) break;
     Object.keys(record).forEach(function (key) {
       if (series.length > MAX_SERIES){
-        return;
+        return
       }
       if (key === '_t' || key === 'date'){
-        return;
+        return
       }
-      /*
-
-       TODO loosen up this constraint as it binds these 2 metrics to the visualization
-       - see https://github.com/strongloop-internal/scrum-nodeops/issues/433
-
-        */
-      if( (key === 'Uptime') || (key === 'Load Average')){
-        if (series.indexOf(key) < 0 && record[key] != null ){
-          series.push(key);
-        }
+      if( key === '__data'){
+        return
       }
-      //if (series.indexOf(key) < 0 && record[key] != null ){
-      //  series.push(key)
-      //}
+      if (series.indexOf(key) < 0 && record[key] != null ){
+        series.push(key)
+      }
     });
     record.date = new Date(record._t);
   }
@@ -21742,7 +21735,7 @@ Line.prototype.draw = function (data) {
 
   var anomalies = self.graph.append('g')
     .attr('class', 'anomalies')
-    .selectAll('path').data(data.filter(function(d, i){ return !!d.__data.lm_a }))
+  .selectAll('path').data(data.filter(function(d, i){ return !!d.__data.lm_a }))
   anomalies.enter().append('path')
     .on('mouseover', anomalyHover)
     .on('click', anomalyClick)
@@ -21936,7 +21929,10 @@ Line.prototype._draw = function () {
             nextX += (d.length + 1) * 8;
             return offset;
           })
-          .style('fill', function (d) { return self.color(d) });
+          .style('fill', function (d) {
+                            console.log('GREAT NEWS: [' + d + ']' + self.color(d));
+                            return self.color(d);
+                          });
   }
 
   switch(this.type) {
@@ -21947,6 +21943,21 @@ Line.prototype._draw = function () {
     default:
       return new Error('Unknown chart type.');
   }
+
+
+   var ts = self.selectedTime;
+  if (ts) {
+    var rec = self.getRecordAt(ts);
+    var x = self.x(rec.date) | 0;
+    self.selectionX = x;
+    self.selectLine
+      .attr('x1', x).attr('x2', x)
+      .attr('style', 'display: visible')  ;
+  }
+
+   //
+
+
 
 }
 
@@ -22001,7 +22012,7 @@ Line.prototype._line = function () {
 
     self.selectLineGroup = self.graph.append('g')
       .attr('class', 'select-line')
-      .attr('style', self.selectionX ? 'display: visible' : 'display: none')
+      //.attr('style', self.selectionX ? 'display: visible' : 'display: none')
 
     self.selectLine = self.selectLineGroup.append('line')
       // TODO x1 to 0/0, or max/max?
@@ -22017,17 +22028,17 @@ Line.prototype._line = function () {
   }
   function handleClick(){
     var coords = d3.mouse(this)
-    var ts = self.x.invert(coords[0]).getTime();
-    var rec = self.getRecordAt(ts);
+    var ts = self.x.invert(coords[0]).getTime()
+    var rec = self.getRecordAt(ts)
     var x = self.x(rec.date) | 0;
-    self.selectionX = x;
+    self.selectionX = x
     self.selectLine
       .attr('x1', x)
       .attr('x2', x)
-      .attr('stroke', function (d, i) { return rec.__data.lm_a ? 'red' : 'black' })
-      .attr('stroke-width', 1)
-      .attr('style', 'display: visible');
-    self.emit('click', rec.__data);
+      .attr('style', 'display: visible')
+      .attr('stroke-width', 5)
+      .attr('stroke', '#ffff33')
+    self.emit('click', rec.__data)
   }
 
   function getHoverX() {
@@ -22040,6 +22051,25 @@ Line.prototype._line = function () {
 
 Line.prototype.clearSelection = function clearSelection(){
   delete this.selectionX
+}
+Line.prototype.setSelection = function setSelection(timestamp){
+
+  var ts = timestamp
+  var rec = this.getRecordAt(ts)
+  var x = this.x(rec.date) | 0;
+//  self.selectionX = x
+console.log('|   x count: ' + x);
+  this.selectionX = x;
+ // self.emit('click', rec.__data);
+ // self.selectLineGroup = self.graph.append('g')
+ //   .attr('class', 'select-line')
+ // //.attr('style', self.selectionX ? 'display: visible' : 'display: none')
+ //
+ // self.selectLine = self.selectLineGroup.append('line')
+ //   // TODO x1 to 0/0, or max/max?
+ //   .attr('x1', self.selectionX || self.innerWidth).attr('x2', self.selectionX || self.innerWidth)
+ //   .attr('y1', 0).attr('y2', self.innerHeight);
+  this.hoverAt(ts);
 }
 
 
@@ -22055,11 +22085,9 @@ Line.prototype.getRecordAt = function getRecordAt(timestamp){
   }
   return record
 }
-Line.prototype.disableHoverLine = function() {
-  var self = this;
-  self.isHoverLineEnabled = false;
-};
-Line.prototype.setSelection = function(timestamp) {
+
+// TODO emit/listen for highlight events when other graphs are highlighting
+Line.prototype.hoverAt = function (timestamp) {
   var self = this;
 
   var record = self.getRecordAt(timestamp)
@@ -22070,36 +22098,7 @@ Line.prototype.setSelection = function(timestamp) {
     .attr('x1', x)
     .attr('x2', x)
     .attr('stroke', function (d, i) { return record.__data.lm_a ? 'red' : 'black' })
-    .attr('stroke-width', 1);
-
-  self.selectionX = x;
-  self.selectLine
-    .attr('x1', x)
-    .attr('x2', x)
-    .attr('stroke', function (d, i) { return record.__data.lm_a ? 'red' : 'black' })
     .attr('stroke-width', 1)
-    .attr('y1', 0).attr('y2', self.innerHeight)
-    .attr('style', 'display: visible');
-
-  self.disableHoverLine();
-};
-// TODO emit/listen for highlight events when other graphs are highlighting
-Line.prototype.hoverAt = function (timestamp) {
-  var self = this;
-
-  var record = self.getRecordAt(timestamp)
-
-  var x = self.x(record.date) | 0;
-
-  if (this.isHoverLineEnabled) {
-    self.hoverLine
-      .attr('x1', x)
-      .attr('x2', x)
-      .attr('stroke', function (d, i) {
-        return record.__data.lm_a ? 'red' : 'black'
-      })
-      .attr('stroke-width', 1);
-  }
 
   var formattedDate = self.formatDate(record.date);
 
@@ -22147,7 +22146,7 @@ Line.prototype.hoverAt = function (timestamp) {
   self.xLegend.select('text').text(formattedDate)
 }
 
-},{"./lib/draw":39,"./lib/schema":40,"cxviz-format":41,"d3":43,"events":69,"util":74}],39:[function(require,module,exports){
+},{"./lib/draw":39,"./lib/schema":40,"cxviz-format":41,"d3":44,"events":69,"util":74}],39:[function(require,module,exports){
 'use strict';
 var d3 = require('d3')
 
@@ -22252,7 +22251,7 @@ function height(viz, d){
   return (h < 2 ) ? 2 : h
 }
 
-},{"d3":43}],40:[function(require,module,exports){
+},{"d3":44}],40:[function(require,module,exports){
 'use strict';
 
 var d3     = require('d3')
@@ -22299,17 +22298,55 @@ function Schema(options){
   }
 }
 
-},{"cxviz-format":41,"d3":43}],41:[function(require,module,exports){
+},{"cxviz-format":41,"d3":44}],41:[function(require,module,exports){
 arguments[4][26][0].apply(exports,arguments)
-},{"dup":26,"numeral":44,"pretty-ms":42}],42:[function(require,module,exports){
-arguments[4][28][0].apply(exports,arguments)
-},{"dup":28,"parse-ms":45}],43:[function(require,module,exports){
-arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],44:[function(require,module,exports){
-arguments[4][27][0].apply(exports,arguments)
-},{"dup":27}],45:[function(require,module,exports){
+},{"dup":26,"numeral":45,"pretty-ms":42}],42:[function(require,module,exports){
+'use strict';
+var parseMs = require('parse-ms');
+
+function add(ret, val, postfix) {
+	if (val > 0) {
+		ret.push(val + postfix);
+	}
+
+	return ret;
+}
+
+module.exports = function (ms, opts) {
+	if (typeof ms !== 'number') {
+		throw new TypeError('Expected a number');
+	}
+
+	if (ms < 1000) {
+		return Math.ceil(ms) + 'ms';
+	}
+
+	opts = opts || {};
+
+	var ret = [];
+	var parsed = parseMs(ms);
+
+	ret = add(ret, parsed.days, 'd');
+	ret = add(ret, parsed.hours, 'h');
+	ret = add(ret, parsed.minutes, 'm');
+
+	if (opts.compact) {
+		ret = add(ret, parsed.seconds, 's');
+		return '~' + ret[0];
+	}
+
+	ret = add(ret, (ms / 1000 % 60).toFixed(1).replace(/\.0$/, ''), 's');
+
+	return ret.join(' ');
+};
+
+},{"parse-ms":43}],43:[function(require,module,exports){
 arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}],46:[function(require,module,exports){
+},{"dup":29}],44:[function(require,module,exports){
+arguments[4][17][0].apply(exports,arguments)
+},{"dup":17}],45:[function(require,module,exports){
+arguments[4][27][0].apply(exports,arguments)
+},{"dup":27}],46:[function(require,module,exports){
 var charenc = {
   // UTF-8 encoding
   utf8: {

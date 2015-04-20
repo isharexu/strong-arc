@@ -1,6 +1,6 @@
 <div data-id="TracingContainer" ng-controller="TracingMainController">
   <sl-tracing-header></sl-tracing-header>
-  <span class="loading" sl-common-loading-indicator size="large" ng-show="!tracingCtx.currentTimeline.length"></span>
+  <!--<span class="loading" sl-common-loading-indicator size="large" ng-show="showTimelineLoading"></span>-->
   <div class="tracing-content-container" ng-show="tracingCtx.currentTimeline">
     <sl-tracing-timeline-view></sl-tracing-timeline-view>
     <sl-tracing-trace-view></sl-tracing-trace-view>

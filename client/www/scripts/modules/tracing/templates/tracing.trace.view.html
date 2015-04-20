@@ -1,36 +1,40 @@
-<div data-id="TraceView" class='trace-view' ng-show="showTraceView()">
-  <div data-hook='summary' class='summary'>
-    <sl-tracing-trace-summary></sl-tracing-trace-summary>
-  </div>
-  <div class="panel panel-info">
-    <div class="panel-heading help">
-      <h3 class="panel-title">Transaction Sequences</h3>
+<div data-id="TraceView" class='trace-view'>
+  <!--<span class="loading" sl-common-loading-indicator size="large" ng-show="!showTraceView()"></span>-->
+  <div  ng-show="showTraceView()">
+    <div data-hook='summary' class='summary'>
+      <sl-tracing-trace-summary></sl-tracing-trace-summary>
     </div>
-    <div class="hidden alert alert-default" role="help-description">
-      <p>
-        Transaction sequences are identifiable routes through a program, such as all of the code invoked to respond to an incoming http request.
-        The list below contains all of the idenfitied routes active in the program during the profiling window.
-      </p>
-      <p>
-        Select any transaction below to see the distinct code paths that handle the transaction.  Each code path can be clicked on as well to see
-        details on that individual code path (including callback delays and a flame graph of execution time)
-      </p>
+    <div class="panel panel-info">
+      <div class="panel-heading help">
+        <h3 class="panel-title">Trace Sequences</h3>
+      </div>
+      <div class="hidden alert alert-default" role="help-description">
+        <p>
+          Trace sequences are identifiable routes through a program, such as all of the code invoked to respond to an incoming http request.
+          The list below contains all of the idenfitied routes active in the program during the profiling window.
+        </p>
+        <p>
+          Select any trace below to see the distinct code paths that handle the transaction.  Each code path can be clicked on as well to see
+          details on that individual code path (including callback delays and a flame graph of execution time)
+        </p>
+      </div>
+
+        <header class='list-group-item'>
+          <div data-ui-type="table">
+            <div data-ui-type="row">
+              <div data-ui-type="cell" class='toggle-control'></div>
+              <div data-ui-type="cell" class='transaction-badge'></div>
+              <div data-ui-type="cell" class='transaction-route'>Route</div>
+              <div data-ui-type="cell" class='transaction-jsmicros'>JS</div>
+              <div data-ui-type="cell" class='transaction-totalmicros'>Total</div>
+              <div data-ui-type="cell" class='transaction-async'>Async</div>
+              <div data-ui-type="cell" class='transaction-blocked'>Sync</div>
+            </div>
+          <div>
+        </header>
+      <ul role='transactions' class='transactions list-group'>
+
+      </ul>
     </div>
-
-      <header class='list-group-item'>
-        <div data-ui-type="table">
-          <div data-ui-type="row">
-            <div data-ui-type="cell" class='transaction-badge'></div>
-            <div data-ui-type="cell" class='transaction-route'>Route</div>
-            <div data-ui-type="cell" class='transaction-jsmicros'>JS</div>
-            <div data-ui-type="cell" class='transaction-totalmicros'>Total</div>
-            <div data-ui-type="cell" class='transaction-async'>Async</div>
-            <div data-ui-type="cell" class='transaction-blocked'>Sync</div>
-          </div>
-        <div>
-      </header>
-    <ul role='transactions' class='transactions list-group'>
-
-    </ul>
   </div>
 </div>

@@ -1,4 +1,5 @@
 <div>
   <div id='cpu-history-cont' data-id="TracingTimeseriesChart" data-hook='cpumonitor'></div>
   <label ng-hide="tracingCtx.currentPFKey" ng-show="tracingCtx.currentTimeline.length">select a timeframe to view available traces</label>
+  <sl-tracing-prev-next ng-hide="tracingCtx.currentWaterfallKey"></sl-tracing-prev-next>
 </div>

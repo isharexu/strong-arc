@@ -20,9 +20,26 @@ Tracing.directive('slTracingBreadcrumbs', [
       restrict: 'E',
       templateUrl: './scripts/modules/tracing/templates/tracing.breadcrumbs.html',
       controller: [
+        '$log',
         '$scope',
-        function($scope) {
+        function($log, $scope) {
           $log.debug('Tracing Breadcrumbs');
+          $scope.getFirstCrumbClass = function() {
+            // if there is a current PF key then enable this
+            if ($scope.tracingCtx.currentPFKey) {
+              return 'link-cmd';
+            }
+            return 'readonly-crumb';
+
+          };
+          $scope.getSecondCrumbClass = function() {
+            // if there is a waterfall key then enable this
+            if ($scope.tracingCtx.currentWaterfallKey) {
+              return 'link-cmd';
+            }
+            return 'readonly-crumb';
+
+          };
         }
       ],
       link: function(scope, el, attrs) {
@@ -31,8 +48,8 @@ Tracing.directive('slTracingBreadcrumbs', [
           var yyy = moment(xxx,"YYYY-MM-DD HH:mm");
 
           scope.tracingCtx.currentBreadcrumbs[1] = {
-            instance: newPFKey,
-            label: yyy._d
+            instance: moment(xxx).format('ddd, MMM Do YYYY, h:mm:ss a'),
+            label: moment(xxx).format('ddd, MMM Do YYYY, h:mm:ss a')
           };
         }, true);
       }
@@ -462,11 +479,13 @@ Tracing.directive('slTracingTraceSummary', [
 
           /*
           *
-          * Transaction History
+          * Transaction Sequences
           *
           * */
-          var trans = d3.select('[role=transactions]').selectAll('li').data(scope.mappedTransactions, function key(d){ return d.id })
-          trans.exit().remove()
+          var trans = d3.select('[role=transactions]')
+            .selectAll('li')
+            .data(scope.mappedTransactions, function key(d){ return d.id });
+          trans.exit().remove();
 
           // transaction enter
           var transactionEnter = trans.enter()
@@ -475,35 +494,60 @@ Tracing.directive('slTracingTraceSummary', [
             .classed('expanded', function (d) { return true })
            // .classed('expanded', function (d) { return self.app.expanded[d.id] })
 
-          var transactionTableEnter = transactionEnter.append('table')
-            .attr('role', 'toggle')
+          var transactionTableEnter = transactionEnter.append('table');
 
-          var transactionTableRow = transactionTableEnter.append('tr')
+          var transactionTableRow = transactionTableEnter.append('tr');
+
+          transactionTableRow.append('td')
+            .attr('class', 'toggle-control')
+            .append('i')
+            .attr('data-id', function(d){ return Sha1(d.id) })
+            .attr('class', 'sl-icon sl-icon-plus-thick');
           transactionTableRow.append('td').attr('class', 'transaction-badge')
             .attr('class', 'transaction-badge')
             .append('span')
-            .attr('class', 'badge')
-          transactionTableRow.append('td').attr('class', 'transaction-route').text(function(d){ return d.id })
-          transactionTableRow.append('td').attr('class', 'transaction-jsmicros')
-          transactionTableRow.append('td').attr('class', 'transaction-totalmicros')
-          transactionTableRow.append('td').attr('class', 'transaction-async')
-          transactionTableRow.append('td').attr('class', 'transaction-blocked')
+            .attr('class', 'badge');
+          transactionTableRow.append('td')
+            .append('button')
+            .attr('class', 'link-cmd transaction-route')
+            .on('click',function (d) {
 
+              $('ul[data-id="' + Sha1(d.id) + '"]').toggle('expanded');
+              $('i[data-id="' + Sha1(d.id) + '"]').toggleClass('sl-icon sl-icon');
+              $('i[data-id="' + Sha1(d.id) + '"]').toggleClass('sl-icon-plus-thick sl-icon-minus-thick');
+
+              d3.select('ul[data-id="' + Sha1(d.id) + '"]').selectAll('.waterfall .panel-body')
+                .each(function (waterfall) {
+                  this.eventloop.update(waterfall, scope.tracingCtx.currentTrace.functions);
+                });
+            })
+            .text(function(d){ return d.id });
+          transactionTableRow.append('td').attr('class', 'transaction-jsmicros');
+          transactionTableRow.append('td').attr('class', 'transaction-totalmicros');
+          transactionTableRow.append('td').attr('class', 'transaction-async');
+          transactionTableRow.append('td').attr('class', 'transaction-blocked');
+
+          /*
+          *
+          * Trace Transaction Sequences
+          *
+          * */
           var panelEnter = transactionEnter.append('ul')
             .attr('class', 'waterfalls')
+            .attr('data-id', function(d){ return Sha1(d.id) });
 
-          //update set
           trans.select('span.badge')
-            .text(function(d){ return d.waterfalls.length})
+            .text(function(d){ return d.waterfalls.length});
 
           var waterfalls = trans.select('.waterfalls')
             .selectAll('.waterfall')
-            .data(function (d) { return d.waterfalls}, function(d){ return d.id})
+            .data(function (d) { return d.waterfalls}, function(d){ return d.id});
 
           var waterfall = waterfalls.enter()
+            .append('li')
             .append('div')
             .attr('class', 'waterfall panel panel-default')
-            .attr('data-id', function(d){ return Sha1(d.id) })
+            .attr('data-id', function(d){ return Sha1(d.id) });
 
           var waterfallHeadingTableEnter = waterfall.append('div')
             .attr('class', 'panel-heading')
@@ -513,11 +557,15 @@ Tracing.directive('slTracingTraceSummary', [
             .append('thead')
             .append('tr');
 
-          waterfallTableHeaderEnter.append('th').text('Code Path')
-          waterfallTableHeaderEnter.append('th').text('JS')
-          waterfallTableHeaderEnter.append('th').text('Total')
-          waterfallTableHeaderEnter.append('th').text('Async')
-          waterfallTableHeaderEnter.append('th').text('Blocked')
+          waterfallTableHeaderEnter.append('th')
+            .text('Code Path')
+            .append('span')
+            .attr('class', 'help-text')
+            .text('click to drill down into waterfall');
+          waterfallTableHeaderEnter.append('th').text('JS');
+          waterfallTableHeaderEnter.append('th').text('Total');
+          waterfallTableHeaderEnter.append('th').text('Async');
+          waterfallTableHeaderEnter.append('th').text('Blocked');
 
           var waterfallTitleEnter = waterfallHeadingTableEnter.append('td')
             .attr('class', 'waterfall-title');
@@ -549,7 +597,7 @@ Tracing.directive('slTracingTraceSummary', [
             .append('div')
             .attr('class', 'panel-body')
             .each(function (waterfall) {
-              this.eventloop = EventLoop().init(this, { expanded: false, color: Color })
+              this.eventloop = EventLoop().init(this, { expanded: true, color: Color })
               //Color
             });
 
@@ -566,22 +614,22 @@ Tracing.directive('slTracingTraceSummary', [
             .text(function(d, i){ return msFormat(d.timing_stats.totalMicros) });
 
           waterfalls.selectAll('.waterfall-async')
-            .text(function(d, i){ return Math.floor(d.timing_stats.percentAsync) + '%' })
+            .text(function(d, i){ return Math.floor(d.timing_stats.percentAsync) + '%' });
 
           waterfalls.selectAll('.waterfall-sync')
-            .text(function(d, i){ return Math.floor(d.timing_stats.percentBlocked) + '%' })
+            .text(function(d, i){ return Math.floor(d.timing_stats.percentBlocked) + '%' });
 
 
           // Update
-          trans.attr('id', function(d){ return slug(d.id) })
+          trans.attr('id', function(d){ return slug(d.id) });
 
-          trans.select('.transaction-route').text(function(d){ return (d.id === 'untagged') ? 'Untagged Waterfalls' : d.id })
-          trans.select('.transaction-jsmicros').text(function(d){ return msFormat(d.waterfalls.summary_stats.jsMicros) })
-          trans.select('.transaction-async').text(function(d){ return Math.floor(d.waterfalls.summary_stats.percentAsync) + '%' })
-          trans.select('.transaction-blocked').text(function(d){ return Math.floor(d.waterfalls.summary_stats.percentBlocked) + '%' })
-          trans.select('.transaction-totalmicros').text(function(d){ return msFormat(d.waterfalls.summary_stats.totalMicros) })
+          trans.select('.transaction-route').text(function(d){ return (d.id === 'untagged') ? 'Untagged Waterfalls' : d.id });
+          trans.select('.transaction-jsmicros').text(function(d){ return msFormat(d.waterfalls.summary_stats.jsMicros) });
+          trans.select('.transaction-async').text(function(d){ return Math.floor(d.waterfalls.summary_stats.percentAsync) + '%' });
+          trans.select('.transaction-blocked').text(function(d){ return Math.floor(d.waterfalls.summary_stats.percentBlocked) + '%' });
+          trans.select('.transaction-totalmicros').text(function(d){ return msFormat(d.waterfalls.summary_stats.totalMicros) });
 
-          trans.attr('data-id', function(d){ return d.id })
+          trans.attr('data-id', function(d){ return d.id });
 
           // only update visible eventloops
           trans.each(function (transaction) {
@@ -614,12 +662,17 @@ Tracing.directive('slTracingTraceSummary', [
                 });
               window.location.href = window.location.hash;
             }
-          }, 0)
+          }, 0);
         }
 
+        /*
+        *
+        * Pie Charts Render
+        *
+        * */
         if (scope.tracingCtx.currentTrace.summary_stats) {
-          scope.asyncpie.update(scope.traceToAsyncPie(trace))
-          scope.idlepie.update(scope.traceToIdlePie(trace))
+          scope.asyncpie.update(scope.traceToAsyncPie(trace));
+          scope.idlepie.update(scope.traceToIdlePie(trace));
         }
 
 
@@ -635,8 +688,8 @@ Tracing.directive('slTracingTraceView', [
       templateUrl: './scripts/modules/tracing/templates/tracing.trace.view.html',
       controller: ['$scope', function($scope) {
         $scope.showTraceView = function() {
-          var retVal = $scope.tracingCtx.currentPFKey;
-          if (retVal && retVal.length > 0) {
+         // var retVal = $scope.tracingCtx.currentTrace;
+          if ($scope.tracingCtx.currentTrace && $scope.tracingCtx.currentTrace.metadata) {
             if ($scope.tracingCtx.currentWaterfallKey && $scope.tracingCtx.currentWaterfallKey.length > 0) {
               return false;
             }
@@ -853,6 +906,7 @@ Tracing.directive('slTracingTransactionHistory', [
 
         scope.$watch('tracingCtx.currentTransactionHistoryCollection', function(historyCollection, oldVal) {
           if (historyCollection && historyCollection.length) {
+
             scope.transactionListView.render(historyCollection);
             //
             $timeout(function() {
