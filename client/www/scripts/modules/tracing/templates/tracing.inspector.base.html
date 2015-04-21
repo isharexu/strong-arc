@@ -1,7 +1,7 @@
 <div class="inspector">
-  <div class='panel panel-primary'>
-    <div class="panel-heading">
-      <h3 class="panel-title">Inspector</h3>
+  <div class='panel'>
+    <div class="panel-heading section-header">
+      <h2>Inspector</h2>
     </div>
     <sl-tracing-inspector-costtree ng-hide="tracingCtx.currentFunction.type == 'eventLoop'" ng-show="tracingCtx.currentFunction.type == 'flame' || 'rawTree'"></sl-tracing-inspector-costtree>
     <sl-tracing-inspector-eventloop ng-show="tracingCtx.currentFunction.type == 'eventLoop'"></sl-tracing-inspector-eventloop>
