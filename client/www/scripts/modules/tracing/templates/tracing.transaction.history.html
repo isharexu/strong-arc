@@ -1,7 +1,10 @@
 <div class="panel" id="TracingTransactionHistoryContainer">
   <div class="panel-heading section-header">
     <h2>Trace History</h2>
+    <sl-popover-help name="trace-transhistory"></sl-popover-help>
   </div>
+
+
   <div class="hidden alert alert-default" role="help-description">
     <p>
       Trace sequences are identifiable routes through a program, such as all of the code invoked to respond to an incoming http request.
@@ -16,7 +19,7 @@
 
   <ul data-hook='transaction-list-cont' class='transactions list-group'>
     <header class='list-group-item'>
-      <table>
+      <table class="ui-table">
         <thead>
         <tr>
           <th class='transaction-route'>Trace Route</th>

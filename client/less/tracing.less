@@ -1,4 +1,23 @@
+@async: #379f15;
+@wait: #fe6600;
 [data-id="TracingContainer"] {
+
+  .panel {
+    border:0;
+  }
+  hr {
+    margin-top:.4rem;
+
+
+  }
+  .tracing-header-container {
+    .sl-pid-selector {
+      .sl-profiler-processes {
+        min-height:0;
+      }
+    }
+
+  }
 
   g {
     &.y {
@@ -14,19 +33,23 @@
   }
   .panel-heading {
     padding:4px 4px;
+
   }
-  .section-header{
+  .section-header {
 
     h2 {
-      font-size:150%;
-      color:#888888;
-      margin-left:5rem;
+      font-size: 150%;
+      color: #888888;
+      margin-left: 2rem;
+      display:inline-block;
     }
+
   }
 
 }
+
+
 [data-id="TracingBreadcrumbsList"] {
-  padding-top:2.9rem;
 
   button {
     font-size:120%;
@@ -43,6 +66,11 @@
     }
   }
 }
+[data-id="TracingBreadcrumbsList"] {
+  li {
+    display:inline-block;
+  }
+}
 /*
 
   Prototyping - port
@@ -51,9 +79,10 @@
 */
 .tracing-header-container {
   position:relative;
-
+  margin-left:2.2rem;
   &.section-header {
     background-color:#ffffff;
+
   }
 
   .pm-host-select {
@@ -76,7 +105,165 @@
     //    float:right;
   }
 }
+.test-view {
+
+}
 [data-id="TracingTimeseriesChart"] {
+  table {
+    width: 100%;
+
+    .transaction-route {
+      width: 70%;
+    }
+
+    .transaction-total-calls,
+    .transaction-average-mean {
+      width: 15%;
+    }
+
+  }
+
+  .dropdown-menu {
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .pid-selector .selected a {
+    font-weight: bold;
+  }
+
+  .transaction table{
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    cursor: pointer;
+
+    svg {
+      //      display: none;
+    }
+  }
+
+  .transaction.expanded {
+
+    &:hover {
+      background: inherit;
+    }
+
+    svg {
+      //      display: block;
+    }
+
+    > table {
+      font-weight: bold;
+    }
+
+  }
+
+  .waterfalls {
+    list-style-position: inside;
+    margin: 0;
+    padding: 0;
+  }
+
+  .waterfall {
+    margin-top: 10px;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    .panel-heading {
+      padding: 5px 7px;
+    }
+
+    table {
+      width: 100%;
+      font-size: 12px;
+
+      .waterfall-title {
+        width: 60%;
+      }
+      .waterfall-micros,
+      .waterfall-async,
+      .waterfall-sync {
+        width: 10%;
+      }
+    }
+  }
+  #stats-history-wait {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  .async {
+    fill: @async;
+  }
+
+  .idle {
+    fill: @async;
+  }
+
+  .blocked {
+    fill: @wait;
+  }
+
+  .operating {
+    fill: @wait;
+  }
+
+  .axis path,
+  .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+  }
+
+  .x.axis path {
+    display: none;
+  }
+
+  .line {
+    fill: none;
+    stroke: steelblue;
+    stroke-width: 1.5px;
+  }
+
+  .hover-line {
+    fill: none;
+    stroke: #ff0000;
+    stroke-width: 5;
+    shape-rendering: crispEdges;
+  }
+
+  .select-line {
+    fill: none;
+    stroke: #FFFF66;
+    shape-rendering: crispEdges;
+    stroke-width: 3px;
+  }
+
+  .gradientLine {
+    fill: none;
+    stroke-width: 1.5px;
+  }
+
+  .grid {
+    fill: none;
+    stroke: lightgrey;
+    opacity: 0.7;
+    shape-rendering: crispEdges;
+  }
+
+  .overlay {
+    fill: none;
+    pointer-events: all;
+  }
+
+  .focus circle {
+    fill: none;
+    stroke: steelblue;
+  }
   svg {
     cursor: pointer;
   }
@@ -117,18 +304,35 @@
 
 
 }
-[data-id="TracingBreadcrumbsList"] {
-  li {
-    display:inline-block;
+#TracingTransactionHistoryContainer {
+
+  ul {
+
+    &.transactions{
+      border:1px solid #eeeeee;
+      margin:0 2rem 0 2rem;
+
+      header.list-group-item {
+        background-color:#eeeeee;
+      }
+
+    }
+
   }
 }
 .timeline-nav-container {
 
   float:right;
   text-align: center;
+  margin-right:8rem;
 
-  button {
+  button.ui-btn.square {
     margin:0 auto 0 auto;
+
+
+    padding:.25rem .5rem;
+//    width:25px;
+//    height:25px;
   }
 }
 .panel-info > .panel-heading {
@@ -230,7 +434,7 @@
 */
 
 .inspector .panel {
-  overflow-x: scroll;
+
 
   .list-group-item {
     word-wrap: break-word;
@@ -305,9 +509,6 @@
   Monitor View
 
 */
-@async: #379f15;
-@wait: #fe6600;
-
 .monitor-view {
 
   table {
