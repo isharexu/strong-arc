@@ -314,6 +314,11 @@
 
       header.list-group-item {
         background-color:#eeeeee;
+        table {
+          th {
+            border-color:transparent;
+          }
+        }
       }
 
     }
@@ -364,6 +369,18 @@
 }
 
 .waterfall-detail {
+
+  .panel-body {
+    border:1px solid #e5e5e5;
+    background-color: #fafafa;
+  }
+
+  .waterfall-summary-container{
+    button.ui-btn.square {
+      margin: 0 auto 0 auto;
+      padding: .25rem .5rem;
+    }
+  }
 
   .btn.right {
     float: right;
@@ -1229,7 +1246,7 @@
 }
 
 .cxviz-rawtree-item {
-  background: #fff;
+  background: transparent;
 }
 
 .cxviz-raw-axis path,

@@ -8,16 +8,20 @@
           <h2>Waterfalls</h2>
           <sl-popover-help name="trace-waterfall"></sl-popover-help>
         </div>
-        <div class="panel-body">
+        <div class="panel-body waterfall-summary-container">
           <div class='row'>
             <div class='col-xs-6 col-sm-6 col-md-3 col-lg-2'>
-              <button ng-click="previousWaterfall()" role='previous' type="button" class="ui-btn secondary small">
-                <i class="sl-icon glyphicon glyphicon-backward"></i>
+              <button ng-click="previousWaterfall()" role='previous'
+                      type="button"
+                      class="ui-btn primary  square">
+                <i class="sl-icon glyphicon glyphicon-arrow-left"></i>
               </button>
             </div>
             <div class='col-xs-6 col-sm-6 col-md-3 col-md-push-6 col-lg-2 col-lg-push-8'>
-              <button ng-click="nextWaterfall()" role='next' type="button" class="ui-btn secondary small right">
-                <i class="sl-icon glyphicon glyphicon-forward"></i>
+              <button ng-click="nextWaterfall()" role='next'
+                      type="button"
+                      class="ui-btn primary  square">
+                <i class="sl-icon glyphicon glyphicon-arrow-right"></i>
               </button>
             </div>
             <div class='col-xs-12 col-sm-12 col-md-6 col-md-pull-3 col-lg-8 col-lg-pull-2'>
