@@ -20,6 +20,7 @@ var pullDevTools = require('./build-tasks/pull-devtools');
 var setupMysql = require('./build-tasks/setup-mysql');
 var downloadHelpAssets = require('./build-tasks/download-help-assets');
 var _ = require('lodash');
+var browserify = require('browserify');
 
 gulp.task('default', ['build', 'test', 'watch']);
 
@@ -127,7 +128,6 @@ gulp.task('build-help-assets', function(callback) {
 });
 
 gulp.task('build-tracing-bundle', function() {
-  var browserify = require('browserify');
   var bSource = './client/www/scripts/modules/tracing/src/tracing.viz.module.js';
   return browserify(bSource, {standalone: 'TracingViz'})
     .bundle()
