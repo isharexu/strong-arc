@@ -131,7 +131,7 @@ gulp.task('build-tracing-bundle', function() {
   var bSource = './client/www/scripts/modules/tracing/src/tracing.viz.module.js';
   return browserify(bSource, {standalone: 'TracingViz'})
     .bundle()
-    .pipe(fs.createWriteStream('./client/www/scripts/modules/tracing/tracing.viz.module.js'))
+    .pipe(fs.createWriteStream('./client/www/scripts/modules/tracing/tracing.viz.module.js'));
 });
 
 gulp.task('install-example-modules', function() {
