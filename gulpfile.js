@@ -32,7 +32,8 @@ gulp.task('build', [
     'build-build-and-deploy-services',
     'build-help-assets',
     'build-arc-services',
-    'install-example-modules'
+    'build-tracing-bundle',
+    'install-example-modules',
 ], function() {
   // Remove the env var
   process.env.GULP_ANGULAR_CODEGEN = undefined;
@@ -123,6 +124,14 @@ gulp.task('build-help-assets', function(callback) {
     names,
     path.resolve(__dirname, 'client/www/help'),
     callback);
+});
+
+gulp.task('build-tracing-bundle', function() {
+  var browserify = require('browserify');
+  var bSource = './client/www/scripts/modules/tracing/src/tracing.viz.module.js';
+  return browserify(bSource, {standalone: 'TracingViz'})
+    .bundle()
+    .pipe(fs.createWriteStream('./client/www/scripts/modules/tracing/tracing.viz.module.js'))
 });
 
 gulp.task('install-example-modules', function() {
