@@ -21473,12 +21473,12 @@ arguments[4][16][0].apply(exports,arguments)
 },{"dup":16}],33:[function(require,module,exports){
 'use strict';
 
-var d3           = require('d3')
-var EventEmitter = require('events').EventEmitter
-var inherits     = require('util').inherits
-var Schema       = require('./lib/schema')
-var format       = require('cxviz-format')
-var Draw         = require('./lib/draw')
+var d3           = require('d3');
+var EventEmitter = require('events').EventEmitter;
+var inherits     = require('util').inherits;
+var Schema       = require('./lib/schema');
+var format       = require('cxviz-format');
+var Draw         = require('./lib/draw');
 
 module.exports = Line;
 
@@ -21517,8 +21517,8 @@ var _dateBisect = d3.bisector(function(d) { return d._t; }).left;
 function Line(parent, options) {
   if (!(this instanceof Line)) return new Line(parent, options);
   this.parent = d3.select(parent);
-  this.options = options
-  this.schema = new Schema(options)
+  this.options = options;
+  this.schema = new Schema(options);
   this.reset(options);
   EventEmitter.call(this);
 }
@@ -21528,7 +21528,7 @@ inherits(Line, EventEmitter);
 Line.prototype.reset = function (options) {
   var svgElement = this.parent.selectAll('svg');
   options = options || {};
-  svgElement.remove()
+  svgElement.remove();
 
   this.raw = [];
   this.series = [];
@@ -21536,12 +21536,12 @@ Line.prototype.reset = function (options) {
 
   // TODO ability to change chart size upon redraw()
   this.type = 'line';
-  this.parentNode = this.parent.node()
+  this.parentNode = this.parent.node();
   this.width = (this.parentNode && this.parentNode.offsetWidth) || 1000;
   this.height = options.height || Math.round(this.width / DEFAULT_RATIO);
   this.selectedTime = options.selectedTime || 0;
   //this.height = Math.round(this.width / DEFAULT_RATIO);
-  this.margin = {top: 20, right: 80, bottom: 30, left: 80}; // TODO better defaults?
+  this.margin = {top: 20, right: 25, bottom: 30, left: 0}; // TODO better defaults?
 
   this.showXAxis = true;
   this.showYAxis = true;
@@ -21550,7 +21550,7 @@ Line.prototype.reset = function (options) {
   this.yGridTicks = 1;
   this.yAxisTicks = 10;
 
-  this.bgfill = 'none'
+  this.bgfill = 'none';
 
   this.formatter = options.formatter;
 
@@ -21564,7 +21564,7 @@ Line.prototype.reset = function (options) {
   this.interactive = true;
   this.legend = true;
 
-  this.color = (options.color && options.color.moduleColor) || d3.scale.category10()
+  this.color = (options.color && options.color.moduleColor) || d3.scale.category10();
 
   // TODO y gridlines based on data extent?
 
@@ -21578,9 +21578,9 @@ Line.prototype.reset = function (options) {
       .range([0, this.innerWidth]);
 
   this.y = d3.scale.linear()
-      .range([this.innerHeight, 0])
+      .range([this.innerHeight, 0]);
   this.y1 = d3.scale.linear()
-      .range([this.innerHeight, 0])
+      .range([this.innerHeight, 0]);
 
   this.xAxis = d3.svg.axis()
       .scale(this.x)
@@ -21593,8 +21593,8 @@ Line.prototype.reset = function (options) {
       .tickSize(-this.innerHeight, 0, 0)
       .tickFormat('');
 
-  this.yAxis = this._yAxis('y')
-  this.y1Axis = this._yAxis('y1')
+  this.yAxis = this._yAxis('y');
+  this.y1Axis = this._yAxis('y1');
 
   this.yGrid = d3.svg.axis()
       .scale(this.y)
@@ -21613,7 +21613,7 @@ Line.prototype.reset = function (options) {
   this.area = d3.svg.area()
       .x(function(d){ return self.x(d.date);})
       .y0(function(d){ return self[self.schema.y(d)](d.val.min)})
-      .y1(function(d){ return self[self.schema.y(d)](d.val.max)})
+      .y1(function(d){ return self[self.schema.y(d)](d.val.max)});
 
   this.svg = this.parent.append('svg')
       .attr('width', this.width)
@@ -21630,12 +21630,12 @@ Line.prototype.reset = function (options) {
     .style('fill', this.bgfill);
 
 
-}
+};
 
 
 // The initial draw of the data
 Line.prototype.draw = function (data) {
-  var self = this
+  var self = this;
 
   if (!data || data.length === 0) {
     return new Error('No records to show.');
@@ -21646,9 +21646,9 @@ Line.prototype.draw = function (data) {
 
   //if our width is different, hard reset
   //TODO--make resize more dynamic
-  var tempwidth = (this.parentNode && this.parentNode.offsetWidth) || 1000;
+  var tempwidth = (this.parentNode && this.parentNode.offsetWidth) || 4000;
   if( tempwidth != this.width ){
-    this.reset(this.options)
+    this.reset(this.options);
   }
   this.raw = data;
   var series = [];
@@ -21661,20 +21661,20 @@ Line.prototype.draw = function (data) {
         return;
       }
       if (key === '_t' || key === 'date'){
-        return
+        return;
       }
       if( key === '__data'){
-        return
+        return;
       }
       if (series.indexOf(key) < 0 && record[key] != null ){
-        series.push(key)
+        series.push(key);
       }
     });
     record.date = new Date(record._t);
   }
 
   if (series.length > MAX_SERIES) {
-    console.log('Refusing to plot line graph with %s series', series.length)
+    console.log('Refusing to plot line graph with %s series', series.length);
     return new Error('Too many series detected');
   }
 
@@ -21719,27 +21719,27 @@ Line.prototype.draw = function (data) {
   anomalies
     .attr('fill', function(d){ return d.__data.lm_a == 1 ? 'red' : '#ff7518' })
     .attr('stroke', 'none')
-    .attr('d', triangle)
+    .attr('d', triangle);
   anomalies.exit().remove();
 
   // Triangles
   function triangle(d) {
-    var x = self.x(d.date)
-    var y = self.innerHeight
-    var top = 'M ' + x + ' ' + (y + 3)
-    var bottomLeft = 'L ' + (x - 5) + ' ' + (y + 13)
-    var bottomRight = 'L ' + (x + 5) + ' ' + (y + 13)
-    return top + ' ' + bottomLeft + ' ' + bottomRight + ' Z'
+    var x = self.x(d.date);
+    var y = self.innerHeight;
+    var top = 'M ' + x + ' ' + (y + 3);
+    var bottomLeft = 'L ' + (x - 5) + ' ' + (y + 13);
+    var bottomRight = 'L ' + (x + 5) + ' ' + (y + 13);
+    return top + ' ' + bottomLeft + ' ' + bottomRight + ' Z';
   }
 
   function anomalyHover(d) {
-    self.hoverAt(d._t)
+    self.hoverAt(d._t);
   }
 
   function anomalyClick(d) {
-    self.emit('click', d.__data)
+    self.emit('click', d.__data);
   }
-}
+};
 
 // Redraw the data with different options
 // Or if not drawn yet, simply set options
@@ -21786,7 +21786,7 @@ Line.prototype.redraw = function (options) {
   // Simple options clobber. TBD: consider validity checks
   Object.keys(options).forEach(function (o) { self[o] = options[o] });
   if( this.color.moduleColor ) {
-    this.color = this.color.moduleColor
+    this.color = this.color.moduleColor;
   }
 
   if (this.ratio && !options.width) {
@@ -21804,7 +21804,7 @@ Line.prototype.redraw = function (options) {
   // Don't attempt to re-draw if it hasn't been drawn yet (or no data)
   if (!this.timeseries.length) return;
   this._draw();
-}
+};
 
 // New incoming data, transition in/transition out old
 // Line.prototype.update = function (delta) {
@@ -21817,15 +21817,15 @@ Line.prototype._draw = function () {
   var self = this;
 
   // TODO consider transitioning these out.
-  this.graph.selectAll('.axis').remove()
-  this.graph.selectAll('.grid').remove()
-  this.graph.selectAll('.timeline').remove()
-  this.graph.selectAll('#gradient').remove()
-  this.graph.selectAll('.hover-line').remove()
-  this.graph.selectAll('.select-line').remove()
-  this.graph.selectAll('.overlay').remove()
-  this.svg.selectAll('.x-legend').remove()
-  this.svg.selectAll('.y-legend').remove()
+  this.graph.selectAll('.axis').remove();
+  this.graph.selectAll('.grid').remove();
+  this.graph.selectAll('.timeline').remove();
+  this.graph.selectAll('#gradient').remove();
+  this.graph.selectAll('.hover-line').remove();
+  this.graph.selectAll('.select-line').remove();
+  this.graph.selectAll('.overlay').remove();
+  this.svg.selectAll('.x-legend').remove();
+  this.svg.selectAll('.y-legend').remove();
 
   this.svg.selectAll('.underlay')
     .style('fill', this.bgfill);
@@ -21841,13 +21841,13 @@ Line.prototype._draw = function () {
   if (this.showYAxis) {
     this.graph.append('g')
         .attr('class', 'y axis')
-        .call(this.yAxis)
+        .call(this.yAxis);
   }
   if( true /*this.showY1Axis*/){
     this.graph.append('g')
       .attr('class', 'y1 axis')
       .attr('transform', 'translate(' + (this.innerWidth) + ', 0)')
-      .call(this.y1Axis)
+      .call(this.y1Axis);
   }
 
   if (this.yGridTicks > 0) {
@@ -21893,20 +21893,20 @@ Line.prototype._draw = function () {
 
     var nextX = 0;
     this.svg.append('g')
-        .attr('class', 'y-legend')
-        .attr('transform', 'translate(8, 15)')
+      .attr('class', 'y-legend')
+      .attr('transform', 'translate(8, 15)')
       .selectAll('g')
-        .data(this.series)
-        .enter()
-          .append('text')
-          .attr('class', 'legend-text')
-          .text(function (d) { return d; })
-          .attr('x', function (d, i) {
-            var offset = nextX;
-            nextX += (d.length + 1) * 8;
-            return offset;
-          })
-          .style('fill', function (d) { return self.color(d) });
+      .data(this.series)
+      .enter()
+      .append('text')
+      .attr('class', 'legend-text')
+      .text(function (d) { return d; })
+      .attr('x', function (d, i) {
+        var offset = nextX;
+        nextX += (d.length + 1) * 8;
+        return offset;
+      })
+      .style('fill', function (d) { return self.color(d) });
   }
 
   switch(this.type) {
@@ -21929,11 +21929,7 @@ Line.prototype._draw = function () {
       .attr('style', 'display: visible')  ;
   }
 
-   //
-
-
-
-}
+};
 
 Line.prototype._yAxis = function (type) {
   var axis = d3.svg.axis()
@@ -21944,7 +21940,7 @@ Line.prototype._yAxis = function (type) {
     axis.tickFormat(this.tickFormat);
   }
   else if (this.options.format && this.options.format[type] ) {
-    axis.tickFormat(format[this.options.format[type]])
+    axis.tickFormat(format[this.options.format[type]]);
   } else {
     axis.tickFormat(format.mb);
   }
@@ -21962,12 +21958,12 @@ Line.prototype._yAxis = function (type) {
   }
 
   return axis;
-}
+};
 
 // Draw the loaded data as a line graph
 Line.prototype._line = function () {
   var self = this;
-  var draw = Draw(self)
+  var draw = Draw(self);
   self.graph.selectAll('.timeline')
     .data(self.timeseries)
     .enter().append('g')
@@ -21985,7 +21981,7 @@ Line.prototype._line = function () {
       .attr('y1', 0).attr('y2', self.innerHeight);
 
     self.selectLineGroup = self.graph.append('g')
-      .attr('class', 'select-line')
+      .attr('class', 'select-line');
       //.attr('style', self.selectionX ? 'display: visible' : 'display: none')
 
     self.selectLine = self.selectLineGroup.append('line')
@@ -21998,14 +21994,14 @@ Line.prototype._line = function () {
       .attr('width', self.innerWidth)
       .attr('height', self.innerHeight)
       .on('mousemove', getHoverX)
-      .on('click', handleClick)
+      .on('click', handleClick);
   }
   function handleClick(){
     var coords = d3.mouse(this)
-    var ts = self.x.invert(coords[0]).getTime()
-    var rec = self.getRecordAt(ts)
+    var ts = self.x.invert(coords[0]).getTime();
+    var rec = self.getRecordAt(ts);
     var x = self.x(rec.date) | 0;
-    self.selectionX = x
+    self.selectionX = x;
     self.selectLine
       .attr('x1', x)
       .attr('x2', x)
@@ -22021,18 +22017,17 @@ Line.prototype._line = function () {
     self.hoverAt(ts);
     self.emit('hover', ts);
   }
-}
+};
 
 Line.prototype.clearSelection = function clearSelection(){
   delete this.selectionX;
-}
+};
 Line.prototype.setSelection = function setSelection(timestamp){
 
-  var ts = timestamp
-  var rec = this.getRecordAt(ts)
+  var ts = timestamp;
+  var rec = this.getRecordAt(ts);
   var x = this.x(rec.date) | 0;
 //  self.selectionX = x
-  console.log('|   x count: ' + x);
   this.selectionX = x;
  // self.emit('click', rec.__data);
  // self.selectLineGroup = self.graph.append('g')
@@ -22044,7 +22039,7 @@ Line.prototype.setSelection = function setSelection(timestamp){
  //   .attr('x1', self.selectionX || self.innerWidth).attr('x2', self.selectionX || self.innerWidth)
  //   .attr('y1', 0).attr('y2', self.innerHeight);
   this.hoverAt(ts);
-}
+};
 
 
 Line.prototype.getRecordAt = function getRecordAt(timestamp){
@@ -22054,11 +22049,13 @@ Line.prototype.getRecordAt = function getRecordAt(timestamp){
     var entry = _dateBisect(self.raw, timestamp, 1);
     var left = self.raw[entry - 1];
     var right = self.raw[entry];
-    if (!left || !right) return right || left
+    if (!left || !right) {
+      return right || left;
+    }
     record = (timestamp - left._t > right._t - timestamp) ? right : left;
   }
   return record;
-}
+};
 Line.prototype.disableHoverLine = function() {
   var self = this;
   self.isHoverLineEnabled = false;
@@ -22090,9 +22087,7 @@ Line.prototype.setSelection = function(timestamp) {
 // TODO emit/listen for highlight events when other graphs are highlighting
 Line.prototype.hoverAt = function (timestamp) {
   var self = this;
-
   var record = self.getRecordAt(timestamp);
-
   var x = self.x(record.date) | 0;
 
   if (this.isHoverLineEnabled) {
@@ -22100,7 +22095,17 @@ Line.prototype.hoverAt = function (timestamp) {
       .attr('x1', x)
       .attr('x2', x)
       .attr('stroke', function (d, i) {
-        return record.__data.lm_a ? 'red' : 'black'
+        return record.__data.lm_a ? 'red' : 'black';
+      })
+      .attr('stroke-width', 1);
+  }
+
+  if (this.isHoverLineEnabled) {
+    self.hoverLine
+      .attr('x1', x)
+      .attr('x2', x)
+      .attr('stroke', function (d, i) {
+        return record.__data.lm_a ? 'red' : 'black';
       })
       .attr('stroke-width', 1);
   }
@@ -22117,38 +22122,40 @@ Line.prototype.hoverAt = function (timestamp) {
       return record[b] - record[a]
     })
     .map(function (key) {
-      var value
-      var f = self.schema.formatByKey(key)
+      var value;
+      var f = self.schema.formatByKey(key);
       if( (record[key] !== undefined) && record[key] !== null) {
         if( typeof record[key] == 'object' ){
-          value = [f(record[key].min), f(record[key].max)].join('/')
+          value = [f(record[key].min), f(record[key].max)].join('/');
         } else {
-          value = f(record[key])
+          value = f(record[key]);
         }
       } else {
-        value = 'N/A'
+        value = 'N/A';
       }
-      colors.push(self.color(key))
+      colors.push(self.color(key));
       return key + ': ' + value;
     });
 
   // TODO better handling when it runs off the end
   self.svg.selectAll('.y-legend')
       .attr('transform', 'translate(' + (formattedDate.length + 2) * 8 + ', 15)');
-  var nextX = 0
+  var nextX = 0;
   self.svg.selectAll('.y-legend > .legend-text')
-      .text(function (d, i) {
-        return legendValues[i]
-      })
-      .attr('x', function (d, i) {
-        var offset = nextX;
-        nextX += (legendValues[i].length + 1) * 8;
-        return offset;
-      })
-      .style('fill', function (d, i) { return colors[i] });
+    .text(function (d, i) {
+      return legendValues[i];
+    })
+    .attr('x', function (d, i) {
+      var offset = nextX;
+      nextX += (legendValues[i].length + 1) * 8;
+      return offset;
+    })
+    .style('fill', function (d, i) {
+      return colors[i]
+    });
 
 
-  self.xLegend.select('text').text(formattedDate)
+  self.xLegend.select('text').text(formattedDate);
 }
 
 },{"./lib/draw":34,"./lib/schema":35,"cxviz-format":36,"d3":39,"events":65,"util":70}],34:[function(require,module,exports){
@@ -22306,46 +22313,8 @@ function Schema(options){
 },{"cxviz-format":36,"d3":39}],36:[function(require,module,exports){
 arguments[4][22][0].apply(exports,arguments)
 },{"dup":22,"numeral":40,"pretty-ms":37}],37:[function(require,module,exports){
-'use strict';
-var parseMs = require('parse-ms');
-
-function add(ret, val, postfix) {
-	if (val > 0) {
-		ret.push(val + postfix);
-	}
-
-	return ret;
-}
-
-module.exports = function (ms, opts) {
-	if (typeof ms !== 'number') {
-		throw new TypeError('Expected a number');
-	}
-
-	if (ms < 1000) {
-		return Math.ceil(ms) + 'ms';
-	}
-
-	opts = opts || {};
-
-	var ret = [];
-	var parsed = parseMs(ms);
-
-	ret = add(ret, parsed.days, 'd');
-	ret = add(ret, parsed.hours, 'h');
-	ret = add(ret, parsed.minutes, 'm');
-
-	if (opts.compact) {
-		ret = add(ret, parsed.seconds, 's');
-		return '~' + ret[0];
-	}
-
-	ret = add(ret, (ms / 1000 % 60).toFixed(1).replace(/\.0$/, ''), 's');
-
-	return ret.join(' ');
-};
-
-},{"parse-ms":38}],38:[function(require,module,exports){
+arguments[4][24][0].apply(exports,arguments)
+},{"dup":24,"parse-ms":38}],38:[function(require,module,exports){
 'use strict';
 module.exports = function (ms) {
 	if (typeof ms !== 'number') {

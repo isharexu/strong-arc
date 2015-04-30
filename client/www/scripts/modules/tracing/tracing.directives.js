@@ -728,7 +728,7 @@ Tracing.directive('slTracingTimeSeriesCharts', [
           'Process Heap Used': '#2ca02c',
           'Process RSS': '#ff7f0e',
           'Load Average': '#7777ff',
-          'Uptime': '#ff7f0e'
+          'Memory Used': '#ff7f0e'
         };
 
         function color(name){
@@ -740,7 +740,7 @@ Tracing.directive('slTracingTimeSeriesCharts', [
           color: color,
           format: {
             'y': 'num',
-            'y1': 's'
+            'y1': 'num'
           },
           keySchema: {
             'Load Average': {
@@ -748,7 +748,7 @@ Tracing.directive('slTracingTimeSeriesCharts', [
               type: 'line',
               y: 'y'
             },
-            'Uptime': {
+            'Memory Used': {
               class: 'cx-monitor-uptime',
               type: 'line',
               y: 'y1'
@@ -783,7 +783,7 @@ Tracing.directive('slTracingTimeSeriesCharts', [
                 color: color,
                 format: {
                   'y': 'num',
-                  'y1': 's'
+                  'y1': 'num'
                 },
                 keySchema: {
                   'Load Average': {
@@ -791,7 +791,7 @@ Tracing.directive('slTracingTimeSeriesCharts', [
                     type: 'line',
                     y: 'y'
                   },
-                  'Uptime': {
+                  'Memory Used': {
                     class: 'cx-monitor-uptime',
                     type: 'line',
                     y: 'y1'
@@ -814,7 +814,7 @@ Tracing.directive('slTracingTimeSeriesCharts', [
               color: color,
               format: {
                 'y': 'num',
-                'y1': 's'
+                'y1': 'num'
               },
               keySchema: {
                 'Load Average': {
@@ -822,7 +822,7 @@ Tracing.directive('slTracingTimeSeriesCharts', [
                   type: 'line',
                   y: 'y'
                 },
-                'Uptime': {
+                'Memory Used': {
                   class: 'cx-monitor-uptime',
                   type: 'line',
                   y: 'y1'
@@ -858,33 +858,6 @@ Tracing.directive('slTracingTimeSeriesCharts', [
 
     }
   }
-]);
-//  experimental transaction history
-Tracing.directive('slTracingTransactionHistory2', [
-  '$log',
-  '$timeout',
-  'TransactionList',
-  function($log, $timeout, TransactionList) {
-    return {
-      templateUrl: './scripts/modules/tracing/templates/tracing.transaction.history.2.html',
-      restrict: 'E',
-      controller: ['$scope', function($scope) {
-        $scope.updatePFKeyFromTransactionHistory = function(pfkey) {
-          $scope.tracingCtx.currentPFKey = pfkey;
-        }
-      }],
-      link: function(scope, el, attrs) {
-
-        scope.transactionListView = TransactionList('[data-hook="transaction-list-cont"]', {});
-
-        scope.$watch('tracingCtx.currentTransactionKeys', function(transactions, oldVal) {
-
-        }, true);
-
-      }
-    }
-  }
-
 ]);
 
 Tracing.directive('slTracingTransactionHistory', [
