@@ -25,7 +25,6 @@ ApiMetrics.controller('MetricsApiController', [
 
         MetricsApiService.getMetricsApiChartDataByNode(d, i, depth, $scope.server, initialModel)
           .then(function(data){
-            $log.log('i', i);
             var chart = {
               data: data,
               node: d,
