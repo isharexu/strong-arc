@@ -75,8 +75,7 @@ TransactionList.prototype.renderList = function renderList(keys){
       });
     })
     .select('svg')
-    .attr('class', 'viz')
-    .attr('height', 0);
+    .attr('class', 'viz');
   sel.exit().remove();
 };
 

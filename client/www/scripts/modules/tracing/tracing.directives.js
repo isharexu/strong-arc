@@ -737,6 +737,7 @@ Tracing.directive('slTracingTimeSeriesCharts', [
 
         scope.cpuGraphOptions = {
           height: 100,
+          margin: {top: 20, right: 25, bottom: 30, left: 0},
           color: color,
           format: {
             'y': 'num',
@@ -780,6 +781,7 @@ Tracing.directive('slTracingTimeSeriesCharts', [
             if (scope.tracingCtx.currentTimeline && scope.tracingCtx.currentTimeline.length) {
               scope.cpuGraphOptions = {
                 height: 100,
+                margin: {top: 20, right: 25, bottom: 30, left: 0},
                 color: color,
                 format: {
                   'y': 'num',
@@ -812,6 +814,7 @@ Tracing.directive('slTracingTimeSeriesCharts', [
             scope.cpuGraphOptions = {
               height: 100,
               color: color,
+              margin: {top: 20, right: 25, bottom: 30, left: 0},
               format: {
                 'y': 'num',
                 'y1': 'num'

@@ -159,8 +159,7 @@ TransactionList.prototype.renderList = function renderList(keys){
       });
     })
     .select('svg')
-    .attr('class', 'viz')
-    .attr('height', 0);
+    .attr('class', 'viz');
   sel.exit().remove();
 };
 
@@ -24416,7 +24415,7 @@ Line.prototype.reset = function (options) {
   this.width = (this.parentNode && this.parentNode.offsetWidth) || 1000;
   this.height = options.height || Math.round(this.width / DEFAULT_RATIO);
   this.selectedTime = options.selectedTime || 0;
-  this.margin = {top: 20, right: 25, bottom: 30, left: 0}; // TODO better defaults?
+  this.margin = options.margin || {top: 20, right: 80, bottom: 30, left: 80}; // TODO better defaults?
 
   this.showXAxis = true;
   this.showYAxis = true;
