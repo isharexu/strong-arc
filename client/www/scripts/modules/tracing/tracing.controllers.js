@@ -29,7 +29,9 @@ Tracing.controller('TracingMainController', [
     $scope.resetTracingCtx = function() {
       $scope.tracingCtx = {
         currentPFKey: '',
+        selectedManagerHost: {},
         currentPMHost: {},
+        currentPMInstance: {},
         currentTraceToggleBool: false,
         currentTimelineTimestamp: '',
         currentTimelineDuration: 0,
@@ -169,31 +171,37 @@ Tracing.controller('TracingMainController', [
     * */
     $scope.init = function() {
       $scope.resetTracingCtx();
+      /*
+       *
+       * make sure we have a list of current manager hosts
+       *
+       * make sure we have a selectedHost (host:port)
+       *
+       * if we have a selectedHost check if it is different
+       *
+       * */
       $scope.mesh.models.ManagerHost.find(function(err, hosts) {
         qFeedback('trace: found at least one');
 
         if (hosts && hosts.map) {
           // qFeedback('[experiement] init available PM host instances (may or may not be running): ' +  hosts.length);
           $scope.managerHosts = hosts;
-
-
-          /*
-           *
-           * We have a list of hosts
-           *
-           *
-           * set default selected
-           *
-           * */
-
-
-          if (!$scope.tracingCtx.currentPMHost.host) {
-            $scope.tracingCtx.currentPMHost = $scope.selectedPMHost = $scope.managerHosts[0];
+          if (!$scope.selectedPMHost.host) {
+            $scope.selectedPMHost = {
+              host: $scope.managerHosts[0].host,
+              port: $scope.managerHosts[0].port
+            }
           }
-
           $scope.main();
+
+        }
+        else {
+          // no hosts
+          $log.warn('no manager hosts available');
+          return;
         }
       });
+
     };
 
     /*
@@ -203,13 +211,23 @@ Tracing.controller('TracingMainController', [
     * */
     $scope.main = function() {
 
-      qFeedback('trace: init');
 
+      if (!$scope.selectedPMHost.host) {
+        // set notification banner?
+        $log.warn('tracing main: no host selected');
+        return;
+      }
 
-      var hostName = $scope.tracingCtx.currentPMHost.host;
-      var hostPort = $scope.tracingCtx.currentPMHost.port;
+      // check for change before re-render
+      if ($scope.tracingCtx.currentPMHost) {
+        if (($scope.selectedPMHost.host === $scope.tracingCtx.currentPMHost.host) &&
+          ($scope.selectedPMHost.port === $scope.tracingCtx.currentPMHost.port)) {
+          return;
+        }
+      }
+
       qFeedback('trace: get pm instance');
-      $scope.pm = new PMClient('http://' + hostName + ':' + hostPort );
+      $scope.pm = new PMClient('http://' + $scope.selectedPMHost.host + ':' + $scope.selectedPMHost.port );
 
 
       qFeedback('trace: pm.instanceFind id=1');
@@ -226,6 +244,10 @@ Tracing.controller('TracingMainController', [
         }
         qFeedback('trace: assign pm instance to currentInstance');
         qFeedback('trace: check for running processes');
+        $scope.tracingCtx.currentPMHost = {
+          host:$scope.selectedPMHost.host,
+          port:$scope.selectedPMHost.port
+        };
         $scope.tracingCtx.currentPMInstance = instance;
         $scope.tracingCtx.currentBreadcrumbs[0] = {
           instance: $scope.tracingCtx.currentPMInstance,
@@ -365,11 +387,11 @@ Tracing.controller('TracingMainController', [
     *
     * */
     // from the host selector in tracing header
-    $scope.changePMHost = function() {
-      if ($scope.selectedPMHost.host) {
-        $scope.resetTracingCtx();
-        $scope.tracingCtx.currentPMHost = $scope.selectedPMHost;
-        $scope.tracingCtx.currentWaterfallKey = '';
+    $scope.changePMHost = function(host) {
+      if (host.host && host.port) {
+        //$scope.resetTracingCtx();
+        $scope.selectedPMHost = host;
+
 
         $scope.main();
       }
