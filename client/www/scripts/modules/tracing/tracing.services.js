@@ -1,5 +1,7 @@
 Tracing.service('TracingServices', [
-  function() {
+  '$log',
+  'LicensesService',
+  function($log, LicensesService) {
     var svc = this;
     var currTraceHosts = [];
     var currentTimelineTimestamp;
@@ -83,6 +85,16 @@ Tracing.service('TracingServices', [
       return collectionData;
     };
 
+    svc.validateLicense = function() {
+      return LicensesService.validateModuleLicense('Tracing')
+        .then(function(response) {
+          return response;
+        })
+        .catch(function(error) {
+          $log.warn('exception validating tracing license');
+          return false;
+        });
+    };
 
     // get first index for prototype
     svc.getFirstHost = function() {

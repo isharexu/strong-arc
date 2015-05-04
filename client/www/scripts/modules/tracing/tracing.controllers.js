@@ -171,37 +171,73 @@ Tracing.controller('TracingMainController', [
     * */
     $scope.init = function() {
       $scope.resetTracingCtx();
+
       /*
-       *
-       * make sure we have a list of current manager hosts
-       *
-       * make sure we have a selectedHost (host:port)
-       *
-       * if we have a selectedHost check if it is different
-       *
+      * begin comments 1 for licensing integration
+      * */
+      //// check if user has a valid metrics license
+      //TracingServices.validateLicense()
+      //  .then(function(isValid) {
+      //   // isValid = true;
+      //    if (!isValid) {
+      //      $log.warn('invalid tracing license');
+      //      return;
+      //    }
+      /*
+       * end comments 1 for licensing integration
        * */
-      $scope.mesh.models.ManagerHost.find(function(err, hosts) {
-        qFeedback('trace: found at least one');
 
-        if (hosts && hosts.map) {
-          // qFeedback('[experiement] init available PM host instances (may or may not be running): ' +  hosts.length);
-          $scope.managerHosts = hosts;
-          if (!$scope.selectedPMHost.host) {
-            $scope.selectedPMHost = {
-              host: $scope.managerHosts[0].host,
-              port: $scope.managerHosts[0].port
+
+
+
+          /*
+           *
+           * make sure we have a list of current manager hosts
+           *
+           * make sure we have a selectedHost (host:port)
+           *
+           * if we have a selectedHost check if it is different
+           *
+           * */
+          $scope.mesh.models.ManagerHost.find(function(err, hosts) {
+            qFeedback('trace: found at least one');
+
+            if (hosts && hosts.map) {
+              // qFeedback('[experiement] init available PM host instances (may or may not be running): ' +  hosts.length);
+              $scope.managerHosts = hosts;
+              if (!$scope.selectedPMHost.host) {
+                $scope.selectedPMHost = {
+                  host: $scope.managerHosts[0].host,
+                  port: $scope.managerHosts[0].port
+                }
+              }
+              $scope.main();
+
             }
-          }
-          $scope.main();
+            else {
+              // no hosts
+              $log.warn('no manager hosts available');
+              return;
+            }
+          });
 
-        }
-        else {
-          // no hosts
-          $log.warn('no manager hosts available');
-          return;
-        }
-      });
 
+
+
+      /*
+       * begin comments 2for licensing integration
+       * */
+
+
+        //
+        //})
+        //.catch(function(error) {
+        //  $log.warn('exception validating tracing license (controller)');
+        //  return;
+        //});
+      /*
+       * end comments 2 for licensing integration
+       * */
     };
 
     /*
