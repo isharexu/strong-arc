@@ -78,7 +78,7 @@ ApiMetrics.service('MetricsApiService', [
       var def = $q.defer();
       var client = svc.getClient(server.host, server.port);
       var modelName = initialModel;
-      var timeStamp = d.orig.timeStamp;
+      var timeStamp = new Date(d.orig.timeStamp);
 
       client.expressMetricsEndpointDetail(modelName, timeStamp, function(err, res) {
         if (err) return def.reject(err);
