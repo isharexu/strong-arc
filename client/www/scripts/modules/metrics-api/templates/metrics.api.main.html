@@ -8,7 +8,10 @@
             <h1>API Metrics</h1>
             <section>
               <div sl-pm-host-form class="sl-pid-selector" onclickload="onClickLoad(form)" hasclickload="true"></div>
-              <sl-api-metrics-chart chart="apiChart" getdata="getData(d, i, depth, initialModel)" ng-show="apiChart.data"></sl-api-metrics-chart>
+              <sl-api-metrics-chart
+                chart="apiChart"
+                getdata="getData(d, i, depth, initialModel)"
+                ng-show="apiChart.data"></sl-api-metrics-chart>
             </section>
         </div>
       </div>
