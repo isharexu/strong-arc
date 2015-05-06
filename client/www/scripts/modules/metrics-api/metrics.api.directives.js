@@ -150,6 +150,8 @@ ApiMetrics.directive('slApiMetricsChart', [
       scope.$watch('chart', function(newVal, oldVal){
         if ( !newVal || !newVal.data ) {
           scope.crumbs = [{ name: 'Past 24 Hours', orig: null }];
+          scope.chartStack = [];
+          scope.chartDepth = 0;
           return;
         }
         var root = newVal.data;
@@ -191,7 +193,7 @@ ApiMetrics.directive('slApiMetricsChart', [
         }
       }
 
-      function up(d, i) {
+      function up(d, i, skipCrumb) {
         if ( tip ) {
           scope.showToolTip = false;
           tip.hide();
@@ -203,74 +205,10 @@ ApiMetrics.directive('slApiMetricsChart', [
         scope.chartDepth = scope.chartDepth > 0 ? scope.chartDepth - 1 : 0;
         scope.navDirection = 'up';
         scope.chart = scope.chartStack.pop();
-        scope.crumbs.pop();
+        if ( !skipCrumb ) {
+          scope.crumbs.pop();
+        }
         $log.log(scope.chart);
-      }
-
-      function upOld(d) {
-        if ( !d.parent || this.__transition__) return;
-        var end = duration + d.children.length * delay;
-
-        // Mark any currently-displayed bars as exiting.
-        var exit = svg.selectAll(".enter")
-          .attr("class", "exit");
-
-        // Enter the new bars for the clicked-on data's parent.
-        var enter = bar(d.parent)
-          .attr("transform", function(d, i) { return "translate(0," + barHeight * i * 1.2 + ")"; })
-          .style("opacity", 1e-6);
-
-        // Color the bars as appropriate.
-        // Exiting nodes will obscure the parent bar, so hide it.
-        enter.select("rect")
-          .style("fill", function(d) { return color(!!d.children); })
-          .filter(function(p) { return p === d; })
-          .style("fill-opacity", 1e-6);
-
-        // Update the x-scale domain.
-        x.domain([0, d3.max(d.parent.children, function(d) { return d.value; })]).nice();
-
-        // Update the x-axis.
-        svg.selectAll(".x.axis").transition()
-          .duration(duration)
-          .call(xAxis);
-
-        // Transition entering bars to fade in over the full duration.
-        var enterTransition = enter.transition()
-          .duration(end)
-          .style("opacity", 1);
-
-        // Transition entering rects to the new x-scale.
-        // When the entering parent rect is done, make it visible!
-        enterTransition.select("rect")
-          .attr("width", function(d) { return x(d.value); })
-          .each("end", function(p) { if (p === d) d3.select(this).style("fill-opacity", null); });
-
-        // Transition exiting bars to the parent's position.
-        var exitTransition = exit.selectAll("g").transition()
-          .duration(duration)
-          .delay(function(d, i) { return i * delay; })
-          .attr("transform", stack(d.index));
-
-        // Transition exiting text to fade out.
-        exitTransition.select("text")
-          .style("fill-opacity", 1e-6);
-
-        // Transition exiting rects to the new scale and fade to parent color.
-        exitTransition.select("rect")
-          .attr("width", function(d) { return x(d.value); })
-          .style("fill", color(true));
-
-        // Remove exiting nodes when the last child has finished transitioning.
-        exit.transition()
-          .duration(end)
-          .remove();
-
-        // Rebind the current parent to the background.
-        svg.select(".background")
-          .datum(d.parent)
-          .transition()
-          .duration(end);
       }
 
 // Creates a set of bars for the given data node, at the specified index.
@@ -328,6 +266,17 @@ ApiMetrics.directive('slApiMetricsChart', [
 
         //example(scope, elem);
         custom(scope, elem);
+
+        scope.onClickCrumb = function(i, crumb){
+          var len = scope.crumbs.length-1;
+
+          //remove crumbs after clicked crumb
+          scope.navDirection = 'up';
+          scope.chartDepth = i;
+          scope.crumbs.splice(i+1, len);
+          scope.chartStack.splice(i+1, len);
+          scope.chart = scope.chartStack.pop();
+        };
       }
     };
   }

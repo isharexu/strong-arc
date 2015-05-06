@@ -18,6 +18,7 @@ ApiMetrics.controller('MetricsApiController', [
         $scope.server.port = form.port.$viewValue;
         $scope.apiChart = {};
 
+
         $scope.getData(null, 0, 0);
       };
 
