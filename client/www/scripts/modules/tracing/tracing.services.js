@@ -54,8 +54,8 @@ Tracing.service('TracingServices', [
     svc.getMappedTransactions = function(transactions) {
       var collectionData = Object.keys(transactions)
         .filter(function (key) {
-          if (key === 'concurix.send') return false
-          if (key === 'concurix.assemble') return false
+          if (key === 'strongtrace.send') return false
+          if (key === 'strongtrace.assemble') return false
           return transactions.hasOwnProperty(key)
         })
         .map(function (key) {
