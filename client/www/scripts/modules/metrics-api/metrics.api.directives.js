@@ -149,6 +149,7 @@ ApiMetrics.directive('slApiMetricsChart', [
 
       scope.$watch('chart', function(newVal, oldVal){
         if ( !newVal || !newVal.data ) {
+          //reset everything if load button is clicked
           scope.crumbs = [{ name: 'Past 24 Hours', orig: null }];
           scope.chartStack = [];
           scope.chartDepth = 0;
@@ -269,6 +270,9 @@ ApiMetrics.directive('slApiMetricsChart', [
 
         scope.onClickCrumb = function(i, crumb){
           var len = scope.crumbs.length-1;
+
+          //skip if clicking on last breadcrumb
+          if ( i === len ) return;
 
           //remove crumbs after clicked crumb
           scope.navDirection = 'up';
