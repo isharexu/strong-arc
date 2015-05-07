@@ -9,12 +9,6 @@ Tracing.controller('TracingMainController', [
   'TraceEnhance',
   function($scope, $log, $timeout, $interval, $location, TracingServices, TimeSeries, TraceEnhance) {
 
-   /*
-   *
-   * CONTROLLER GLOBALS
-   *
-   * */
-    var PMClient = require('strong-mesh-models').Client;
     $scope.pm = {};
     $scope.systemFeedback = [];  // FEEDBACK
     $scope.managerHosts = [];    // $location.host()
@@ -22,10 +16,112 @@ Tracing.controller('TracingMainController', [
     $scope.processes = [];
     $scope.showTransactionHistoryLoading = true;
     $scope.showTimelineLoading = true;
+    $scope.selectedProcess = {};
+    $scope.tracingCtx = {};
 
-   // var hostName = 'ec2-54-67-79-53.us-west-1.compute.amazonaws.com';
+    /*
+     *
+     * INIT
+     *
+     * */
+    $scope.init = function() {
+      $scope.resetTracingCtx();
 
+      // check if user has a valid metrics license
+      TracingServices.validateLicense()
+        .then(function(isValid) {
+          // isValid = true;
+          if (!isValid) {
+            $log.warn('invalid tracing license');
+            return;
+          }
 
+          $scope.managerHosts = TracingServices.getManagerHosts(function(hosts) {
+            $scope.managerHosts = hosts;
+            if (!$scope.selectedPMHost.host) {
+              $scope.selectedPMHost = {
+                host: $scope.managerHosts[0].host,
+                port: $scope.managerHosts[0].port
+              }
+            }
+            $scope.main();
+          });
+
+        })
+        .catch(function(error) {
+          $log.warn('exception validating tracing license (controller)');
+          return;
+        });
+
+    };
+
+    /*
+     *
+     * MAIN
+     *
+     * */
+    $scope.main = function() {
+
+      if (!$scope.selectedPMHost.host) {
+        // set notification banner?
+        $log.warn('tracing main: no host selected');
+        return;
+      }
+
+      // check for change before re-render
+      if ($scope.tracingCtx.currentPMHost) {
+        if (($scope.selectedPMHost.host === $scope.tracingCtx.currentPMHost.host) &&
+          ($scope.selectedPMHost.port === $scope.tracingCtx.currentPMHost.port)) {
+          return;
+        }
+      }
+
+      TracingServices.getFirstPMInstance($scope.selectedPMHost, function(instance) {
+        $scope.tracingCtx.currentPMInstance = instance;
+
+        $scope.tracingCtx.currentPMHost = {
+          host:$scope.selectedPMHost.host,
+          port:$scope.selectedPMHost.port
+        };
+        $scope.tracingCtx.currentPMInstance = instance;
+        $scope.tracingCtx.currentBreadcrumbs[0] = {
+          instance: $scope.tracingCtx.currentPMInstance,
+          label: $scope.tracingCtx.currentPMInstance.applicationName
+        };
+        $scope.tracingCtx.currentPMInstance.processes(function(err, processes) {
+          if (err) {
+            $log.warn('bad get processes: ' + err.message);
+            return;
+          }
+          if (!processes) {
+            $log.warn('no processes');
+
+          }
+          /*
+           * we have processes but they need to be filtered
+           * */
+          var filteredProcesses = [];
+
+          // get rid of the supervisor
+          processes.map(function(proc) {
+            if (proc.workerId !== 0) {
+              filteredProcesses.push(proc);
+            }
+          });
+          $scope.processes = filteredProcesses;
+          $scope.tracingCtx.currentProcesses = filteredProcesses;
+          $scope.tracingCtx.currentProcess = filteredProcesses[0];  //default
+          $scope.selectedProcess = filteredProcesses[0];
+          $scope.refreshTimelineProcess();
+
+        });
+
+      });
+
+    };
+    /*
+    * reset main context variables
+    * */
     $scope.resetTracingCtx = function() {
       $scope.tracingCtx = {
         currentPFKey: '',
@@ -50,27 +146,6 @@ Tracing.controller('TracingMainController', [
         currentApp: {name: ''}
       };
     };
-    $scope.selectedProcess = {};
-    /*
-     *
-     * MESH INIT
-     *
-     *
-     * */
-    $scope.mesh = require('strong-mesh-client')('http://' + $location.host() + ':' + $location.port() + '/manager');
-
-    var qFeedback = function(message) { //  FEEDBACK
-      $scope.systemFeedback.push(message);
-    };
-    /*
-    *
-    * END CONTROLLER GLOBALS
-    *
-    *
-    * */
-
-
-
 
     /*
     *
@@ -87,9 +162,6 @@ Tracing.controller('TracingMainController', [
       self.timeline.map(function(trace) {
         var t = trace;
         $scope.tracingCtx.currentTimelineKeyCollection.push(trace.__data.pfkey);
-        //trace._t = moment(trace.ts).unix();
-        //trace.Uptime = trace.p_ut;
-        //trace['Load Average'] = trace.s_la;
       });
       $scope.$apply(function() {
         $scope.tracingCtx.currentTimeline = self.timeline;
@@ -115,38 +187,8 @@ Tracing.controller('TracingMainController', [
         }
 
         $scope.tracingCtx.currentPFKey = '';
-        var seconds  = 0;
 
-        if (rawResponse.length && rawResponse.length > 0) {
-          var seconds = rawResponse[rawResponse.length - 1].p_ut;
-
-        }
-
-        var message = '';
-        if (seconds > 604800) {
-          message = 'more than a week';
-        }
-        if (seconds > 86400) {
-          message = 'more than a day';
-        }
-        if (seconds > 3600) {
-          message = 'more than an hour';
-        }
-        if (seconds > 59) {
-          message = 'more than a minute';
-        }
-        else {
-          message = seconds + ' seconds';
-        }
-
-
-
-        $scope.tracingCtx.timelineDuration =  message;
-        // $scope.tracingCtx.timelineStart = rawResponse[0].ts;
         $scope.tracingCtx.timelineStart = 0;
-        if (seconds > 0) {
-          $scope.tracingCtx.timelineStart = rawResponse[0].ts;
-        }
 
         /*
          *
@@ -160,171 +202,6 @@ Tracing.controller('TracingMainController', [
     };
 
 
-
-
-    qFeedback('trace: check for available pm hosts');
-
-    /*
-    *
-    * INIT METHOD
-    *
-    * */
-    $scope.init = function() {
-      $scope.resetTracingCtx();
-
-      /*
-      * begin comments 1 for licensing integration
-      * */
-      // check if user has a valid metrics license
-      TracingServices.validateLicense()
-        .then(function(isValid) {
-         // isValid = true;
-          if (!isValid) {
-            $log.warn('invalid tracing license');
-            return;
-          }
-      /*
-       * end comments 1 for licensing integration
-       * */
-
-
-
-
-          /*
-           *
-           * make sure we have a list of current manager hosts
-           *
-           * make sure we have a selectedHost (host:port)
-           *
-           * if we have a selectedHost check if it is different
-           *
-           * */
-          $scope.mesh.models.ManagerHost.find(function(err, hosts) {
-            qFeedback('trace: found at least one');
-
-            if (hosts && hosts.map) {
-              // qFeedback('[experiement] init available PM host instances (may or may not be running): ' +  hosts.length);
-              $scope.managerHosts = hosts;
-              if (!$scope.selectedPMHost.host) {
-                $scope.selectedPMHost = {
-                  host: $scope.managerHosts[0].host,
-                  port: $scope.managerHosts[0].port
-                }
-              }
-              $scope.main();
-
-            }
-            else {
-              // no hosts
-              $log.warn('no manager hosts available');
-              return;
-            }
-          });
-
-
-
-
-      /*
-       * begin comments 2for licensing integration
-       * */
-
-
-
-        })
-        .catch(function(error) {
-          $log.warn('exception validating tracing license (controller)');
-          return;
-        });
-      /*
-       * end comments 2 for licensing integration
-       * */
-    };
-
-    /*
-    *
-    * MAIN METHOD
-    *
-    * */
-    $scope.main = function() {
-
-
-      if (!$scope.selectedPMHost.host) {
-        // set notification banner?
-        $log.warn('tracing main: no host selected');
-        return;
-      }
-
-      // check for change before re-render
-      if ($scope.tracingCtx.currentPMHost) {
-        if (($scope.selectedPMHost.host === $scope.tracingCtx.currentPMHost.host) &&
-          ($scope.selectedPMHost.port === $scope.tracingCtx.currentPMHost.port)) {
-          return;
-        }
-      }
-
-      qFeedback('trace: get pm instance');
-      $scope.pm = new PMClient('http://' + $scope.selectedPMHost.host + ':' + $scope.selectedPMHost.port );
-
-
-      qFeedback('trace: pm.instanceFind id=1');
-      $scope.pm.instanceFind('1', function(err, instance) {
-        if (err) {
-          $log.warn('trace: error finding pm instance: ' + err.message);
-          qFeedback('trace: error finding pm instance: ' + err.message);
-          return;
-        }
-        if (!instance){
-          $log.warn('trace: no instance returned: ');
-          qFeedback('trace: no instance returned: ');
-          return;
-        }
-        qFeedback('trace: assign pm instance to currentInstance');
-        qFeedback('trace: check for running processes');
-        $scope.tracingCtx.currentPMHost = {
-          host:$scope.selectedPMHost.host,
-          port:$scope.selectedPMHost.port
-        };
-        $scope.tracingCtx.currentPMInstance = instance;
-        $scope.tracingCtx.currentBreadcrumbs[0] = {
-          instance: $scope.tracingCtx.currentPMInstance,
-          label: $scope.tracingCtx.currentPMInstance.applicationName
-        };
-        $scope.tracingCtx.currentPMInstance.processes(function(err, processes) {
-          if (err) {
-            $log.warn('bad get processes: ' + err.message);
-            return;
-          }
-          if (!processes) {
-            $log.warn('no processes');
-
-          }
-          /*
-          *
-          * we have processes but they need to be filtered
-          *
-          * */
-
-          var filteredProcesses = [];
-
-          // get rid of the supervisor
-          processes.map(function(proc) {
-            if (proc.workerId !== 0) {
-              filteredProcesses.push(proc);
-            }
-          });
-          $scope.processes = filteredProcesses;
-
-          qFeedback('trace: running processes: ' + filteredProcesses.length);
-          $scope.tracingCtx.currentProcesses = filteredProcesses;
-          qFeedback('trace: assign first process as default');
-          $scope.tracingCtx.currentProcess = filteredProcesses[0];  //default
-          $scope.selectedProcess = filteredProcesses[0];
-          qFeedback('trace: trigger timeline initialization');
-          $scope.refreshTimelineProcess();
-
-        });
-      });
-    };
 
     /*
 
@@ -378,9 +255,6 @@ Tracing.controller('TracingMainController', [
         return trace;
       });
     };
-
-
-
 
     /*
     *
@@ -537,10 +411,7 @@ Tracing.controller('TracingMainController', [
 
           return;
         }
-       // $scope.$apply(function() {
         $scope.tracingCtx.currentTransactionKeys = response;
-
-        //});
 
 
           /*
@@ -639,24 +510,6 @@ Tracing.controller('TracingMainController', [
     * */
     $scope.init();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     /*
      *
      * Feedback
@@ -691,10 +544,3 @@ Tracing.controller('TracingMainController', [
   }
 ]);
 
-Tracing.controller('TracingMonitorController', [
-  '$scope',
-  '$log',
-  function($scope, $log) {
-
-  }
-]);

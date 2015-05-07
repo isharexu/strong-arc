@@ -161,12 +161,8 @@ Tracing.directive('slTracingWaterfallEventloop', [
     return {
       restrict: 'E',
       controller: ['$scope', function($scope) {
-
       }],
       link: function(scope, el, attrs) {
-
-
-
       }
     }
   }
@@ -178,8 +174,6 @@ Tracing.directive('slTracingWaterfallSummary', [
       templateUrl: './scripts/modules/tracing/templates/tracing.waterfall.summary.html',
       restrict: 'E',
       link: function(scope, el, attrs) {
-
-
       }
     }
   }
@@ -280,18 +274,7 @@ Tracing.directive('slTracingWaterfallView', [
         scope.$watch('tracingCtx.currentWaterfallKey', function(newVal, oldVal) {
           if (newVal && newVal.length > 0) {
             scope.tracingCtx.currentWaterfall = scope.loadWaterfallById(newVal);
-            //jQuery('[data-id="TraceDetailView"]').offset().top;
-            /*
-            *
-            * modify the ui to provide good ux for nav
-            *
-            * get rid of memory chart
-            * get rid of transaction history
-            * shrink the cpu chart
-            * indicate which point in time is selected
-            * animate the scroll
-            *
-            * */
+
           }
         });
         scope.charts = [];
@@ -410,11 +393,8 @@ Tracing.directive('slTracingTraceSummary', [
 
         scope.$watch('tracingCtx.currentTraceToggleBool', function(newVal, oldVal) {
           if (scope.tracingCtx.currentTrace && scope.tracingCtx.currentTrace.transactions) {
-           // $timeout(function() {
               scope.mappedTransactions = TracingServices.getMappedTransactions(scope.tracingCtx.currentTrace.transactions.transactions);
               render();
-
-         //   }, 4000);
 
           }
         }, true);
@@ -422,12 +402,6 @@ Tracing.directive('slTracingTraceSummary', [
         scope.msFormat = function(d){
           return scope.format(d/1000000) + 's';
         };
-
-
-
-
-        //$scope.mappedTransactions = $scope.mapTransactions($scope.tracingCtx.currentTrace.transactions.transactions)
-
 
         var traceToAsyncPie = function(trace){
           var data = [

@@ -1,26 +1,45 @@
 Tracing.service('TracingServices', [
   '$log',
   'LicensesService',
-  function($log, LicensesService) {
+  '$location',
+  function($log, LicensesService, $location) {
     var svc = this;
     var currTraceHosts = [];
     var currentTimelineTimestamp;
 
-    'use strict';
-
-    //var ajax = require('component-ajax')
-   // var enhance = require('concurix-waterfalltransform').enhanceWaterfall
-
-    //
-    //function API(options) {
-    //  var opts = options || {}
-    //  this.base = opts.base || '/'
-    //  this.project = opts.project || ''
-    //  return this
-    //}
-
     svc.getCurrentTimelineTimestamp = function() {
       return currentTimelineTimestamp;
+    };
+
+    svc.getFirstPMInstance = function(pmHost, cb) {
+      var PMClient = require('strong-mesh-models').Client;
+      var pm = new PMClient('http://' + pmHost.host + ':' + pmHost.port );
+
+      pm.instanceFind('1', function(err, instance) {
+        if (err) {
+          $log.warn('trace: error finding pm instance: ' + err.message);
+          return;
+        }
+        if (!instance){
+          $log.warn('trace: no instance returned: ');
+          return;
+        }
+
+        cb(instance);
+
+      });
+    };
+    svc.getManagerHosts = function(cb) {
+      var meshManager = require('strong-mesh-client')('http://' + $location.host() + ':' + $location.port() + '/manager');
+      meshManager.models.ManagerHost.find(function(err, hosts) {
+        if (err) {
+          $log.warn('exception requesting manager hosts');
+          return;
+        }
+        if (hosts && hosts.map) {
+          cb(hosts);
+        }
+      });
     };
     svc.convertTimeseries = function(t){
       var ret = {};
@@ -136,9 +155,6 @@ Tracing.service('TracingFormat', [
       if (typeof back == 'number') ret += str.slice(-back)
       return ret
     };
-
-
-
     return svc;
   }
 
