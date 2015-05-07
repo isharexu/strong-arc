@@ -86,7 +86,7 @@ Tracing.service('TracingServices', [
     };
 
     svc.validateLicense = function() {
-      return LicensesService.validateModuleLicense('Tracing')
+      return LicensesService.validateModuleLicense('Tracing', 'agent')
         .then(function(response) {
           return response;
         })

@@ -175,14 +175,14 @@ Tracing.controller('TracingMainController', [
       /*
       * begin comments 1 for licensing integration
       * */
-      //// check if user has a valid metrics license
-      //TracingServices.validateLicense()
-      //  .then(function(isValid) {
-      //   // isValid = true;
-      //    if (!isValid) {
-      //      $log.warn('invalid tracing license');
-      //      return;
-      //    }
+      // check if user has a valid metrics license
+      TracingServices.validateLicense()
+        .then(function(isValid) {
+         // isValid = true;
+          if (!isValid) {
+            $log.warn('invalid tracing license');
+            return;
+          }
       /*
        * end comments 1 for licensing integration
        * */
@@ -229,12 +229,12 @@ Tracing.controller('TracingMainController', [
        * */
 
 
-        //
-        //})
-        //.catch(function(error) {
-        //  $log.warn('exception validating tracing license (controller)');
-        //  return;
-        //});
+
+        })
+        .catch(function(error) {
+          $log.warn('exception validating tracing license (controller)');
+          return;
+        });
       /*
        * end comments 2 for licensing integration
        * */
