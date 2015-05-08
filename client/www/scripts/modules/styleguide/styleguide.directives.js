@@ -219,6 +219,8 @@ Styleguide.directive('slStyleguideModulePopovers', [
       templateUrl: './scripts/modules/styleguide/templates/styleguide.module.popovers.html',
       scope: {},
       controller: function($scope) {
+        var templateBase = '/scripts/modules/styleguide/templates/';
+
         $scope.show = true;
         $scope.showClickableInfo = false;
 
@@ -226,8 +228,13 @@ Styleguide.directive('slStyleguideModulePopovers', [
           $scope.show = !$scope.show;
         };
 
+        $scope.contextModal = {
+          templateUrl: templateBase + 'styleguide.module.popovers.context.html',
+          position: 'bottom',
+          value: 100
+        };
+
         $scope.showModal = function() {
-          var templateBase = '/scripts/modules/styleguide/templates/';
           var modalDlg = $modal.open({
             templateUrl: templateBase + 'styleguide.module.popovers.modal.html',
             size: 'lg',

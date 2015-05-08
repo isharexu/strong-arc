@@ -62,6 +62,14 @@
           <sl-popover-help name="composer"></sl-popover-help>
         </li>
         <li>
+          Contextual modal dialog
+          <button class="ui-btn small"
+            popover-template="contextModal.templateUrl"
+            popover-placement="{{contextModal.position}}">
+            Show Modal ({{contextModal.value}})
+          </button>
+        </li>
+        <li>
           Modal dialog
           <button class="ui-btn small" ng-click="showModal()">Show Modal</button>
         </li>
