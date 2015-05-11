@@ -90,17 +90,41 @@ ApiMetrics.directive('slApiMetricsChart', [
           .call(xAxis);
 
         //show tooltip for chart 3
-        if ( scope.chartDepth === 2 ) {
-          tip = d3.tip().attr('class', 'd3-tip endpoint').direction('e').html(function(d) {
+        if ( scope.chartDepth === 1 || scope.chartDepth === 2 ) {
+          tip = d3.tip().attr('class', 'd3-tip endpoint').direction('se').html(function(d) {
             var list = '';
-            var keys = 'requestMethod statusCode responseDuration responseSize'.split(' ');
+
+            //show proper data for current chart
+            if ( scope.chartDepth === 2 ) {
+              var keys = 'requestMethod statusCode responseDuration responseSize'.split(' ');
+            } else if ( scope.chartDepth === 1 ) {
+              var keys = 'GET POST DELETE PUT'.split(' ');
+            }
 
             keys.forEach(function(key){
-                var tmpl = $interpolate('<li>{{key}}: {{val}}</li>');
-                list += tmpl({ key: key, val: d.orig[key]});
+              var val = d.orig[key];
+              var tmpl = $interpolate('<li>{{key}}: {{val}}</li>');
+
+              if ( key === 'responseDuration' ) {
+                val += 'ms';
+              }
+
+              if ( key === 'responseSize' ){
+                val += 'kb';
+              }
+
+              list += tmpl({ key: key, val: val });
             });
 
-            var listTmpl = $interpolate('<h3>{{name}}</h3><ul>{{list}}</ul>');
+            var icon = (
+            '<span class="ui-icon"><svg version="1.1" viewBox="0 0 30 30" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="arrow-popover">' +
+              '<g>' +
+                '<path d="M3.55271368e-15,0 L30,15 L-3.55271368e-15,30"></path>' +
+              '</g>' +
+            '</svg></span>'
+            );
+
+            var listTmpl = $interpolate(icon+'<h3>{{name}}</h3><ul>{{list}}</ul>');
 
             return listTmpl({ name: d.name, list: list });
           });

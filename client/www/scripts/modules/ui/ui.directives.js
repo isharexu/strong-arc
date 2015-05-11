@@ -217,3 +217,21 @@ UI.directive('slUiDataTable', function() {
     }
   };
 });
+
+UI.directive('uiIcon', function () {
+  return {
+    restrict: 'E',
+    replace: true,
+    templateUrl: './scripts/modules/ui/templates/ui.icons.svg.html',
+    scope: {
+      name: '@',
+      classes: '@'
+    },
+    link: function(scope, elem, attrs){
+      var className = '.'+scope.name;
+      var icon = elem.find(className);
+
+      elem.html(icon);
+    }
+  };
+});
