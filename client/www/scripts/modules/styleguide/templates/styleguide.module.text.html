@@ -66,13 +66,13 @@
       </li>
       <li>
         <h4 class="module-subheading">SVG Icons (.small, .medium, .large)</h4>
-        <ui-icon name="arrow" classes="small"></ui-icon>
-        <ui-icon name="arrow" classes="medium"></ui-icon>
-        <ui-icon name="arrow" classes="large"></ui-icon>
-
-        <ui-icon name="restart" classes="small"></ui-icon>
-        <ui-icon name="restart" classes="medium"></ui-icon>
-        <ui-icon name="restart" classes="large"></ui-icon>
+        <ul class="clearfix">
+          <li ng-repeat="name in ['arrow', 'restart', 'separator']" class="pull-left">
+            <ui-icon name="{{name}}" classes="small"></ui-icon>
+            <ui-icon name="{{name}}" classes="medium"></ui-icon>
+            <ui-icon name="{{name}}" classes="large"></ui-icon>
+          </li>
+        </ul>
       </li>
       <li>
         <h4 class="module-subheading">Headings</h4>
