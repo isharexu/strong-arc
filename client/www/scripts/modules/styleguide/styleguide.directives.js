@@ -244,7 +244,7 @@ Styleguide.directive('slStyleguideModulePopovers', [
         $scope.setupHidePopover = function($event) {
           var element = angular.element($event.target);
           $scope.hidePopover = function() {
-            $timeout(function () {
+            $timeout(function() {
               element.triggerHandler('click');
             });
           };
