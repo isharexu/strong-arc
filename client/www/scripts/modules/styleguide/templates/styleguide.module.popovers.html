@@ -63,10 +63,11 @@
         </li>
         <li>
           Contextual modal dialog
-          <button class="ui-btn small"
+          <button class="ui-btn accessory text-left" style="width:40rem"
             popover-template="contextModal.templateUrl"
-            popover-placement="{{contextModal.position}}">
-            Show Modal ({{contextModal.value}})
+            popover-placement="{{contextModal.position}}"
+            ng-click="setupHidePopover($event)">
+            {{contextModal.name}} is {{contextModal.value}} (click to edit)
           </button>
         </li>
         <li>

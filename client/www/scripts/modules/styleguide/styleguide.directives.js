@@ -218,7 +218,7 @@ Styleguide.directive('slStyleguideModulePopovers', [
       replace: true,
       templateUrl: './scripts/modules/styleguide/templates/styleguide.module.popovers.html',
       scope: {},
-      controller: function($scope) {
+      controller: function($scope, $timeout) {
         var templateBase = '/scripts/modules/styleguide/templates/';
 
         $scope.show = true;
@@ -231,7 +231,23 @@ Styleguide.directive('slStyleguideModulePopovers', [
         $scope.contextModal = {
           templateUrl: templateBase + 'styleguide.module.popovers.context.html',
           position: 'bottom',
+          name: 'testValue',
           value: 100
+        };
+
+        /* this is a pretty ugly hack to work around the bootstrap popover
+           not having any programatic control. This should be reworked if
+           that situation changes
+
+           https://github.com/angular-ui/bootstrap/issues/590
+           */
+        $scope.setupHidePopover = function($event) {
+          var element = angular.element($event.target);
+          $scope.hidePopover = function() {
+            $timeout(function () {
+              element.triggerHandler('click');
+            });
+          };
         };
 
         $scope.showModal = function() {
